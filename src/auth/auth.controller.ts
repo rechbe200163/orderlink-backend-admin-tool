@@ -1,0 +1,46 @@
+import {
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  NotImplementedException,
+  Post,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
+import { AuthService } from './auth.service';
+// import { AuthGuard } from './guards/auth.guard';
+import { JwtAuthGuard } from './guards/jwt.guard';
+import { ThrottlerGuard } from '@nestjs/throttler';
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiOkResponse,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
+import { AuthInputDto } from './dto/auth-input.dto';
+import { AuthResultDto } from './dto/auth-result.dto';
+
+@Controller('auth')
+export class AuthController {
+  constructor(private authService: AuthService) {}
+
+  @Post('signIn')
+  @HttpCode(HttpStatus.OK)
+  @ApiBody({ type: AuthInputDto })
+  @ApiOkResponse({ type: AuthResultDto })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid credentials',
+  })
+  login(@Body() body: AuthInputDto) {
+    return this.authService.authenticate(body);
+  }
+
+  @Get('profile')
+  @ApiBearerAuth()
+  @UseGuards(JwtAuthGuard, ThrottlerGuard)
+  getProfile(@Request() request) {
+    return request.user;
+  }
+}
