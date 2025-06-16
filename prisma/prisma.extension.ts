@@ -1,5 +1,7 @@
-import { Prisma, PrismaClient } from '@prisma/client';
+import { ResourceAction } from './src/generated/dto/resourceAction.entity';
+import { Actions, Prisma, PrismaClient, Ressources } from '@prisma/client';
 import { pagination } from 'prisma-extension-pagination';
+import { permission } from 'process';
 
 export const extendedPrismaClient = new PrismaClient()
   .$extends(pagination())
@@ -41,18 +43,59 @@ export const extendedPrismaClient = new PrismaClient()
             where: { email },
           });
         },
+        findByRole: async (role: string) => {
+          return extendedPrismaClient.employees.findMany({
+            where: { role },
+          });
+        },
+        findById: async (employeeId: string) => {
+          return extendedPrismaClient.employees.findUnique({
+            where: { employeeId },
+          });
+        },
+        findByPermission: async (
+          paging: {
+            limit: number;
+            page: number;
+          },
+          permissions: {
+            resource: Ressources;
+            action: Actions;
+            allowed: boolean;
+          },
+        ) => {
+          // Set default values if not provided
+          const limit = paging.limit ?? 10;
+          const page = paging.page ?? 1;
+          return extendedPrismaClient.employees
+            .paginate({
+              where: {
+                Role: {
+                  permissions: {
+                    some: {
+                      resource: permissions.resource,
+                      action: permissions.action,
+                      allowed: permissions.allowed,
+                    },
+                  },
+                },
+              },
+            })
+            .withPages({
+              limit,
+              page,
+              includePageCount: true, // Include total page count
+            });
+        },
+      },
+      role: {
+        findByName: async (name: string) => {
+          return extendedPrismaClient.role.findFirst({
+            where: { name },
+          });
+        },
       },
     },
   });
 
 export type ExtendedPrismaClient = typeof extendedPrismaClient;
-
-function addNotDeletedFilter(where: any = {}) {
-  if ('deleted' in where || typeof where !== 'object') {
-    return where;
-  }
-
-  return {
-    AND: [{ deleted: false }, where],
-  };
-}

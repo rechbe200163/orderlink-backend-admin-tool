@@ -9,16 +9,16 @@ generator client {
 
 // NestJS DTO Generator
 
-generator nestjsDto {
-  provider         = "prisma-generator-nestjs-dto"
-  output           = "./src/generated/dto"
-  createDtoPrefix  = "Create"
-  updateDtoPrefix  = "Update"
-  classValidator   = true
-  classTransformer = true
-  renameIdFields   = true
-  strict           = true
-}
+// generator nestjsDto {
+//   provider         = "prisma-generator-nestjs-dto"
+//   output           = "./src/generated/dto"
+//   createDtoPrefix  = "Create"
+//   updateDtoPrefix  = "Update"
+//   classValidator   = true
+//   classTransformer = true
+//   renameIdFields   = true
+//   strict           = true
+// }
 
 datasource db {
   provider = "postgresql"
@@ -39,11 +39,12 @@ enum Ressources {
   CART
   ADDRESS
   INVOICE
-  EMPLOYEE
-  ROLE
+  EMPLOYEE 
+  ROLE 
   SITE_CONFIG
   CATEGORY
   ACTION
+  PERMISSION
 }
 
 enum OrderState {
@@ -237,8 +238,8 @@ model Employees {
   firstName  String  @db.VarChar(255)
   lastName   String  @db.VarChar(255)
   deleted    Boolean @default(false)
-  Role       Role?   @relation(fields: [role], references: [name])
-  role       String? @db.VarChar(255)
+  Role       Role    @relation(fields: [role], references: [name])
+  role       String  @db.VarChar(255)
 
   @@index([email], name: "employee_email_index")
   @@index([lastName], name: "employee_last_name_index")

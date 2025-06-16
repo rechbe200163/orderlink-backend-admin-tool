@@ -4,8 +4,7 @@ import { AuthService } from './auth.service';
 import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategy/jwt.strategy';
-import { CustomersModule } from 'src/customers/customers.module';
-import { EmployeesModule } from 'src/employee/employee.module';
+import { EmployeesModule } from 'src/employees/employees.module';
 
 @Module({
   providers: [AuthService, JwtStrategy],

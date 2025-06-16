@@ -10,7 +10,6 @@ import { CustomerDto } from 'prisma/src/generated/dto/customer.dto';
 import { CustomerPagingResultDto } from './dto/customer-paging.dto';
 import { BusinessSector, Prisma, PrismaPromise } from '@prisma/client';
 import { CreateCustomerDto } from 'prisma/src/generated/dto/create-customer.dto';
-import { CustomerEntity } from 'prisma/src/generated/dto/customer.entity';
 import { customAlphabet } from 'nanoid';
 import { hash } from 'bcryptjs';
 import { UpdateCustomerDto } from 'prisma/src/generated/dto/update-customer.dto';
@@ -68,7 +67,9 @@ export class CustomersRepository {
       });
 
     return {
-      data: users.map((user: any) => transformResponse(CustomerDto, user)),
+      data: users.map((user: CustomerDto) =>
+        transformResponse(CustomerDto, user),
+      ),
       meta,
     };
   }

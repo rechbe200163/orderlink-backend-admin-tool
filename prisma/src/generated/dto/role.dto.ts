@@ -1,9 +1,13 @@
-
-
-
+import { Expose } from 'class-transformer';
+import { PermissionDto } from './permission.dto';
 
 export class RoleDto {
-  name: string ;
-description: string  | null;
-deleted: boolean ;
+  @Expose()
+  name: string;
+  @Expose()
+  description: string | null;
+  @Expose()
+  deleted: boolean;
+  @Expose()
+  permissions: PermissionDto[];
 }

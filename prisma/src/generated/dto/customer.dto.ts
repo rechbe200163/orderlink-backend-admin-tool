@@ -4,7 +4,6 @@ import { IsEmail, IsInt, IsString } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
 
 export class CustomerDto {
-  @ApiProperty()
   @IsInt()
   @Expose()
   customerReference: number;
@@ -60,10 +59,6 @@ export class CustomerDto {
   @Exclude()
   modifiedAt: Date | null;
 
-  @ApiProperty({
-    type: `boolean`,
-    default: false,
-  })
   @Expose()
   deleted: boolean;
 

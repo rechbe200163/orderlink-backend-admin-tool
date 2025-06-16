@@ -1,9 +1,11 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compare } from 'bcryptjs';
 import { CustomersService } from 'src/customers/customers.service';
 import { SanitizedCustomer, SanitizedEmployee } from 'lib/types';
-import { EmployeesService } from 'src/employee/employee.service';
+import { EmployeesRepository } from 'src/employees/employees.repository';
+import { CustomPrismaService } from 'nestjs-prisma';
+import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 
 type AuthInput = {
   email: string;
@@ -19,7 +21,9 @@ type AuthResult = {
 @Injectable()
 export class AuthService {
   constructor(
-    private readonly employeeService: EmployeesService,
+    @Inject('PrismaService')
+    private prismaService: CustomPrismaService<ExtendedPrismaClient>,
+
     private jwtService: JwtService,
   ) {}
 
@@ -38,7 +42,7 @@ export class AuthService {
   }
 
   async validateUser(authInput: AuthInput): Promise<SanitizedEmployee | null> {
-    const user = await this.employeeService.findEmployeeByEmail(
+    const user = await this.prismaService.client.employees.findEmployeeByEmail(
       authInput.email,
     );
     if (user && (await compare(authInput.password, user.password))) {

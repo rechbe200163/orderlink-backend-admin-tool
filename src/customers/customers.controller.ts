@@ -35,8 +35,7 @@ import { CustomerDto } from 'prisma/src/generated/dto/customer.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { UpdateCustomerDto } from 'prisma/src/generated/dto/update-customer.dto';
-
-const MAX_PAGE_SIZE = 100;
+import { MAX_PAGE_SIZE } from 'lib/constants';
 
 @Controller('customers')
 @UseInterceptors(CacheInterceptor)

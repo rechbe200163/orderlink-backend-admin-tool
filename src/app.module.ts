@@ -7,11 +7,13 @@ import { ThrottlerModule } from '@nestjs/throttler';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { CustomersModule } from './customers/customers.module';
 import { AuthModule } from './auth/auth.module';
-import { EmployeesModule } from './employee/employee.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { CacheableMemory } from 'cacheable';
 import { createKeyv } from '@keyv/redis';
 import { Keyv } from 'keyv';
+import { RolesModule } from './roles/roles.module';
+import { PermissionsModule } from './permissions/permissions.module';
+import { EmployeesModule } from './employees/employees.module';
 
 @Module({
   imports: [
@@ -48,6 +50,8 @@ import { Keyv } from 'keyv';
     CustomersModule,
     AuthModule,
     EmployeesModule,
+    RolesModule,
+    PermissionsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

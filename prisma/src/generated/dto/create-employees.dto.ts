@@ -1,12 +1,55 @@
-
-
-
-
-
+import { ApiProperty } from '@nestjs/swagger';
+import { Exclude, Expose } from 'class-transformer';
+import { IsEmail, IsString, Matches } from 'class-validator';
+import { RoleDto } from './role.dto';
+import { CreateRoleDto } from './create-role.dto';
 
 export class CreateEmployeesDto {
+  @ApiProperty({
+    type: String,
+    required: true,
+  })
+  @IsEmail()
+  @Expose()
   email: string;
-password: string;
-firstName: string;
-lastName: string;
+
+  @ApiProperty({
+    type: String,
+    required: true,
+  })
+  @IsString()
+  @Exclude()
+  password: string;
+
+  @ApiProperty({
+    type: String,
+    required: true,
+  })
+  @IsString()
+  @Expose()
+  firstName: string;
+
+  @ApiProperty({
+    type: String,
+    required: true,
+  })
+  @IsString()
+  @Expose()
+  lastName: string;
+
+  @IsString()
+  @Expose()
+  deleted: boolean;
+
+  @ApiProperty({
+    type: RoleDto,
+    required: true,
+  })
+  @Expose()
+  @Matches(/^[A-Z_]+$/, {
+    message:
+      'Role must be in uppercase and can only contain letters and underscores',
+  })
+  @IsString()
+  role: string;
 }
