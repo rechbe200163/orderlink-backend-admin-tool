@@ -67,7 +67,10 @@ export class CategoriesRepository {
   }
 
   async create(data: CreateCategoryDto): Promise<CategoryDto> {
-    const existingCategory = await this.findByName(data.name);
+    const existingCategory =
+      await this.prismaService.client.category.findUnique({
+        where: { name: data.name },
+      });
 
     if (existingCategory) {
       throw new NotFoundException(

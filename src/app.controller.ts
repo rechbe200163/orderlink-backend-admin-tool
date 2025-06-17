@@ -4,8 +4,12 @@ import { Controller, Get, Request, Post, UseGuards } from '@nestjs/common';
 export class AppController {
   constructor() {}
 
-  @Get('profile')
+  @Get('')
   getProfile(@Request() req) {
-    return req.user;
+    return {
+      message: 'Welcome to the Order Link Backend API',
+      status: 'success',
+      docs: 'visit /docs for more information',
+    };
   }
 }
