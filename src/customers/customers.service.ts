@@ -3,12 +3,14 @@ import { CustomersRepository } from './customer.repository';
 import { CreateCustomerDto } from 'prisma/src/generated/dto/create-customer.dto';
 import { UpdateCustomerDto } from 'prisma/src/generated/dto/update-customer.dto';
 import { BusinessSector } from '@prisma/client';
+import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
 
 @Injectable()
 export class CustomersService {
   constructor(
     // ✅ use `ExtendedPrismaClient` type for correct type-safety of your extended PrismaClient
     private readonly customerRepository: CustomersRepository,
+    private readonly eventEmitter: TypedEventEmitter,
   ) {}
 
   async findCustomerByReference(customerReference: number) {
@@ -24,7 +26,19 @@ export class CustomersService {
   }
 
   async createCustomer(customerData: CreateCustomerDto) {
-    return this.customerRepository.createCustomer(customerData);
+    const { customer, password } =
+      await this.customerRepository.createCustomer(customerData);
+    if (customer) {
+      // Emit an event after creating a customer
+      this.eventEmitter.emit('customer.created', {
+        firstName: customer.firstName || '',
+        lastName: customer.lastName,
+        email: customer.email,
+        password: password || '', // Ensure password is included if available
+      });
+      console.log(`Customer created with password: ${password}`);
+    }
+    return customer;
   }
 
   async updateCustomer(

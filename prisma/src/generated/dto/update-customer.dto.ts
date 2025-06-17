@@ -32,14 +32,6 @@ export class UpdateCustomerDto {
   })
   @IsString()
   @IsOptional()
-  password: string;
-
-  @ApiProperty({
-    type: String,
-    required: false,
-  })
-  @IsString()
-  @IsOptional()
   firstName: string | null;
 
   @ApiProperty({

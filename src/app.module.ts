@@ -14,6 +14,8 @@ import { Keyv } from 'keyv';
 import { RolesModule } from './roles/roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { EmployeesModule } from './employees/employees.module';
+import { CategoriesModule } from './categories/categories.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -47,11 +49,13 @@ import { EmployeesModule } from './employees/employees.module';
         },
       ],
     }),
+    EmailModule,
     CustomersModule,
     AuthModule,
     EmployeesModule,
     RolesModule,
     PermissionsModule,
+    CategoriesModule,
   ],
   controllers: [AppController],
   providers: [AppService],

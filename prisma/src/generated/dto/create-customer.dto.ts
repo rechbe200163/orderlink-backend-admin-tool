@@ -24,12 +24,6 @@ export class CreateCustomerDto {
 
   @ApiProperty({
     type: String,
-  })
-  @IsString()
-  password: string;
-
-  @ApiProperty({
-    type: String,
     required: false,
   })
   @IsOptional()
