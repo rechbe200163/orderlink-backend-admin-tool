@@ -3,14 +3,32 @@ import { EmployeesRepository } from './employees.repository';
 import { Actions, Ressources } from '@prisma/client';
 import { CreateEmployeesDto } from 'prisma/src/generated/dto/create-employees.dto';
 import { UpdateEmployeesDto } from 'prisma/src/generated/dto/update-employees.dto';
+import { transformResponse } from 'lib/utils/transform';
+import { EmployeesDto } from 'prisma/src/generated/dto/employees.dto';
+import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
 
 @Injectable()
 export class EmployeesService {
   constructor(
     private readonly employeesRepository: EmployeesRepository, // Assuming you have an EmployeesRepository
+    private readonly eventEmitter: TypedEventEmitter, // Assuming you have a TypedEventEmitter for event handling
   ) {}
-  create(createEmployeeDto: CreateEmployeesDto) {
-    return this.employeesRepository.create(createEmployeeDto);
+  async create(
+    createEmployeeDto: CreateEmployeesDto,
+  ): Promise<CreateEmployeesDto> {
+    const { employee, password } =
+      await this.employeesRepository.create(createEmployeeDto);
+    if (employee) {
+      // Emit an event after creating a employee
+      this.eventEmitter.emit('employee.created', {
+        firstName: employee.firstName || '',
+        lastName: employee.lastName,
+        email: employee.email,
+        password: password || '', // Ensure password is included if available
+      });
+      console.log(`Employee created with password: ${password}`);
+    }
+    return transformResponse(EmployeesDto, employee);
   }
 
   findAll(

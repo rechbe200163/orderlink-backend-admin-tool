@@ -1,3 +1,4 @@
+import { hash } from 'bcryptjs';
 import { PagingResultDto } from 'lib/dto/generictPagingReslutDto';
 import { RolesRepository } from './../roles/roles.repository';
 import {
@@ -14,6 +15,7 @@ import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { UpdateEmployeesDto } from 'prisma/src/generated/dto/update-employees.dto';
 import { EmployeesDto } from 'prisma/src/generated/dto/employees.dto';
 import { CreateEmployeesDto } from 'prisma/src/generated/dto/create-employees.dto';
+import { customAlphabet } from 'nanoid';
 
 @Injectable()
 export class EmployeesRepository {
@@ -24,7 +26,10 @@ export class EmployeesRepository {
     private readonly rolesRepository: RolesRepository,
   ) {}
 
-  async create(createEmployeeDto: CreateEmployeesDto): Promise<EmployeesDto> {
+  async create(createEmployeeDto: CreateEmployeesDto): Promise<{
+    employee: EmployeesDto;
+    password: string;
+  }> {
     const existingEmployee =
       await this.prismaService.client.employees.findEmployeeByEmail(
         createEmployeeDto.email,
@@ -40,10 +45,20 @@ export class EmployeesRepository {
         `Role ${createEmployeeDto.role} does not exist`,
       );
     }
+
+    const password = this.generateEmployeePassword();
+    const hashedPassword = await hash(password, 10);
+
     const createdEmployee = await this.prismaService.client.employees.create({
-      data: createEmployeeDto,
+      data: {
+        ...createEmployeeDto,
+        password: hashedPassword,
+      },
     });
-    return transformResponse(EmployeesDto, createdEmployee);
+    return {
+      employee: transformResponse(EmployeesDto, createdEmployee),
+      password,
+    };
   }
 
   async findAll(
@@ -137,5 +152,25 @@ export class EmployeesRepository {
       data: updateEmployee,
     });
     return transformResponse(EmployeesDto, updatedEmployee);
+  }
+
+  async findAdminEmails(): Promise<string[]> {
+    const admins = await this.prismaService.client.employees.findMany({
+      where: { role: 'ADMIN', deleted: false },
+      select: { email: true },
+    });
+    return admins.map((admin) => admin.email);
+  }
+
+  private generateEmployeePassword(): string {
+    const nanoid = customAlphabet(
+      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
+      18,
+    );
+    // Format: xxxxxx-xxxxxxx-xxxxxx
+    const part1 = nanoid(6);
+    const part2 = nanoid(6);
+    const part3 = nanoid(6);
+    return `${part1}-${part2}-${part3}`;
   }
 }

@@ -4,6 +4,7 @@ import { EmailController } from './email.controller';
 import { PugAdapter } from '@nestjs-modules/mailer/dist/adapters/pug.adapter';
 import { MailerModule } from '@nestjs-modules/mailer';
 import { join } from 'path';
+import { EmployeesModule } from 'src/employees/employees.module';
 
 @Module({
   imports: [
@@ -28,6 +29,7 @@ import { join } from 'path';
         },
       },
     }),
+    EmployeesModule,
   ],
   controllers: [EmailController],
   providers: [EmailService],

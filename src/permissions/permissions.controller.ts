@@ -44,7 +44,7 @@ import { PermissionPagingResultDto } from './dto/permissions-paging';
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiForbiddenResponse({
   description:
-    'Role does not have permission to access this resource with this action',
+    'Role does not have the permissions to perform this action on the requeseted ressource',
 })
 export class PermissionsController {
   constructor(private readonly permissionsService: PermissionsService) {}

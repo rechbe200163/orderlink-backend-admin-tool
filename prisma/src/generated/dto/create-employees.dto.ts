@@ -18,14 +18,6 @@ export class CreateEmployeesDto {
     required: true,
   })
   @IsString()
-  @Exclude()
-  password: string;
-
-  @ApiProperty({
-    type: String,
-    required: true,
-  })
-  @IsString()
   @Expose()
   firstName: string;
 
@@ -36,10 +28,6 @@ export class CreateEmployeesDto {
   @IsString()
   @Expose()
   lastName: string;
-
-  @IsString()
-  @Expose()
-  deleted: boolean;
 
   @ApiProperty({
     type: RoleDto,

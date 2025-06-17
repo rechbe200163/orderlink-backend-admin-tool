@@ -1,0 +1,80 @@
+doctype html
+html(lang="de")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Mitarbeiterkonto erstellt – OrderLink
+    style.
+      body {
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        background-color: #f2f2f2;
+        margin: 0;
+        padding: 0;
+        -webkit-font-smoothing: antialiased;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+      }
+      .header {
+        background-color: #1e1e24;
+        padding: 25px 0;
+        text-align: center;
+        border-bottom: 4px solid #e63946;
+      }
+      .logo {
+        width: 180px;
+        margin: 0 auto;
+      }
+      .content {
+        padding: 40px 30px;
+        background-color: #ffffff;
+      }
+      h2 {
+        color: #2b2d42;
+        font-size: 24px;
+        margin: 0 0 20px;
+      }
+      p {
+        color: #555555;
+        font-size: 16px;
+        line-height: 1.6;
+        margin: 0 0 20px;
+      }
+      .password {
+        font-size: 18px;
+        font-weight: bold;
+        color: #e63946;
+        margin: 0 0 20px;
+      }
+      a {
+        color: #e63946;
+        text-decoration: underline;
+      }
+      .footer {
+        background-color: #1e1e24;
+        color: #ffffff;
+        padding: 30px;
+        text-align: center;
+      }
+      .powered {
+        font-size: 14px;
+        color: #aaaaaa;
+        margin-top: 10px;
+      }
+  body
+    .container
+      .header
+        img.logo(src="https://placeholder.svg?height=60&width=180" alt="OrderLink Logo")
+      .content
+        h2 Willkommen im Team, #{firstName} #{lastName}!
+        p Ihr Mitarbeiterkonto bei #{companyName} wurde erfolgreich erstellt.
+        p Sie können sich mit Ihrer E-Mail-Adresse #{email} anmelden. Ihr vorläufiges Passwort lautet:
+        p.password #{password}
+        p Bitte ändern Sie Ihr Passwort nach dem ersten Login aus Sicherheitsgründen.
+          a(href="https://yourdomain.com/change/password") Passwort hier ändern.
+        p Wir freuen uns, Sie an Bord zu haben und wünschen Ihnen einen erfolgreichen Start!
+      .footer
+        p &copy; #{new Date().getFullYear()} #{companyName}. Alle Rechte vorbehalten.
+        .powered Powered by OrderLink

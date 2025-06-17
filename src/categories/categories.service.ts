@@ -1,26 +1,40 @@
 import { Injectable } from '@nestjs/common';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { CategoriesRepository } from './categories.repository';
+import { CategoryDto } from './dto/category.dto';
+import { PagingResultDto } from 'lib/dto/generictPagingReslutDto';
 
 @Injectable()
 export class CategoriesService {
-  create(createCategoryDto: CreateCategoryDto) {
-    return 'This action adds a new category';
+  constructor(
+    private readonly categoriesRepository: CategoriesRepository, // Assuming you have a repository to handle DB operations
+  ) {}
+
+  create(createCategoryDto: CreateCategoryDto): Promise<CreateCategoryDto> {
+    return this.categoriesRepository.create(createCategoryDto);
   }
 
-  findAll() {
-    return `This action returns all categories`;
+  findAll(
+    limit: number = 10,
+    page: number = 1,
+    search?: string,
+  ): Promise<PagingResultDto<CategoryDto>> {
+    return this.categoriesRepository.findAll(limit, page, search);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} category`;
+  findById(id: string): Promise<CategoryDto> {
+    return this.categoriesRepository.findById(id);
   }
 
-  update(id: number, updateCategoryDto: UpdateCategoryDto) {
-    return `This action updates a #${id} category`;
+  findByName(name: string): Promise<CategoryDto> {
+    return this.categoriesRepository.findByName(name);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} category`;
+  update(
+    id: string,
+    updateCategoryDto: UpdateCategoryDto,
+  ): Promise<UpdateCategoryDto> {
+    return this.categoriesRepository.update(id, updateCategoryDto);
   }
 }

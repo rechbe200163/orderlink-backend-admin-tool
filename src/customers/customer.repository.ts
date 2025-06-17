@@ -6,13 +6,13 @@ import {
 } from '@nestjs/common';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'prisma/prisma.extension';
-import { CustomerDto } from 'prisma/src/generated/dto/customer.dto';
+import { CustomerDto } from 'src/customers/dto/customer.dto';
 import { CustomerPagingResultDto } from './dto/customer-paging.dto';
 import { BusinessSector, Prisma, PrismaPromise } from '@prisma/client';
-import { CreateCustomerDto } from 'prisma/src/generated/dto/create-customer.dto';
+import { CreateCustomerDto } from 'src/customers/dto/create-customer.dto';
 import { customAlphabet } from 'nanoid';
 import { hash } from 'bcryptjs';
-import { UpdateCustomerDto } from 'prisma/src/generated/dto/update-customer.dto';
+import { UpdateCustomerDto } from 'src/customers/dto/update-customer.dto';
 import { isNoChange } from 'lib/utils/isNoChange';
 import { transformResponse } from 'lib/utils/transform';
 

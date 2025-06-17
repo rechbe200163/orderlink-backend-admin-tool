@@ -19,6 +19,7 @@ import { Resource } from 'lib/decorators/ressource-decorator';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
+  ApiBody,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiQuery,
@@ -43,6 +44,10 @@ export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}
 
   @Post()
+  @ApiBody({
+    type: CreateEmployeesDto,
+    description: 'Create a new employee',
+  })
   create(@Body() createEmployeeDto: CreateEmployeesDto) {
     return this.employeesService.create(createEmployeeDto);
   }

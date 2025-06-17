@@ -5,11 +5,13 @@ import { JwtModule } from '@nestjs/jwt';
 import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { EmployeesModule } from 'src/employees/employees.module';
+import { TypedEventEmitterModule } from 'src/event-emitter/event-emitter.module';
 
 @Module({
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
   imports: [
+    TypedEventEmitterModule,
     EmployeesModule,
     JwtModule.register({
       global: true,

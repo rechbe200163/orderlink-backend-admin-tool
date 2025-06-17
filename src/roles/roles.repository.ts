@@ -8,7 +8,7 @@ import { transformResponse } from 'lib/utils/transform';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { CreateRoleDto } from 'prisma/src/generated/dto/create-role.dto';
-import { CustomerDto } from 'prisma/src/generated/dto/customer.dto';
+import { CustomerDto } from 'src/customers/dto/customer.dto';
 import { RoleDto } from 'prisma/src/generated/dto/role.dto';
 import { UpdateRoleDto } from 'prisma/src/generated/dto/update-role.dto';
 

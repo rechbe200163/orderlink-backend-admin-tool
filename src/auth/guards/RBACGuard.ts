@@ -11,6 +11,7 @@ import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { SanitizedEmployee } from '../../../lib/types';
 import { Actions, Ressources } from '@prisma/client';
+import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -18,11 +19,12 @@ export class PermissionsGuard implements CanActivate {
     private reflector: Reflector,
     @Inject('PrismaService')
     private prismaService: CustomPrismaService<ExtendedPrismaClient>,
+    private readonly eventEmitter: TypedEventEmitter,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<Request>();
-    const user = req.user as SanitizedEmployee;
+    const employee = req.user as SanitizedEmployee;
 
     const method = req.method;
     const handler = context.getHandler();
@@ -33,10 +35,10 @@ export class PermissionsGuard implements CanActivate {
       this.reflector.get<Ressources>('resource', controller);
 
     console.log(
-      `Checking permissions for user: ${user?.email}, method: ${method}, resource: ${resource}, role: ${user?.role}`,
+      `Checking permissions for user: ${employee?.email}, method: ${method}, resource: ${resource}, role: ${employee?.role}`,
     );
 
-    if (!user || !user.role || !resource) {
+    if (!employee || !employee.role || !resource) {
       throw new ForbiddenException('Missing user role or resource.');
     }
 
@@ -49,7 +51,7 @@ export class PermissionsGuard implements CanActivate {
     const permission = await this.prismaService.client.permission.findUnique({
       where: {
         role_action_resource: {
-          role: user.role,
+          role: employee.role,
           action: action,
           resource: resource,
         },
@@ -57,8 +59,18 @@ export class PermissionsGuard implements CanActivate {
     });
 
     if (!permission || !permission.allowed) {
+      // Emit an event for access violation
+      this.eventEmitter.emit('access-violation', {
+        employeeId: employee.employeeId,
+        firstName: employee.firstName || '',
+        lastName: employee.lastName,
+        email: employee.email,
+        role: employee.role,
+        resource: resource,
+        action: action,
+      });
       throw new ForbiddenException(
-        `Role "${user.role}" is not allowed to ${action} ${resource}`,
+        `Role "${employee.role}" is not allowed to ${action} ${resource}`,
       );
     }
 

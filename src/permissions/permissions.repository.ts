@@ -6,7 +6,7 @@ import { transformResponse } from 'lib/utils/transform';
 import { PermissionDto } from 'prisma/src/generated/dto/permission.dto';
 import { CreatePermissionDto } from 'prisma/src/generated/dto/create-permission.dto';
 import { UpdatePermissionDto } from 'prisma/src/generated/dto/update-permission.dto';
-import { CustomerDto } from 'prisma/src/generated/dto/customer.dto';
+import { CustomerDto } from 'src/customers/dto/customer.dto';
 import { Actions, Ressources } from '@prisma/client';
 import { RolesRepository } from 'src/roles/roles.repository';
 

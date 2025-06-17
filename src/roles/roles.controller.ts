@@ -46,7 +46,7 @@ import { RolePagingResultDto } from './dto/role-paging';
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiForbiddenResponse({
   description:
-    'Role does not have permission to access this resource with this action',
+    'Role does not have the permissions to perform this action on the requeseted ressource',
 })
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}

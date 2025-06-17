@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Body,
-  ClassSerializerInterceptor,
   Controller,
   Get,
   Param,
@@ -30,11 +29,11 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { CustomerPagingResultDto } from './dto/customer-paging.dto';
-import { CreateCustomerDto } from 'prisma/src/generated/dto/create-customer.dto';
-import { CustomerDto } from 'prisma/src/generated/dto/customer.dto';
+import { CreateCustomerDto } from 'src/customers/dto/create-customer.dto';
+import { CustomerDto } from 'src/customers/dto/customer.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
-import { UpdateCustomerDto } from 'prisma/src/generated/dto/update-customer.dto';
+import { UpdateCustomerDto } from 'src/customers/dto/update-customer.dto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
 
 @Controller('customers')
@@ -46,7 +45,7 @@ import { MAX_PAGE_SIZE } from 'lib/constants';
 @ApiBearerAuth()
 @ApiForbiddenResponse({
   description:
-    'Role does not have permission to access this resource with this action',
+    'Role does not have the permissions to perform this action on the requeseted ressource',
 })
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class CustomersController {
