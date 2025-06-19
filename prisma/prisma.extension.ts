@@ -1,10 +1,14 @@
-import { ResourceAction } from './src/generated/dto/resourceAction.entity';
-import { Actions, Prisma, PrismaClient, Ressources } from '@prisma/client';
+import { readReplicas } from '@prisma/extension-read-replicas';
+import { Actions, PrismaClient, Ressources } from '@prisma/client';
 import { pagination } from 'prisma-extension-pagination';
-import { permission } from 'process';
 
 export const extendedPrismaClient = new PrismaClient()
   .$extends(pagination())
+  // .$extends(
+  //   readReplicas({
+  //     url: process.env.DATABASE_URL_REPLICA!,
+  //   }),
+  // )
   .$extends({
     model: {
       customer: {

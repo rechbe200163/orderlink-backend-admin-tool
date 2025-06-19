@@ -16,6 +16,8 @@ import { PermissionsModule } from './permissions/permissions.module';
 import { EmployeesModule } from './employees/employees.module';
 import { CategoriesModule } from './categories/categories.module';
 import { EmailModule } from './email/email.module';
+import { OrdersModule } from './orders/orders.module';
+import { ProductsModule } from './products/products.module';
 
 @Module({
   imports: [
@@ -56,6 +58,8 @@ import { EmailModule } from './email/email.module';
     RolesModule,
     PermissionsModule,
     CategoriesModule,
+    OrdersModule,
+    ProductsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

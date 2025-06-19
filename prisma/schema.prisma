@@ -41,6 +41,7 @@ enum Ressources {
   INVOICE
   EMPLOYEE 
   ROLE 
+  ROUTES
   SITE_CONFIG
   CATEGORY
   ACTION
