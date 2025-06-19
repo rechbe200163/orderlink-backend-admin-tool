@@ -18,6 +18,8 @@ import { CategoriesModule } from './categories/categories.module';
 import { EmailModule } from './email/email.module';
 import { OrdersModule } from './orders/orders.module';
 import { ProductsModule } from './products/products.module';
+import { FileRepositoryModule } from './file-repository/file-repository.module';
+import { ConfigModule } from '@nestjs/config';
 
 @Module({
   imports: [
@@ -51,6 +53,10 @@ import { ProductsModule } from './products/products.module';
         },
       ],
     }),
+    ConfigModule.forRoot({
+      isGlobal: true, // Makes ConfigService globally available
+      envFilePath: '.env', // Default
+    }),
     EmailModule,
     CustomersModule,
     AuthModule,
@@ -60,6 +66,7 @@ import { ProductsModule } from './products/products.module';
     CategoriesModule,
     OrdersModule,
     ProductsModule,
+    FileRepositoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

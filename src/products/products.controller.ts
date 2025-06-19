@@ -43,20 +43,20 @@ import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
   description:
     'Role does not have the permissions to perform this action on the requeseted ressource',
 })
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+// @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
   @Post()
   @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    description: 'Create product',
-    type: CreateProductDto,
-  })
-  @ApiOkResponse({
-    description: 'Product created successfully',
-    type: CreateProductDto,
-  })
+  // @ApiBody({
+  //   description: 'Create product',
+  //   type: CreateProductDto,
+  // })
+  // @ApiOkResponse({
+  //   description: 'Product created successfully',
+  //   type: CreateProductDto,
+  // })
   @UseInterceptors(FileInterceptor('image'))
   create(
     @Body() createProductDto: CreateProductDto,
@@ -64,6 +64,7 @@ export class ProductsController {
   ) {
     console.log('Received product data:', createProductDto);
     console.log('Received file:', file);
+    return this.productsService.create(createProductDto, file);
   }
 
   @Get()
