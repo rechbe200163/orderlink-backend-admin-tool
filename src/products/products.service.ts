@@ -3,6 +3,8 @@ import { FileRepositoryService } from 'src/file-repository/file-repository.servi
 import { CreateProductDto } from 'src/products/dto/create-product.dto';
 import { UpdateProductDto } from 'src/products/dto/update-product.dto';
 import { ProductsRepository } from './products.repository';
+import { PagingResultDto } from 'lib/dto/generictPagingReslutDto';
+import { ProductDto } from './dto/product.dto';
 
 @Injectable()
 export class ProductsService {
@@ -24,16 +26,66 @@ export class ProductsService {
     return this.productRepository.create(createProductDto, imageFilename);
   }
 
-  findAll() {
-    return `This action returns all products`;
+  async findAll(
+    limit = 10,
+    page = 1,
+    searchTerm?: string,
+    categoryId?: string,
+  ): Promise<PagingResultDto<ProductDto>> {
+    const { data: products, meta } = await this.productRepository.findAll(
+      limit,
+      page,
+      searchTerm,
+      categoryId,
+    );
+
+    // Falls paginate ein { data, meta }-Objekt zurückgibt:
+    const productsWithUrls = await Promise.all(
+      products.map(async (product) => {
+        const imageUrl = product.imagePath
+          ? await this.fileService.getFile(product.imagePath)
+          : null;
+
+        return {
+          ...product,
+          imageUrl,
+        };
+      }),
+    );
+
+    return {
+      data: productsWithUrls,
+      meta,
+    };
   }
 
-  findOne(id: string) {
-    return `This action returns a #${id} product`;
+  async findOne(id: string): Promise<ProductDto> {
+    const product = await this.productRepository.findById(id);
+
+    const imagePath = product.imagePath
+      ? await this.fileService.getFile(product.imagePath)
+      : null;
+
+    return {
+      ...product,
+      imagePath,
+    };
   }
 
-  update(id: string, updateProductDto: UpdateProductDto) {
-    return `This action updates a #${id} product`;
+  async update(
+    id: string,
+    updateProductDto: UpdateProductDto,
+    file: Express.Multer.File,
+  ) {
+    let imageFilename: string | undefined;
+
+    if (file) {
+      const uploadResult = await this.fileService.uploadFile(file);
+      console.log('File uploaded successfully:', uploadResult);
+      imageFilename = uploadResult;
+    }
+
+    return this.productRepository.update(id, updateProductDto, imageFilename);
   }
 
   remove(id: string) {

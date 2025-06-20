@@ -17,6 +17,7 @@ export class FileRepositoryService {
       'GET',
       this._bucketName,
       filename,
+      24 * 60 * 60, // 1 day in seconds
     );
   }
 

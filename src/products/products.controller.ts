@@ -5,11 +5,12 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
   UseInterceptors,
   UploadedFile,
   UseGuards,
   ParseUUIDPipe,
+  ParseIntPipe,
+  Query,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import {
@@ -20,6 +21,7 @@ import {
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
+  ApiQuery,
 } from '@nestjs/swagger';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { Ressources } from '@prisma/client';
@@ -31,6 +33,8 @@ import { PagingResultDto } from 'lib/dto/generictPagingReslutDto';
 import { ProductDto } from './dto/product.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
+import { CustomerPagingResultDto } from 'src/customers/dto/customer-paging.dto';
+import { MAX_PAGE_SIZE } from 'lib/constants';
 
 @Controller('products')
 @UseInterceptors(CacheInterceptor)
@@ -68,12 +72,41 @@ export class ProductsController {
   }
 
   @Get()
+  @ApiQuery({
+    name: 'limit',
+    description: 'Number of products to return per page',
+    type: Number,
+    default: 10,
+    required: true,
+    maximum: MAX_PAGE_SIZE,
+    example: 10,
+  })
+  @ApiQuery({
+    name: 'page',
+    description: 'Page number to return',
+    type: Number,
+    default: 1,
+    required: true,
+    example: 1,
+  })
+  @ApiQuery({
+    name: 'search',
+    description: 'Search term to filter products by name or description',
+    required: false,
+    example: 'example search term',
+    type: String,
+    default: undefined,
+  })
   @ApiOkResponse({
     description: 'List of all products',
     type: PagingResultDto<ProductDto>,
   })
-  findAll() {
-    return this.productsService.findAll();
+  findAll(
+    @Query('limit', ParseIntPipe) limit: number = 10,
+    @Query('page', ParseIntPipe) page: number = 1,
+    @Query('search') search?: string,
+  ) {
+    return this.productsService.findAll(limit, page, search);
   }
 
   @Get(':id')
@@ -102,7 +135,8 @@ export class ProductsController {
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateProductDto: UpdateProductDto,
+    @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.productsService.update(id, updateProductDto);
+    return this.productsService.update(id, updateProductDto, file);
   }
 }
