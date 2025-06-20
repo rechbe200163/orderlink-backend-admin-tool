@@ -157,22 +157,23 @@ model Product {
   createdAt   DateTime  @default(now())
   modifiedAt  DateTime? @default(dbgenerated("null")) @updatedAt
   deleted     Boolean   @default(false)
+  categoryId  String    @db.Uuid
 
-  categories CategoriesOnProducts[]
-  carts      CartOnProducts[]
-  orders     OrderOnProducts[]
+  category Category @relation(fields: [categoryId], references: [categoryId])
+  carts    CartOnProducts[]
+  orders   OrderOnProducts[]
 
   @@index([name], name: "product_name_index")
   @@map("products")
 }
 
 model Category {
-  categoryId String  @id @default(uuid()) @db.Uuid
-  name       String  @unique @db.VarChar(255)
-  imagePath  String? @db.VarChar(255)
-  deleted    Boolean @default(false)
+  categoryId String   @id @default(uuid()) @db.Uuid
+  name       String   @unique @db.VarChar(255)
+  imagePath  String?  @db.VarChar(255)
+  deleted    Boolean  @default(false)
 
-  products CategoriesOnProducts[]
+  products   Product[]
 
   @@map("categories")
 }
@@ -324,15 +325,15 @@ model Permission {
   @@unique([role, action, resource])
 }
 
-model CategoriesOnProducts {
-  productId  String   @db.Uuid
-  product    Product  @relation(fields: [productId], references: [productId])
-  categoryId String   @db.Uuid
-  category   Category @relation(fields: [categoryId], references: [categoryId])
+// model CategoriesOnProducts {
+//   productId  String   @db.Uuid
+//   product    Product  @relation(fields: [productId], references: [productId])
+//   categoryId String   @db.Uuid
+//   category   Category @relation(fields: [categoryId], references: [categoryId])
 
-  @@id([productId, categoryId])
-  @@map("categoriesProducts")
-}
+//   @@id([productId, categoryId])
+//   @@map("categoriesProducts")
+// }
 
 model CartOnProducts {
   cartId    String  @db.Uuid

@@ -1,4 +1,9 @@
-import { BusinessSector, PrismaClient } from '@prisma/client';
+import {
+  Actions,
+  Ressources,
+  BusinessSector,
+  PrismaClient,
+} from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import { hash } from 'bcryptjs';
 
@@ -12,31 +17,33 @@ async function hashPassword(plain: string) {
 async function main() {
   const password = await hashPassword('Kennwort1');
 
-  // 1. Insert Actions
-  const actionEnums = ['READ', 'CREATE', 'UPDATE', 'DELETE'] as const;
+  // 1. Seed Actions
+  const actionEnums = Object.values(Actions);
   const actions = await Promise.all(
     actionEnums.map((name) => prisma.action.create({ data: { name } })),
   );
 
-  // 2. Insert Ressources
-  const resourceEnums = [
-    'PRODUCT',
-    'ORDER',
-    'CUSTOMER',
-    'CART',
-    'ADDRESS',
-    'INVOICE',
-    'EMPLOYEE',
-    'ROLE',
-    'SITE_CONFIG',
-    'CATEGORY',
-    'ACTION',
-  ] as const;
+  // 2. Seed Ressources
+  const resourceEnums = Object.values(Ressources);
   const ressources = await Promise.all(
     resourceEnums.map((name) => prisma.ressource.create({ data: { name } })),
   );
 
-  // 3. Create all ResourceAction combinations (action + resource)
+  // 3. Create ResourceActions (all combinations)
+  await Promise.all(
+    actions.flatMap((action) =>
+      ressources.map((resource) =>
+        prisma.resourceAction.create({
+          data: {
+            action: action.name,
+            resource: resource.name,
+          },
+        }),
+      ),
+    ),
+  );
+
+  // 4. Create ADMIN Role
   const role = await prisma.role.create({
     data: {
       name: 'ADMIN',
@@ -44,7 +51,7 @@ async function main() {
     },
   });
 
-  // 5. Employee (assign ADMIN role)
+  // 5. Create an Employee with ADMIN role
   await prisma.employees.create({
     data: {
       email: faker.internet.email(),
@@ -55,11 +62,11 @@ async function main() {
     },
   });
 
-  // 6. Permission (for ADMIN → allow 10 random ResourceActions)
-  const resourceActions = await prisma.resourceAction.findMany();
-
+  // 6. Assign 10 random permissions to ADMIN role
+  const allResourceActions = await prisma.resourceAction.findMany();
+  const randomSubset = faker.helpers.arrayElements(allResourceActions, 10);
   await Promise.all(
-    faker.helpers.arrayElements(resourceActions, 10).map((ra) =>
+    randomSubset.map((ra) =>
       prisma.permission.create({
         data: {
           role: role.name,
@@ -70,7 +77,8 @@ async function main() {
       }),
     ),
   );
-  // Create Addresses
+
+  // 7. Create Addresses
   const addresses = await Promise.all(
     Array.from({ length: 10 }).map(() =>
       prisma.address.create({
@@ -86,42 +94,28 @@ async function main() {
     ),
   );
 
-  // Create Customers
+  // 8. Create Customers
   const customers = await Promise.all(
     Array.from({ length: 10 }).map((_, i) =>
       prisma.customer.create({
         data: {
           customerReference: 1000 + i,
           email: faker.internet.email(),
-          phoneNumber: faker.phone.number({
-            style: 'international',
-          }),
+          phoneNumber: faker.phone.number({ style: 'international' }),
           password,
           firstName: faker.person.firstName(),
           lastName: faker.person.lastName(),
           companyNumber: faker.company.name(),
           addressId: addresses[i % addresses.length].addressId,
-          businessSector: faker.helpers.enumValue({
-            AGRICULTURE: 'AGRICULTURE',
-            CONSTRUCTION: 'CONSTRUCTION',
-            EDUCATION: 'EDUCATION',
-            FINANCE: 'FINANCE',
-            HEALTH: 'HEALTH',
-            HOSPITALITY: 'HOSPITALITY',
-            IT: 'IT',
-            MANUFACTURING: 'MANUFACTURING',
-            OTHER: 'OTHER',
-            RETAIL: 'RETAIL',
-            TECHNOLOGY: 'TECHNOLOGY',
-            TOURISM: 'TOURISM',
-            TRANSPORTATION: 'TRANSPORTATION',
-          }) as BusinessSector,
+          businessSector: faker.helpers.arrayElement(
+            Object.values(BusinessSector),
+          ),
         },
       }),
     ),
   );
 
-  // Carts
+  // 9. Create Carts for Customers
   const carts = await Promise.all(
     customers.map((customer) =>
       prisma.cart.create({
@@ -132,7 +126,7 @@ async function main() {
     ),
   );
 
-  // Categories
+  // 10. Create Categories
   const categories = await Promise.all(
     Array.from({ length: 10 }).map(() =>
       prisma.category.create({
@@ -145,9 +139,9 @@ async function main() {
     ),
   );
 
-  // Products
+  // 11. Create Products with category relation
   const products = await Promise.all(
-    Array.from({ length: 10 }).map(() =>
+    Array.from({ length: 10 }).map((_, i) =>
       prisma.product.create({
         data: {
           name: faker.commerce.productName(),
@@ -155,24 +149,13 @@ async function main() {
           description: faker.commerce.productDescription(),
           stock: faker.number.int({ min: 10, max: 100 }),
           imagePath: faker.image.urlLoremFlickr({ category: 'product' }),
-        },
-      }),
-    ),
-  );
-
-  // Category-Product linking
-  await Promise.all(
-    products.map((product, i) =>
-      prisma.categoriesOnProducts.create({
-        data: {
-          productId: product.productId,
           categoryId: categories[i % categories.length].categoryId,
         },
       }),
     ),
   );
 
-  // CartOnProducts
+  // 12. Add Products to Carts
   await Promise.all(
     carts.map((cart, i) =>
       prisma.cartOnProducts.create({
@@ -185,9 +168,9 @@ async function main() {
     ),
   );
 
-  // Orders
+  // 13. Create Orders
   const orders = await Promise.all(
-    customers.map((customer, i) =>
+    customers.map((customer) =>
       prisma.order.create({
         data: {
           customerReference: customer.customerReference,
@@ -199,7 +182,7 @@ async function main() {
     ),
   );
 
-  // OrderOnProducts
+  // 14. Add Products to Orders
   await Promise.all(
     orders.map((order, i) =>
       prisma.orderOnProducts.create({
@@ -212,9 +195,9 @@ async function main() {
     ),
   );
 
-  // Invoices
+  // 15. Create Invoices
   await Promise.all(
-    orders.map((order, i) =>
+    orders.map((order) =>
       prisma.invoice.create({
         data: {
           orderId: order.orderId,
@@ -225,7 +208,7 @@ async function main() {
     ),
   );
 
-  // Routes
+  // 16. Create Routes
   const routes = await Promise.all(
     Array.from({ length: 10 }).map(() =>
       prisma.route.create({
@@ -236,7 +219,7 @@ async function main() {
     ),
   );
 
-  // RoutesOnOrders
+  // 17. Assign Routes to Orders
   await Promise.all(
     orders.map((order, i) =>
       prisma.routesOnOrders.create({
@@ -248,26 +231,20 @@ async function main() {
     ),
   );
 
-  // Site Configs
-  await Promise.all(
-    Array.from({ length: 1 }).map((_, i) =>
-      prisma.siteConfig.create({
-        data: {
-          companyName: faker.company.name(),
-          logoPath: faker.image.urlPicsumPhotos(),
-          email: faker.internet.email(),
-          phoneNumber: faker.phone.number({
-            style: 'international',
-          }),
-          iban: faker.finance.iban(),
-          companyNumber: faker.string.uuid(),
-          addressId: addresses[i % addresses.length].addressId,
-        },
-      }),
-    ),
-  );
+  // 18. Create Site Config
+  await prisma.siteConfig.create({
+    data: {
+      companyName: faker.company.name(),
+      logoPath: faker.image.urlPicsumPhotos(),
+      email: faker.internet.email(),
+      phoneNumber: faker.phone.number({ style: 'international' }),
+      iban: faker.finance.iban(),
+      companyNumber: faker.string.uuid(),
+      addressId: addresses[0].addressId,
+    },
+  });
 
-  console.log('✅ Seeding complete with faker.js!');
+  console.log('✅ Seeding complete!');
 }
 
 main()

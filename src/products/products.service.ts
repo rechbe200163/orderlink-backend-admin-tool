@@ -10,8 +10,18 @@ export class ProductsService {
     private readonly fileService: FileRepositoryService,
     private readonly productRepository: ProductsRepository,
   ) {}
-  create(createProductDto: CreateProductDto, file: Express.Multer.File) {
-    return this.fileService.uploadFile(file);
+  // products.service.ts
+  async create(createProductDto: CreateProductDto, file: Express.Multer.File) {
+    let imageFilename: string | undefined;
+
+    if (file) {
+      const uploadResult = await this.fileService.uploadFile(file);
+      console.log('File uploaded successfully:', uploadResult);
+      imageFilename = uploadResult;
+      console.log('Image filename:', imageFilename);
+    }
+
+    return this.productRepository.create(createProductDto, imageFilename);
   }
 
   findAll() {

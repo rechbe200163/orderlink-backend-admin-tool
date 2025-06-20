@@ -42,5 +42,5 @@ export class UpdateProductDto {
 
   @ApiProperty({ type: 'string', format: 'binary', required: false })
   @IsOptional()
-  image?: any;
+  productImage?: any;
 }

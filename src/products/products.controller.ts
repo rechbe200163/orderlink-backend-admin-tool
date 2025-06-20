@@ -49,15 +49,15 @@ export class ProductsController {
 
   @Post()
   @ApiConsumes('multipart/form-data')
-  // @ApiBody({
-  //   description: 'Create product',
-  //   type: CreateProductDto,
-  // })
-  // @ApiOkResponse({
-  //   description: 'Product created successfully',
-  //   type: CreateProductDto,
-  // })
-  @UseInterceptors(FileInterceptor('image'))
+  @ApiBody({
+    description: 'Create product',
+    type: CreateProductDto,
+  })
+  @ApiOkResponse({
+    description: 'Product created successfully',
+    type: CreateProductDto,
+  })
+  @UseInterceptors(FileInterceptor('productImage'))
   create(
     @Body() createProductDto: CreateProductDto,
     @UploadedFile() file: Express.Multer.File,
@@ -98,7 +98,7 @@ export class ProductsController {
     description: 'Product updated successfully',
     type: UpdateProductDto,
   })
-  @UseInterceptors(FileInterceptor('image'))
+  @UseInterceptors(FileInterceptor('productImage'))
   update(
     @Param('id', ParseUUIDPipe) id: string,
     @Body() updateProductDto: UpdateProductDto,

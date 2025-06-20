@@ -20,7 +20,7 @@ export class FileRepositoryService {
     );
   }
 
-  uploadFile(file: Express.Multer.File) {
+  uploadFile(file: Express.Multer.File): Promise<string> {
     return new Promise((resolve, reject) => {
       const filename = `${randomUUID().toString()}-${file.originalname}`;
       this.minioService.putObject(
@@ -32,7 +32,7 @@ export class FileRepositoryService {
           if (error) {
             reject(error);
           } else {
-            resolve(objInfo);
+            resolve(filename);
           }
         },
       );

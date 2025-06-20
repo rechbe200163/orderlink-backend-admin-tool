@@ -3,7 +3,6 @@ import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { FileRepositoryService } from 'src/file-repository/file-repository.service';
 import { CreateProductDto } from 'src/products/dto/create-product.dto';
-import { UpdateProductDto } from 'src/products/dto/update-product.dto';
 
 @Injectable()
 export class ProductsRepository {
@@ -13,8 +12,19 @@ export class ProductsRepository {
     private prismaService: CustomPrismaService<ExtendedPrismaClient>,
   ) {}
 
-  async create(createProductDto: CreateProductDto, file: Express.Multer.File) {
-    console.log('Received product data:', createProductDto);
-    console.log('Received file:', file);
+  // products.repository.ts
+  async create(createProductDto: CreateProductDto, imageName?: string) {
+    console.log('Creating product with data:', imageName);
+    return this.prismaService.client.product.create({
+      data: {
+        name: createProductDto.name,
+        price: createProductDto.price,
+        description: createProductDto.description,
+        stock: createProductDto.stock,
+        imagePath: imageName, // in DB speichern
+        categoryId: createProductDto.categoryId, // Kategorie zuordnen
+      },
+    });
+    // Kategorien zuordnen
   }
 }
