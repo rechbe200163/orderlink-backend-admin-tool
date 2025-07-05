@@ -16,4 +16,20 @@ export class StatisticsService {
   getQuickStats() {
     return this.statisticsRepository.getQuickStats();
   }
+
+  getRevenueStats() {
+    return this.statisticsRepository.getRevenueStats();
+  }
+
+  getSalesStats() {
+    return this.statisticsRepository.getSalesStats();
+  }
+
+  getAverageOrderValueStats() {
+    return this.statisticsRepository.getAverageOrderValueStats();
+  }
+
+  getCustomerStats() {
+    return this.statisticsRepository.getCustomerStats();
+  }
 }
