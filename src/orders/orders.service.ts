@@ -1,26 +1,35 @@
 import { Injectable } from '@nestjs/common';
+import { OrdersRepository } from './orders.repository';
 import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
+import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
+import { OrderDto } from './dto/order.dto';
 
 @Injectable()
 export class OrdersService {
-  create(createOrderDto: CreateOrderDto) {
-    return 'This action adds a new order';
+  constructor(private readonly ordersRepository: OrdersRepository) {}
+
+  create(createOrderDto: CreateOrderDto): Promise<OrderDto> {
+    return this.ordersRepository.create(createOrderDto);
   }
 
-  findAll() {
-    return `This action returns all orders`;
+  findAll(
+    limit = 10,
+    page = 1,
+    customerReference?: number,
+  ): Promise<PagingResultDto<OrderDto>> {
+    return this.ordersRepository.findAll(limit, page, customerReference);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} order`;
+  findOne(id: string): Promise<OrderDto> {
+    return this.ordersRepository.findById(id);
   }
 
-  update(id: number, updateOrderDto: UpdateOrderDto) {
-    return `This action updates a #${id} order`;
+  update(id: string, updateOrderDto: UpdateOrderDto): Promise<OrderDto> {
+    return this.ordersRepository.update(id, updateOrderDto);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} order`;
+  remove(id: string): Promise<OrderDto> {
+    return this.ordersRepository.remove(id);
   }
 }
