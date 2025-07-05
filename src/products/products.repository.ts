@@ -1,5 +1,5 @@
 import { Inject, Injectable, NotFoundException } from '@nestjs/common';
-import { PagingResultDto } from 'lib/dto/generictPagingReslutDto';
+import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { FileRepositoryService } from 'src/file-repository/file-repository.service';

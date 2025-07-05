@@ -29,7 +29,7 @@ import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { CreateEmployeesDto } from 'prisma/src/generated/dto/create-employees.dto';
 import { UpdateEmployeesDto } from 'prisma/src/generated/dto/update-employees.dto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
-import { PagingResultDto } from 'lib/dto/generictPagingReslutDto';
+import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { EmployeesDto } from 'prisma/src/generated/dto/employees.dto';
 
 @Controller('employees')

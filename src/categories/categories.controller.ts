@@ -30,7 +30,7 @@ import { Resource } from 'lib/decorators/ressource-decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { CacheInterceptor } from '@nestjs/cache-manager';
-import { PagingResultDto } from 'lib/dto/generictPagingReslutDto';
+import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { CategoryDto } from './dto/category.dto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
 import { UpdateCategoryDto } from './dto/update-category.dto';
