@@ -20,6 +20,9 @@ import { OrdersModule } from './orders/orders.module';
 import { ProductsModule } from './products/products.module';
 import { FileRepositoryModule } from './file-repository/file-repository.module';
 import { ConfigModule } from '@nestjs/config';
+import { AddressesModule } from './addresses/addresses.module';
+import { InvoicesModule } from './invoices/invoices.module';
+import { RoutesModule } from './routes/routes.module';
 
 @Module({
   imports: [
@@ -67,6 +70,9 @@ import { ConfigModule } from '@nestjs/config';
     OrdersModule,
     ProductsModule,
     FileRepositoryModule,
+    AddressesModule,
+    InvoicesModule,
+    RoutesModule,
   ],
   controllers: [AppController],
   providers: [AppService],
