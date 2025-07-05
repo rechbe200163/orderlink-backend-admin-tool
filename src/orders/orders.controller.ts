@@ -93,11 +93,4 @@ export class OrdersController {
   ) {
     return this.ordersService.update(id, updateOrderDto);
   }
-
-  @Delete(':id')
-  @ApiParam({ name: 'id', type: String })
-  @ApiOkResponse({ type: OrderDto })
-  remove(@Param('id', ParseUUIDPipe) id: string) {
-    return this.ordersService.remove(id);
-  }
 }

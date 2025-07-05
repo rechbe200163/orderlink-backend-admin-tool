@@ -28,8 +28,4 @@ export class OrdersService {
   update(id: string, updateOrderDto: UpdateOrderDto): Promise<OrderDto> {
     return this.ordersRepository.update(id, updateOrderDto);
   }
-
-  remove(id: string): Promise<OrderDto> {
-    return this.ordersRepository.remove(id);
-  }
 }
