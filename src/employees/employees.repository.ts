@@ -1,5 +1,5 @@
 import { hash } from 'bcryptjs';
-import { PagingResultDto } from 'lib/dto/generictPagingReslutDto';
+import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { RolesRepository } from './../roles/roles.repository';
 import {
   BadRequestException,

@@ -29,7 +29,7 @@ import { Resource } from 'lib/decorators/ressource-decorator';
 import { CreateProductDto } from 'src/products/dto/create-product.dto';
 import { UpdateProductDto } from 'src/products/dto/update-product.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
-import { PagingResultDto } from 'lib/dto/generictPagingReslutDto';
+import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { ProductDto } from './dto/product.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';

@@ -3,7 +3,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoriesRepository } from './categories.repository';
 import { CategoryDto } from './dto/category.dto';
-import { PagingResultDto } from 'lib/dto/generictPagingReslutDto';
+import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 
 @Injectable()
 export class CategoriesService {
