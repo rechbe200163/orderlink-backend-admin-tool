@@ -23,6 +23,7 @@ import { ConfigModule } from '@nestjs/config';
 import { AddressesModule } from './addresses/addresses.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { RoutesModule } from './routes/routes.module';
+import { StatisticsModule } from './statistics/statistics.module';
 
 @Module({
   imports: [
@@ -73,6 +74,7 @@ import { RoutesModule } from './routes/routes.module';
     AddressesModule,
     InvoicesModule,
     RoutesModule,
+    StatisticsModule,
   ],
   controllers: [AppController],
   providers: [AppService],
