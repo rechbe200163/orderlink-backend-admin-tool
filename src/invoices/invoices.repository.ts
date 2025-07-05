@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
@@ -54,8 +59,10 @@ export class InvoicesRepository {
     if (!existing) {
       throw new NotFoundException(`Invoice with ID ${invoiceId} not found`);
     }
-    if (isNoChange<UpdateInvoiceDto>(data, existing)) {
-      throw new BadRequestException(`No changes detected for invoice ${invoiceId}`);
+    if (isNoChange<UpdateInvoiceDto>(data, existing as any)) {
+      throw new BadRequestException(
+        `No changes detected for invoice ${invoiceId}`,
+      );
     }
     const invoice = await this.prismaService.client.invoice.update({
       where: { invoiceId },

@@ -46,6 +46,7 @@ enum Ressources {
   CATEGORY
   ACTION
   PERMISSION
+  STATISTICS
 }
 
 enum OrderState {
