@@ -10,6 +10,10 @@ import {
 import { OrderStateCountDto } from './dto/order-state-count.dto';
 import { CustomerBusinessSectorDto } from './dto/customer-business-sector.dto';
 import { QuickStatsDto } from './dto/quick-stats.dto';
+import { RevenueStatsDto } from './dto/revenue-stats.dto';
+import { SalesStatsDto } from './dto/sales-stats.dto';
+import { AverageOrderValueStatsDto } from './dto/average-order-value-stats.dto';
+import { CustomerStatsDto } from './dto/customer-stats.dto';
 
 @Controller('statistics')
 @UseInterceptors(CacheInterceptor)
@@ -35,5 +39,29 @@ export class StatisticsController {
   @ApiOkResponse({ type: QuickStatsDto })
   getQuickStats() {
     return this.statisticsService.getQuickStats();
+  }
+
+  @Get('revenue')
+  @ApiOkResponse({ type: RevenueStatsDto })
+  getRevenueStats() {
+    return this.statisticsService.getRevenueStats();
+  }
+
+  @Get('sales')
+  @ApiOkResponse({ type: SalesStatsDto })
+  getSalesStats() {
+    return this.statisticsService.getSalesStats();
+  }
+
+  @Get('average-order-value')
+  @ApiOkResponse({ type: AverageOrderValueStatsDto })
+  getAverageOrderValueStats() {
+    return this.statisticsService.getAverageOrderValueStats();
+  }
+
+  @Get('customers/monthly-signups')
+  @ApiOkResponse({ type: CustomerStatsDto })
+  getCustomerStats() {
+    return this.statisticsService.getCustomerStats();
   }
 }
