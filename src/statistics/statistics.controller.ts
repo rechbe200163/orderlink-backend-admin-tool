@@ -1,0 +1,39 @@
+import { Controller, Get, UseInterceptors, UseGuards } from '@nestjs/common';
+import { CacheInterceptor } from '@nestjs/cache-manager';
+import { StatisticsService } from './statistics.service';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import {
+  ApiBearerAuth,
+  ApiInternalServerErrorResponse,
+  ApiOkResponse,
+} from '@nestjs/swagger';
+import { OrderStateCountDto } from './dto/order-state-count.dto';
+import { CustomerBusinessSectorDto } from './dto/customer-business-sector.dto';
+import { QuickStatsDto } from './dto/quick-stats.dto';
+
+@Controller('statistics')
+@UseInterceptors(CacheInterceptor)
+@ApiInternalServerErrorResponse({ description: 'Internal server error' })
+@ApiBearerAuth()
+@UseGuards(JwtAuthGuard)
+export class StatisticsController {
+  constructor(private readonly statisticsService: StatisticsService) {}
+
+  @Get('orders/state')
+  @ApiOkResponse({ type: OrderStateCountDto, isArray: true })
+  getOrderStates() {
+    return this.statisticsService.getOrderStateCounts();
+  }
+
+  @Get('customers/business-sector')
+  @ApiOkResponse({ type: CustomerBusinessSectorDto })
+  getCustomerBusinessSectors() {
+    return this.statisticsService.getCustomerBusinessSectors();
+  }
+
+  @Get('quick')
+  @ApiOkResponse({ type: QuickStatsDto })
+  getQuickStats() {
+    return this.statisticsService.getQuickStats();
+  }
+}
