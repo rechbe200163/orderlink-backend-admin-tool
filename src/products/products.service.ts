@@ -3,7 +3,7 @@ import { FileRepositoryService } from 'src/file-repository/file-repository.servi
 import { CreateProductDto } from 'src/products/dto/create-product.dto';
 import { UpdateProductDto } from 'src/products/dto/update-product.dto';
 import { ProductsRepository } from './products.repository';
-import { PagingResultDto } from 'lib/dto/generictPagingReslutDto';
+import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { ProductDto } from './dto/product.dto';
 
 @Injectable()
