@@ -1,4 +1,10 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import { SiteConfig } from './../../prisma/src/generated/dto/siteConfig.entity';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { CreateSiteConfigDto } from 'prisma/src/generated/dto/create-siteConfig.dto';
@@ -16,19 +22,20 @@ export class SiteConfigRepository {
   ) {}
 
   async create(data: CreateSiteConfigDto): Promise<SiteConfigDto> {
-    const siteConfig = await this.prismaService.client.siteConfig.create({ data });
+    const siteConfig = await this.prismaService.client.siteConfig.create({
+      data,
+    });
     return transformResponse(SiteConfigDto, siteConfig);
   }
 
-  async findAll(limit = 10, page = 1): Promise<PagingResultDto<SiteConfigDto>> {
-    const [configs, meta] = await this.prismaService.client.siteConfig
-      .paginate({ where: { deleted: false } })
-      .withPages({ limit, page, includePageCount: true });
-
-    return {
-      data: configs.map((c: SiteConfigDto) => transformResponse(SiteConfigDto, c)),
-      meta,
-    };
+  async findFirst(): Promise<SiteConfigDto> {
+    const siteConfig = await this.prismaService.client.siteConfig.findFirst({
+      where: { deleted: false },
+      include: {
+        address: true, // Include address if needed
+      },
+    });
+    return transformResponse(SiteConfigDto, siteConfig);
   }
 
   async findById(siteConfigId: string): Promise<SiteConfigDto> {
@@ -36,20 +43,29 @@ export class SiteConfigRepository {
       where: { siteConfigId },
     });
     if (!config) {
-      throw new NotFoundException(`SiteConfig with ID ${siteConfigId} not found`);
+      throw new NotFoundException(
+        `SiteConfig with ID ${siteConfigId} not found`,
+      );
     }
     return transformResponse(SiteConfigDto, config);
   }
 
-  async update(siteConfigId: string, data: UpdateSiteConfigDto): Promise<SiteConfigDto> {
+  async update(
+    siteConfigId: string,
+    data: UpdateSiteConfigDto,
+  ): Promise<SiteConfigDto> {
     const existing = await this.prismaService.client.siteConfig.findUnique({
       where: { siteConfigId },
     });
     if (!existing) {
-      throw new NotFoundException(`SiteConfig with ID ${siteConfigId} not found`);
+      throw new NotFoundException(
+        `SiteConfig with ID ${siteConfigId} not found`,
+      );
     }
     if (isNoChange<UpdateSiteConfigDto>(data, existing)) {
-      throw new BadRequestException(`No changes detected for site config ${siteConfigId}`);
+      throw new BadRequestException(
+        `No changes detected for site config ${siteConfigId}`,
+      );
     }
     const config = await this.prismaService.client.siteConfig.update({
       where: { siteConfigId },

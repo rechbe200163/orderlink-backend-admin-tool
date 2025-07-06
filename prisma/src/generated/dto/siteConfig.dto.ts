@@ -1,23 +1,51 @@
-
-import {ApiProperty} from '@nestjs/swagger'
-
+import { ApiProperty } from '@nestjs/swagger';
+import { Expose } from 'class-transformer';
+import { AddressDto } from './address.dto';
 
 export class SiteConfigDto {
-  siteConfigId: string ;
-companyName: string ;
-logoPath: string ;
-email: string ;
-phoneNumber: string ;
-iban: string ;
-companyNumber: string ;
-@ApiProperty({
-  type: `string`,
-  format: `date-time`,
-})
-modifiedAt: Date  | null;
-isPremium: boolean ;
-deleted: boolean ;
-stripeCustomerId: string  | null;
-stripeAccountId: string  | null;
-stripeConfigured: boolean ;
+  @ApiProperty({
+    description: 'The unique identifier for the site configuration',
+    type: String,
+    format: 'uuid',
+  })
+  @Expose()
+  siteConfigId: string;
+  @Expose()
+  companyName: string;
+  @Expose()
+  logoPath: string;
+  @Expose()
+  email: string;
+  @Expose()
+  phoneNumber: string;
+  @Expose()
+  iban: string;
+  @Expose()
+  companyNumber: string;
+  @ApiProperty({
+    type: String,
+    format: 'date-time',
+  })
+  @Expose({
+    name: 'createdAt',
+    toPlainOnly: true,
+  })
+  createdAt: Date | null;
+  @Expose({
+    name: 'modifiedAt',
+    toPlainOnly: true,
+  })
+  modifiedAt: Date | null;
+  @Expose()
+  isPremium: boolean;
+  @Expose()
+  deleted: boolean;
+  @Expose()
+  stripeCustomerId: string | null;
+  @Expose()
+  stripeAccountId: string | null;
+  @Expose()
+  stripeConfigured: boolean;
+  @Expose()
+  address: AddressDto;
 }

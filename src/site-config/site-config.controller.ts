@@ -54,17 +54,9 @@ export class SiteConfigController {
   }
 
   @Get()
-  @ApiQuery({ name: 'limit', type: Number, required: false, default: 10, maximum: MAX_PAGE_SIZE })
-  @ApiQuery({ name: 'page', type: Number, required: false, default: 1 })
-  @ApiOkResponse({ type: PagingResultDto<SiteConfigDto> })
-  findAll(
-    @Query('limit', ParseIntPipe) limit = 10,
-    @Query('page', ParseIntPipe) page = 1,
-  ) {
-    if (limit > MAX_PAGE_SIZE) {
-      throw new BadRequestException(`Limit cannot exceed ${MAX_PAGE_SIZE}`);
-    }
-    return this.siteConfigService.findAll(limit, page);
+  @ApiOkResponse({ type: SiteConfigDto })
+  findAll() {
+    return this.siteConfigService.findFirst();
   }
 
   @Get(':id')

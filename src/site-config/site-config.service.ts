@@ -13,8 +13,8 @@ export class SiteConfigService {
     return this.siteConfigRepository.create(createDto);
   }
 
-  findAll(limit = 10, page = 1): Promise<PagingResultDto<SiteConfigDto>> {
-    return this.siteConfigRepository.findAll(limit, page);
+  findFirst(): Promise<SiteConfigDto> {
+    return this.siteConfigRepository.findFirst();
   }
 
   findById(id: string): Promise<SiteConfigDto> {

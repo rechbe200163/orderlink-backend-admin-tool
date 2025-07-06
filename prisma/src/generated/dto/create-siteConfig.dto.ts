@@ -1,16 +1,64 @@
-
-
-
-
-
+import { ApiProperty } from '@nestjs/swagger';
+import { IsIBAN, IsPhoneNumber, IsString, IsUUID } from 'class-validator';
 
 export class CreateSiteConfigDto {
+  @ApiProperty({
+    description: 'The name of the company for the site configuration',
+    required: true,
+  })
+  @IsString()
   companyName: string;
-logoPath: string;
-email: string;
-phoneNumber: string;
-iban: string;
-companyNumber: string;
-stripeCustomerId?: string;
-stripeAccountId?: string;
+
+  @ApiProperty({
+    description: 'The logo path for the site configuration',
+    required: true,
+  })
+  @IsString()
+  logoPath: string;
+
+  @ApiProperty({
+    description: 'The email address for the site configuration',
+    required: true,
+  })
+  @IsString()
+  email: string;
+
+  @ApiProperty({
+    description: 'The phone number for the site configuration',
+    required: true,
+  })
+  @IsPhoneNumber()
+  phoneNumber: string;
+  @ApiProperty({
+    description: 'The IBAN for the site configuration',
+    required: true,
+  })
+  @IsIBAN()
+  iban: string;
+  @ApiProperty({
+    description: 'The company number for the site configuration',
+    required: true,
+  })
+  @IsString()
+  companyNumber: string;
+  @ApiProperty({
+    description: 'The Stripe customer ID for the site configuration',
+    required: false,
+  })
+  @IsString()
+  stripeCustomerId?: string;
+
+  @ApiProperty({
+    description: 'The Stripe customer ID for the site configuration',
+    required: false,
+  })
+  @IsString()
+  stripeAccountId?: string;
+
+  @ApiProperty({
+    description: 'The address ID for the site configuration',
+    required: true,
+  })
+  @IsUUID()
+  addressId: string;
 }
