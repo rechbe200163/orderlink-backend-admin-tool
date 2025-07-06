@@ -24,6 +24,7 @@ import { AddressesModule } from './addresses/addresses.module';
 import { InvoicesModule } from './invoices/invoices.module';
 import { RoutesModule } from './routes/routes.module';
 import { StatisticsModule } from './statistics/statistics.module';
+import { SiteConfigModule } from './site-config/site-config.module';
 
 @Module({
   imports: [
@@ -74,6 +75,7 @@ import { StatisticsModule } from './statistics/statistics.module';
     AddressesModule,
     InvoicesModule,
     RoutesModule,
+    SiteConfigModule,
     StatisticsModule,
   ],
   controllers: [AppController],
