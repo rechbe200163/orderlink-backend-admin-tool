@@ -54,7 +54,13 @@ export class AddressesController {
   }
 
   @Get()
-  @ApiQuery({ name: 'limit', type: Number, required: false, default: 10, maximum: MAX_PAGE_SIZE })
+  @ApiQuery({
+    name: 'limit',
+    type: Number,
+    required: false,
+    default: 10,
+    maximum: MAX_PAGE_SIZE,
+  })
   @ApiQuery({ name: 'page', type: Number, required: false, default: 1 })
   @ApiOkResponse({ type: PagingResultDto<AddressDto> })
   findAll(
