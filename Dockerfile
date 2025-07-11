@@ -10,13 +10,14 @@ COPY prisma ./prisma/
 RUN npm install -g pnpm
 
 # Install app dependencies
-RUN pnpm install
+RUN pnpm install --frozen-lockfile --prod=false
 
 COPY . .
 
 RUN pnpm run build
 
 FROM node:latest
+WORKDIR /app
 
 COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
