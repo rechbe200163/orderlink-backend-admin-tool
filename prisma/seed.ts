@@ -1,8 +1,8 @@
 import {
   Actions,
-  Ressources,
   BusinessSector,
   PrismaClient,
+  Ressources,
 } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import { hash } from 'bcryptjs';

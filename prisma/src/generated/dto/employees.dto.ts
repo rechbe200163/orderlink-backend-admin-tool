@@ -1,8 +1,5 @@
-import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose } from 'class-transformer';
 import { IsEmail, IsString, IsUUID } from 'class-validator';
-import { RoleDto } from './role.dto';
-import { Role } from './role.entity';
 
 export class EmployeesDto {
   @IsUUID()

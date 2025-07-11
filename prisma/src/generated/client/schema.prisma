@@ -1,0 +1,405 @@
+// This is your Prisma schema file with @nestjsDto annotations for DTO generation
+
+// Prisma Client Generator
+
+generator client {
+  provider      = "prisma-client-js"
+  output        = "./src/generated/client"
+  binaryTargets = ["native", "debian-openssl-3.0.x", "linux-arm64-openssl-3.0.x"]
+}
+
+// NestJS DTO Generator
+
+// generator nestjsDto {
+//   provider         = "prisma-generator-nestjs-dto"
+//   output           = "./src/generated/dto"
+//   createDtoPrefix  = "Create"
+//   updateDtoPrefix  = "Update"
+//   classValidator   = true
+//   classTransformer = true
+//   renameIdFields   = true
+//   strict           = true
+// }
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL_DEV")
+}
+
+enum Actions {
+  READ
+  DELETE
+  UPDATE
+  CREATE
+}
+
+enum Ressources {
+  PRODUCT
+  ORDER
+  CUSTOMER
+  CART
+  ADDRESS
+  INVOICE
+  EMPLOYEE
+  ROLE
+  ROUTES
+  SITE_CONFIG
+  CATEGORY
+  ACTION
+  PERMISSION
+  STATISTICS
+}
+
+enum OrderState {
+  ORDER_PLACED
+  IN_PROGRESS
+  DISPATCHED
+  DELIVERED
+  ORDER_COLLECTED
+}
+
+enum BusinessSector {
+  AGRICULTURE
+  CONSTRUCTION
+  EDUCATION
+  FINANCE
+  HEALTH
+  HOSPITALITY
+  IT
+  MANUFACTURING
+  OTHER
+  RETAIL
+  TECHNOLOGY
+  TOURISM
+  TRANSPORTATION
+}
+
+model Customer {
+  customerId        String          @id @default(nanoid()) @db.Uuid
+  customerReference Int             @unique()
+  email             String          @unique
+  phoneNumber       String          @db.VarChar(15)
+  password          String          @db.VarChar(255)
+  firstName         String?         @db.VarChar(255)
+  lastName          String          @db.VarChar(255)
+  companyNumber     String?         @db.VarChar(255)
+  modifiedAt        DateTime?       @default(dbgenerated("null")) @updatedAt
+  deleted           Boolean         @default(false)
+  signedUp          DateTime        @default(now())
+  avatarPath        String?         @db.VarChar(255)
+  addressId         String          @db.Uuid
+  businessSector    BusinessSector?
+
+  address Address           @relation(fields: [addressId], references: [addressId])
+  cart    Cart?
+  orders  Order[]
+  history CustomerHistory[]
+
+  @@index([customerReference], name: "customer_reference_index")
+  @@index([email], name: "customer_email_index")
+  @@index([lastName], name: "customer_last_name_index")
+  @@map("customers")
+}
+
+model CustomerHistory {
+  historyId         String          @id @default(nanoid()) @db.Uuid
+  customerReference Int
+  email             String
+  phoneNumber       String          @db.VarChar(15)
+  password          String          @db.VarChar(255)
+  firstName         String?         @db.VarChar(255)
+  lastName          String          @db.VarChar(255)
+  companyNumber     String?         @db.VarChar(255)
+  modifiedAt        DateTime?       @default(dbgenerated("null")) @updatedAt
+  deleted           Boolean         @default(false)
+  signedUp          DateTime        @default(now())
+  avatarPath        String?         @db.VarChar(255)
+  addressId         String          @db.Uuid
+  businessSector    BusinessSector?
+
+  customer Customer @relation(fields: [customerReference], references: [customerReference])
+
+  @@map("customerHistory")
+}
+
+model Cart {
+  cartId            String           @id @default(nanoid()) @db.Uuid
+  customerReference Int?             @unique
+  customer          Customer?        @relation(fields: [customerReference], references: [customerReference])
+  products          CartOnProducts[]
+
+  @@map("carts")
+}
+
+model Address {
+  addressId    String    @id @default(nanoid()) @db.Uuid
+  city         String    @db.VarChar(100)
+  country      String    @db.VarChar(40)
+  postCode     String    @db.VarChar(10)
+  state        String    @db.VarChar(40)
+  streetName   String    @db.VarChar(255)
+  streetNumber String    @db.VarChar(30)
+  modifiedAt   DateTime? @default(dbgenerated("null")) @updatedAt
+  deleted      Boolean   @default(false)
+
+  customers  Customer[]
+  siteConfig SiteConfig[]
+
+  @@index([postCode], name: "address_post_code_index")
+  @@map("addresses")
+}
+
+model Product {
+  productId   String    @id @default(nanoid()) @db.Uuid
+  name        String    @db.VarChar(255)
+  price       Int
+  description String    @db.VarChar(255)
+  stock       Int
+  imagePath   String?   @db.VarChar(255)
+  createdAt   DateTime  @default(now())
+  modifiedAt  DateTime? @default(dbgenerated("null")) @updatedAt
+  deleted     Boolean   @default(false)
+  categoryId  String    @db.Uuid
+
+  category       Category          @relation(fields: [categoryId], references: [categoryId])
+  carts          CartOnProducts[]
+  orders         OrderOnProducts[]
+  ProductHistory ProductHistory[]
+
+  @@index([name], name: "product_name_index")
+  @@map("products")
+}
+
+model ProductHistory {
+  historyId   String    @id @default(nanoid()) @db.Uuid
+  productId   String    @db.Uuid
+  name        String    @db.VarChar(255)
+  price       Int
+  description String    @db.VarChar(255)
+  stock       Int
+  imagePath   String?   @db.VarChar(255)
+  createdAt   DateTime  @default(now())
+  modifiedAt  DateTime? @default(dbgenerated("null")) @updatedAt
+  deleted     Boolean   @default(false)
+  categoryId  String    @db.Uuid
+
+  category Category @relation(fields: [categoryId], references: [categoryId])
+
+  product Product @relation(fields: [productId], references: [productId])
+
+  @@map("productHistory")
+}
+
+model Category {
+  categoryId String  @id @default(nanoid()) @db.Uuid
+  name       String  @unique @db.VarChar(255)
+  imagePath  String? @db.VarChar(255)
+  deleted    Boolean @default(false)
+
+  products       Product[]
+  ProductHistory ProductHistory[]
+
+  @@map("categories")
+}
+
+/**
+ * Order
+ */
+model Order {
+  orderId           String     @id @default(nanoid()) @db.Uuid
+  customerReference Int
+  orderDate         DateTime   @default(now())
+  deliveryDate      DateTime?
+  deleted           Boolean    @default(false)
+  orderState        OrderState @default(ORDER_PLACED)
+  selfCollect       Boolean    @default(false)
+
+  customer Customer          @relation(fields: [customerReference], references: [customerReference])
+  products OrderOnProducts[]
+  invoice  Invoice?
+  route    RoutesOnOrders[]
+  // history  RouteOrderHistory[]
+
+  @@index([customerReference], name: "order_customer_reference_index")
+  @@index([orderDate], name: "order_date_index")
+  @@map("orders")
+}
+
+/**
+ * Invoice
+ */
+model Invoice {
+  invoiceId     String    @id @default(nanoid()) @db.Uuid
+  orderId       String    @unique @db.Uuid
+  invoiceAmount Int //price in cents
+  paymentDate   DateTime? @default(now())
+  pdfUrl        String    @db.VarChar(255)
+  deleted       Boolean   @default(false)
+
+  order Order @relation(fields: [orderId], references: [orderId])
+
+  @@map("invoices")
+}
+
+/**
+ * Route
+ */
+model Route {
+  routeId String           @id @default(nanoid()) @db.Uuid
+  name    String           @db.VarChar(255)
+  deleted Boolean          @default(false)
+  order   RoutesOnOrders[]
+  // history RouteOrderHistory[]
+
+  @@map("routes")
+}
+
+/**
+ * Employees
+ */
+model Employees {
+  employeeId String  @id @default(nanoid()) @db.Uuid
+  email      String  @unique @db.VarChar(255)
+  password   String  @db.VarChar(255)
+  firstName  String  @db.VarChar(255)
+  lastName   String  @db.VarChar(255)
+  deleted    Boolean @default(false)
+  Role       Role    @relation(fields: [role], references: [name])
+  role       String  @db.VarChar(255)
+
+  @@index([email], name: "employee_email_index")
+  @@index([lastName], name: "employee_last_name_index")
+  @@map("employees")
+}
+
+/**
+ * SiteConfig
+ */
+model SiteConfig {
+  siteConfigId String @id @default(nanoid()) @db.Uuid
+  companyName  String @db.VarChar(255)
+  //? should probably also have a slogan or a short description field
+  //? should probably also have a relation to a socialMedia model with links to social media
+
+  logoPath         String    @db.VarChar(255)
+  email            String    @unique @db.VarChar(255)
+  phoneNumber      String    @db.VarChar(15)
+  iban             String    @db.VarChar(40)
+  companyNumber    String    @db.VarChar(255)
+  addressId        String    @db.Uuid
+  modifiedAt       DateTime? @default(dbgenerated("null")) @updatedAt
+  isPremium        Boolean   @default(false)
+  deleted          Boolean   @default(false)
+  stripeCustomerId String?   @db.VarChar(255)
+  stripeAccountId  String?   @db.VarChar(255)
+  stripeConfigured Boolean   @default(false)
+  address          Address   @relation(fields: [addressId], references: [addressId])
+
+  @@map("siteConfigs")
+}
+
+model Action {
+  name          Actions          @id
+  description   String?          @db.VarChar(255)
+  deleted       Boolean          @default(false)
+  resourceLinks ResourceAction[]
+}
+
+model Ressource {
+  name        Ressources       @id
+  description String?          @db.VarChar(255)
+  deleted     Boolean          @default(false)
+  actionLinks ResourceAction[]
+}
+
+model ResourceAction {
+  action      Actions
+  resource    Ressources
+  Action      Action       @relation(fields: [action], references: [name])
+  Ressource   Ressource    @relation(fields: [resource], references: [name])
+  permissions Permission[]
+
+  @@id([action, resource]) // Composite primary key for action and resource
+  @@unique([action, resource]) // verhindert doppelte Kombinationen
+  @@index([action, resource], name: "resource_action_resource_index") // Index for both action and resource
+  @@map("resourceActions")
+}
+
+model Role {
+  name        String       @id @unique @default("ADMIN") @db.VarChar(255)
+  description String?      @db.VarChar(255)
+  deleted     Boolean      @default(false)
+  employees   Employees[]
+  permissions Permission[]
+
+  @@index([name], name: "role_name_index")
+  @@map("roles")
+}
+
+model Permission {
+  id             String         @id @default(nanoid()) @db.Uuid
+  role           String         @db.VarChar(255)
+  action         Actions
+  resource       Ressources
+  Role           Role           @relation(fields: [role], references: [name])
+  resourceAction ResourceAction @relation(fields: [action, resource], references: [action, resource])
+  allowed        Boolean        @default(false)
+  createdAt      DateTime       @default(now())
+
+  @@unique([role, action, resource])
+}
+
+// model CategoriesOnProducts {
+//   productId  String   @db.Uuid
+//   product    Product  @relation(fields: [productId], references: [productId])
+//   categoryId String   @db.Uuid
+//   category   Category @relation(fields: [categoryId], references: [categoryId])
+
+//   @@id([productId, categoryId])
+//   @@map("categoriesProducts")
+// }
+
+model CartOnProducts {
+  cartId    String  @db.Uuid
+  cart      Cart    @relation(fields: [cartId], references: [cartId])
+  productId String  @db.Uuid
+  product   Product @relation(fields: [productId], references: [productId])
+  quantity  Int     @default(1) @map("productAmount")
+
+  @@id([cartId, productId])
+  @@map("cartsProducts")
+}
+
+model OrderOnProducts {
+  orderId       String   @db.Uuid
+  order         Order    @relation(fields: [orderId], references: [orderId])
+  productId     String   @db.Uuid
+  product       Product  @relation(fields: [productId], references: [productId])
+  orderDate     DateTime @default(now())
+  productAmount Int      @default(1)
+
+  @@id([orderId, productId])
+  @@map("ordersProducts")
+}
+
+model RoutesOnOrders {
+  routeId String @db.Uuid
+  route   Route  @relation(fields: [routeId], references: [routeId])
+  orderId String @db.Uuid
+  order   Order  @relation(fields: [orderId], references: [orderId])
+
+  @@id([routeId, orderId])
+  @@map("routesOrders")
+}
+
+// model RouteOrderHistory {
+//   historyId String @id @default(nanoid()) @db.Uuid
+//   routeId             String @db.Uuid
+//   orderId             String @db.Uuid
+//   deleted             Boolean @default(false)
+
+//   route Route @relation(fields: [routeId], references: [routeId])
+//   order Order @relation(fields: [orderId], references: [orderId])
+
+//   @@map("routeOrderHistory")
+// }

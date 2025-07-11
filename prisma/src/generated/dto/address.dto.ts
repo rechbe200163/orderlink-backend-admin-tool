@@ -1,19 +1,17 @@
-
-import {ApiProperty} from '@nestjs/swagger'
-
+import { ApiProperty } from '@nestjs/swagger';
 
 export class AddressDto {
-  addressId: string ;
-city: string ;
-country: string ;
-postCode: string ;
-state: string ;
-streetName: string ;
-streetNumber: string ;
-@ApiProperty({
-  type: `string`,
-  format: `date-time`,
-})
-modifiedAt: Date  | null;
-deleted: boolean ;
+  addressId: string;
+  city: string;
+  country: string;
+  postCode: string;
+  state: string;
+  streetName: string;
+  streetNumber: string;
+  @ApiProperty({
+    type: `string`,
+    format: `date-time`,
+  })
+  modifiedAt: Date | null;
+  deleted: boolean;
 }
