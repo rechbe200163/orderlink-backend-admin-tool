@@ -1,54 +1,83 @@
+# services:
+#   redis:
+#     container_name: cache
+#     image: redis:7
+#     ports:
+#       - '6379:6379'
+#     volumes:
+#       - redis:/data
+
+#   # minio:
+#   #   image: bitnami/minio:2024.11.7
+#   #   container_name: minio
+#   #   restart: always
+#   #   ports:
+#   #     - '${MINIO_PORT}:${MINIO_PORT}'
+#   #     - '${MINIO_CONSOLE_PORT}:${MINIO_CONSOLE_PORT}'
+#   #   environment:
+#   #     MINIO_ROOT_USER: ${MINIO_USER}
+#   #     MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
+#   #     MINIO_DEFAULT_BUCKETS: ${MINIO_BUCKET}
+#   #     MINIO_API_PORT_NUMBER: ${MINIO_PORT}
+#   #     MINIO_CONSOLE_PORT_NUMBER: ${MINIO_CONSOLE_PORT}
+#   #   volumes:
+#   #     - minio-data:/bitnami/minio/data
+
+#   nest-api:
+#     build:
+#       context: .
+#       dockerfile: Dockerfile
+#     container_name: nest-api
+#     restart: always
+#     ports:
+#       - '3001:3000' # Dockerfile exposes 3000, lokal erreichbar über 3001
+#     depends_on:
+#       # - nest-postgres
+#       - redis
+#       # - minio
+#     env_file:
+#       - .env
+
+#   # nest-postgres:
+#   #   image: postgres:14
+#   #   container_name: nest-postgres
+#   #   restart: always
+#   #   ports:
+#   #     - '5432:5432'
+#   #   env_file:
+#   #     - .env
+#   #   volumes:
+#   #     - nest-postgres:/var/lib/postgresql/data
+
+# volumes:
+#   # minio-data:
+#   redis:
+#   nest-postgres:
 services:
   redis:
-    container_name: cache
-    image: redis
+    image: redis:7
+    container_name: redis
     ports:
-      - 6379:6379
+      - '6379:6379'
     volumes:
-      - redis:/data
-  minio:
-    image: bitnami/minio:2024.11.7
-    restart: always
-    ports:
-      - ${MINIO_PORT}:${MINIO_PORT}
-      - ${MINIO_CONSOLE_PORT}:${MINIO_CONSOLE_PORT}
-    environment:
-      MINIO_ROOT_USER: ${MINIO_USER}
-      MINIO_ROOT_PASSWORD: ${MINIO_PASSWORD}
-      MINIO_DEFAULT_BUCKETS: ${MINIO_BUCKET}
-      MINIO_API_PORT_NUMBER: ${MINIO_PORT}
-      MINIO_CONSOLE_PORT_NUMBER: ${MINIO_CONSOLE_PORT}
-    volumes:
-      - minio-data:/bitnami/minio/data
+      - redis-data:/data
 
   nest-api:
+    container_name: nest-api
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: nest-api
-    restart: always
+      args:
+        HUSKY: 0
+    environment:
+      - NODE_ENV=production
     ports:
       - '3001:3001'
     depends_on:
-      - nest-postgres
+      - redis
+    restart: unless-stopped
     env_file:
       - .env
-
-  nest-postgres:
-    image: postgres:14
-    container_name: nest-postgres
-    restart: always
-    ports:
-      - '5432:5432'
-    env_file:
-      - .env
-    volumes:
-      - nest-postgres:/var/lib/postgresql/data
 
 volumes:
-  minio-data:
-    driver: local
-  redis:
-    driver: local
-  nest-postgres:
-    name: nest-postgres-db
+  redis-data:

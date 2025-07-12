@@ -1,26 +1,21 @@
-FROM node:latest AS builder
+# Dockerfile
+FROM node:20
 
-# Create app directory
-WORKDIR /app
+WORKDIR /usr/src/app
 
-# A wildcard is used to ensure both package.json AND package-lock.json are copied
-COPY package*.json ./
-COPY prisma ./prisma/
-
-RUN npm install -g pnpm
-
-# Install app dependencies
-RUN pnpm install
+# Installiere pnpm global
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 COPY . .
 
-RUN pnpm run build
+# Optional: Falls du .npmrc brauchst (z. B. Registry oder pnpm settings)
+# COPY .npmrc .npmrc
 
-FROM node:latest
+# Installiere Dependencies mit pnpm
+RUN pnpm install --frozen-lockfile
 
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/package*.json ./
-COPY --from=builder /app/dist ./dist
+RUN pnpm prisma generate
+# Baue dein Projekt (optional)
+RUN pnpm build
 
-EXPOSE 3000
-CMD [ "pnpm", "start:prod" ]
+CMD ["pnpm", "start"]
