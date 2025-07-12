@@ -1,6 +1,12 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Actions, Ressources } from '@prisma/client';
-import { IsBoolean, isBoolean, IsString, Matches } from 'class-validator';
+import {
+  IsBoolean,
+  isBoolean,
+  IsOptional,
+  IsString,
+  Matches,
+} from 'class-validator';
 
 export class CreatePermissionDto {
   @ApiProperty({
@@ -45,5 +51,6 @@ export class CreatePermissionDto {
     example: true,
   })
   @IsBoolean()
+  @IsOptional()
   allowed?: boolean;
 }
