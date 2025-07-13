@@ -44,6 +44,18 @@ export class PermissionsRepository {
     };
   }
 
+  async findAllPermissions(role?: string): Promise<PermissionDto[]> {
+    const permissions = await this.prismaService.client.permission.findMany({
+      where: {
+        role: role ? role : undefined,
+      },
+    });
+
+    return permissions.map((permission) =>
+      transformResponse(PermissionDto, permission),
+    );
+  }
+
   async findById(id: string): Promise<PermissionDto> {
     const permission = await this.prismaService.client.permission.findUnique({
       where: { id },

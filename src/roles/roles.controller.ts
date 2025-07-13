@@ -30,7 +30,6 @@ import {
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { MAX_PAGE_SIZE } from 'lib/constants';
-import { CustomerPagingResultDto } from 'src/customers/dto/customer-paging.dto';
 import { UpdateRoleDto } from 'prisma/src/generated/dto/update-role.dto';
 import { CreateRoleDto } from 'prisma/src/generated/dto/create-role.dto';
 import { RoleDto } from 'prisma/src/generated/dto/role.dto';
@@ -108,6 +107,15 @@ export class RolesController {
       throw new BadRequestException(`Limit cannot exceed ${MAX_PAGE_SIZE}`);
     }
     return this.rolesService.findAll(limit, page, search);
+  }
+
+  @Get('roleNames')
+  @ApiOkResponse({
+    description: 'All role names retrieved successfully',
+    type: [String],
+  })
+  findAllRoleNames() {
+    return this.rolesService.findAllRoleNames();
   }
 
   @Get(':name')
