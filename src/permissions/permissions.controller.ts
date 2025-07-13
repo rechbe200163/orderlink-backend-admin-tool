@@ -29,9 +29,9 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
-import { CreatePermissionDto } from 'prisma/src/generated/dto/create-permission.dto';
 import { CreatePermissionsDto } from './dto/create-permissions.dto';
 import { UpdatePermissionDto } from 'prisma/src/generated/dto/update-permission.dto';
+import { PermissionDto } from 'prisma/src/generated/dto/permission.dto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
 import { PermissionPagingResultDto } from './dto/permissions-paging';
 import { PermissionDto } from 'prisma/src/generated/dto/permission.dto';
@@ -53,8 +53,8 @@ export class PermissionsController {
 
   @Post()
   @ApiBody({
-    type: CreatePermissionDto,
-    description: 'Create a new permission',
+    type: CreatePermissionsDto,
+    description: 'Create one or multiple permissions',
   })
   @ApiForbiddenResponse({
     description: 'You do not have permission to create a permission',
@@ -63,11 +63,12 @@ export class PermissionsController {
     description: 'Permission already exists',
   })
   @ApiOkResponse({
-    description: 'Permission created successfully',
-    type: CreatePermissionDto,
+    description: 'Permissions created successfully',
+    type: PermissionDto,
+    isArray: true,
   })
-  create(@Body() createPermissionDto: CreatePermissionDto) {
-    return this.permissionsService.create(createPermissionDto);
+  create(@Body() createPermissionsDto: CreatePermissionsDto) {
+    return this.permissionsService.create(createPermissionsDto);
   }
 
   @Post('bulk')

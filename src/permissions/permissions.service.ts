@@ -8,8 +8,8 @@ import { PermissionsRepository } from './permissions.repository';
 export class PermissionsService {
   constructor(private permissionsRepository: PermissionsRepository) {}
 
-  create(createPermissionDto: CreatePermissionDto) {
-    return this.permissionsRepository.create(createPermissionDto);
+  create(createPermissionsDto: CreatePermissionsDto) {
+    return this.permissionsRepository.create(createPermissionsDto);
   }
 
   createMany(createPermissionsDto: CreatePermissionsDto) {

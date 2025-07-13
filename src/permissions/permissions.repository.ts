@@ -67,68 +67,57 @@ export class PermissionsRepository {
     return transformResponse(PermissionDto, permission);
   }
 
-  async create(permissionData: CreatePermissionDto): Promise<PermissionDto> {
-    // check if the permissionData.resource is in Ressources enum
 
-    if (!Object.values(Actions).includes(permissionData.action)) {
-      throw new BadRequestException(
-        `Invalid action type: ${permissionData.action}. Must be one of ${Object.values(Actions).join(', ')}`,
-      );
-    }
+  async create(dto: CreatePermissionsDto): Promise<PermissionDto[]> {
+    const results: PermissionDto[] = [];
+    for (const action of dto.actions) {
+      if (!Object.values(Actions).includes(action)) {
+        throw new BadRequestException(
+          `Invalid action type: ${action}. Must be one of ${Object.values(Actions).join(', ')}`,
+        );
+      }
 
-    if (!Object.values(Ressources).includes(permissionData.resource)) {
-      throw new BadRequestException(
-        `Invalid resource type: ${permissionData.resource}. Must be one of ${Object.values(Ressources).join(', ')}`,
-      );
-    }
+      if (!Object.values(Ressources).includes(dto.resource)) {
+        throw new BadRequestException(
+          `Invalid resource type: ${dto.resource}. Must be one of ${Object.values(Ressources).join(', ')}`,
+        );
+      }
 
-    // check if the role exists
-    const roleExists = await this.rolesRepository.findByName(
-      permissionData.role,
-    );
+      const roleExists = await this.rolesRepository.findByName(dto.role);
 
-    if (!roleExists) {
-      throw new BadRequestException(
-        `Role with name ${permissionData.role} does not exist`,
-      );
-    }
+      if (!roleExists) {
+        throw new BadRequestException(
+          `Role with name ${dto.role} does not exist`,
+        );
+      }
 
-    // check if the permission already exists
-    const existingPermission =
-      await this.prismaService.client.permission.findFirst({
+      const existingPermission = await this.prismaService.client.permission.findFirst({
         where: {
-          action: permissionData.action,
-          resource: permissionData.resource,
-          role: permissionData.role,
+          action,
+          resource: dto.resource,
+          role: dto.role,
         },
       });
 
-    if (existingPermission) {
-      throw new BadRequestException(
-        `Permission with action ${permissionData.action}, resource ${permissionData.resource}, and role ${permissionData.role} already exists`,
-      );
+      if (existingPermission) {
+        throw new BadRequestException(
+          `Permission with action ${action}, resource ${dto.resource}, and role ${dto.role} already exists`,
+        );
+      }
+
+      const createdPermission = await this.prismaService.client.permission.create({
+        data: {
+          role: dto.role,
+          resource: dto.resource,
+          action,
+          allowed: dto.allowed,
+        },
+      });
+      results.push(transformResponse(PermissionDto, createdPermission));
     }
 
-    const createdPermission = await this.prismaService.client.permission.create(
-      {
-        data: permissionData,
-      },
-    );
-    return transformResponse(PermissionDto, createdPermission);
+    return results;
   }
-
-  async createMany(dto: CreatePermissionsDto): Promise<PermissionDto[]> {
-    const promises = dto.actions.map((action) =>
-      this.create({
-        role: dto.role,
-        resource: dto.resource,
-        action,
-        allowed: dto.allowed,
-      }),
-    );
-    return Promise.all(promises);
-  }
-
   async update(
     id: string,
     permissionData: Partial<UpdatePermissionDto>,
