@@ -5,6 +5,7 @@ import { PermissionPagingResultDto } from './dto/permissions-paging';
 import { transformResponse } from 'lib/utils/transform';
 import { PermissionDto } from 'prisma/src/generated/dto/permission.dto';
 import { CreatePermissionDto } from 'prisma/src/generated/dto/create-permission.dto';
+import { CreatePermissionsDto } from './dto/create-permissions.dto';
 import { UpdatePermissionDto } from 'prisma/src/generated/dto/update-permission.dto';
 import { CustomerDto } from 'src/customers/dto/customer.dto';
 import { Actions, Ressources } from '@prisma/client';
@@ -102,6 +103,18 @@ export class PermissionsRepository {
       },
     );
     return transformResponse(PermissionDto, createdPermission);
+  }
+
+  async createMany(dto: CreatePermissionsDto): Promise<PermissionDto[]> {
+    const promises = dto.actions.map((action) =>
+      this.create({
+        role: dto.role,
+        resource: dto.resource,
+        action,
+        allowed: dto.allowed,
+      }),
+    );
+    return Promise.all(promises);
   }
 
   async update(

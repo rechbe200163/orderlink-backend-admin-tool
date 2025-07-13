@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CreatePermissionDto } from 'prisma/src/generated/dto/create-permission.dto';
+import { CreatePermissionsDto } from './dto/create-permissions.dto';
 import { UpdatePermissionDto } from 'prisma/src/generated/dto/update-permission.dto';
 import { PermissionsRepository } from './permissions.repository';
 
@@ -9,6 +10,10 @@ export class PermissionsService {
 
   create(createPermissionDto: CreatePermissionDto) {
     return this.permissionsRepository.create(createPermissionDto);
+  }
+
+  createMany(createPermissionsDto: CreatePermissionsDto) {
+    return this.permissionsRepository.createMany(createPermissionsDto);
   }
 
   findAll(limit: number = 10, page: number = 1, role?: string) {
