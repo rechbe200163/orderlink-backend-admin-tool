@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { EmployeesRepository } from './employees.repository';
-import { Actions, Ressources } from '@prisma/client';
+import { Actions } from '@prisma/client';
+import { Resources } from '../rbac/resources.enum';
 import { CreateEmployeesDto } from 'prisma/src/generated/dto/create-employees.dto';
 import { UpdateEmployeesDto } from 'prisma/src/generated/dto/update-employees.dto';
 import { transformResponse } from 'lib/utils/transform';
@@ -36,7 +37,7 @@ export class EmployeesService {
     limit: number = 10,
     search?: string,
     permissions?: {
-      resource: Ressources;
+      resource: Resources;
       action: Actions;
       allowed: boolean;
     },

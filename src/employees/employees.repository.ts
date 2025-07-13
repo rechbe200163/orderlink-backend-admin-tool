@@ -7,7 +7,8 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Actions, Ressources } from '@prisma/client';
+import { Actions } from '@prisma/client';
+import { Resources } from '../rbac/resources.enum';
 import { isNoChange } from 'lib/utils/isNoChange';
 import { transformResponse } from 'lib/utils/transform';
 import { CustomPrismaService } from 'nestjs-prisma';
@@ -66,7 +67,7 @@ export class EmployeesRepository {
     limit: number = 10,
     search?: string,
     permissions?: {
-      resource: Ressources;
+      resource: Resources;
       action: Actions;
       allowed: boolean;
     },

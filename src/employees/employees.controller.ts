@@ -14,8 +14,9 @@ import {
 } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { CacheInterceptor } from '@nestjs/cache-manager';
-import { Actions, Ressources } from '@prisma/client';
-import { Resource } from 'lib/decorators/ressource-decorator';
+import { Actions } from '@prisma/client';
+import { Resources } from '../rbac/resources.enum';
+import { Resource } from 'lib/decorators/resource.decorator';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -34,7 +35,7 @@ import { EmployeesDto } from 'prisma/src/generated/dto/employees.dto';
 
 @Controller('employees')
 @UseInterceptors(CacheInterceptor)
-@Resource(Ressources.EMPLOYEE)
+@Resource(Resources.EMPLOYEE)
 @ApiInternalServerErrorResponse({
   description: 'Internal server error',
 })
@@ -83,7 +84,7 @@ export class EmployeesController {
     type: Object,
     required: false,
     example: {
-      resource: Ressources.EMPLOYEE,
+      resource: Resources.EMPLOYEE,
       action: Actions.READ,
       allowed: true,
     },
@@ -101,7 +102,7 @@ export class EmployeesController {
     @Query('search') search?: string,
     @Query('permissions')
     permissions?: {
-      resource: Ressources;
+      resource: Resources;
       action: Actions;
       allowed: boolean;
     },
