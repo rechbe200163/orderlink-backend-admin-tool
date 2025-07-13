@@ -1,5 +1,4 @@
-import { Resources } from '../../../src/rbac/resources.enum';
-
+import { Resources } from '@prisma/client';
 export class ConnectResourceDto {
   name: Resources;
 }

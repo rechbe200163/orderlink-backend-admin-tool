@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Actions } from '@prisma/client';
-import { Resources } from '../../../src/rbac/resources.enum';
+import { Resources } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { IsBoolean, IsString, IsUUID, Matches } from 'class-validator';
 

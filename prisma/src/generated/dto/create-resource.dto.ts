@@ -1,8 +1,5 @@
-import { Resources } from '../../../src/rbac/resources.enum';
-import {ApiProperty,getSchemaPath} from '@nestjs/swagger'
-
-
-
+import { Resources } from '@prisma/client';
+import { ApiProperty, getSchemaPath } from '@nestjs/swagger';
 
 export class CreateResourceDto {
   @ApiProperty({

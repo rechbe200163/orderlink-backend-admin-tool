@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Actions } from '@prisma/client';
-import { Resources } from '../../../src/rbac/resources.enum';
+import { Resources } from '@prisma/client';
 import { IsOptional, IsString, Matches } from 'class-validator';
 
 export class UpdatePermissionDto {
