@@ -19,6 +19,10 @@ export class RolesService {
     return this.rolesRepository.findByName(name);
   }
 
+  findAllRoleNames() {
+    return this.rolesRepository.findAllRoleNames();
+  }
+
   update(name: string, updateRoleDto: UpdateRoleDto) {
     return this.rolesRepository.update(name, updateRoleDto);
   }

@@ -34,6 +34,7 @@ import { UpdatePermissionDto } from 'prisma/src/generated/dto/update-permission.
 import { PermissionDto } from 'prisma/src/generated/dto/permission.dto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
 import { PermissionPagingResultDto } from './dto/permissions-paging';
+import { PermissionDto } from 'prisma/src/generated/dto/permission.dto';
 
 @Controller('permissions')
 @UseInterceptors(CacheInterceptor)
@@ -70,6 +71,40 @@ export class PermissionsController {
     return this.permissionsService.create(createPermissionsDto);
   }
 
+  @Post('bulk')
+  @ApiBody({
+    type: CreatePermissionsDto,
+    description: 'Create multiple permissions at once',
+  })
+  @ApiForbiddenResponse({
+    description: 'You do not have permission to create permissions',
+  })
+  @ApiConflictResponse({ description: 'One of the permissions already exists' })
+  @ApiOkResponse({
+    description: 'Permissions created successfully',
+    type: PermissionDto,
+    isArray: true,
+  })
+  createMany(@Body() createPermissionsDto: CreatePermissionsDto) {
+    return this.permissionsService.createMany(createPermissionsDto);
+  }
+
+  @Get('all')
+  @ApiOkResponse({
+    description: 'All permissions found successfully',
+    type: [PermissionDto],
+  })
+  @ApiQuery({
+    name: 'role',
+    description: 'Search permissions by role',
+    type: String,
+    required: false,
+    example: 'admin',
+  })
+  findAllPermissions(@Query('role') role?: string) {
+    return this.permissionsService.findAllPermissions(role);
+  }
+
   @Get()
   @ApiQuery({
     name: 'limit',
@@ -104,7 +139,7 @@ export class PermissionsController {
     if (limit > MAX_PAGE_SIZE) {
       throw new BadRequestException(`Limit cannot exceed ${MAX_PAGE_SIZE}`);
     }
-    return this.permissionsService.findAll(limit, page, role);
+    return this.permissionsService.findAllPaging(limit, page, role);
   }
 
   @Get(':id')

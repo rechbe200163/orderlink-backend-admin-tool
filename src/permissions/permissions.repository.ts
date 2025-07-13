@@ -4,6 +4,7 @@ import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { PermissionPagingResultDto } from './dto/permissions-paging';
 import { transformResponse } from 'lib/utils/transform';
 import { PermissionDto } from 'prisma/src/generated/dto/permission.dto';
+import { CreatePermissionDto } from 'prisma/src/generated/dto/create-permission.dto';
 import { CreatePermissionsDto } from './dto/create-permissions.dto';
 import { UpdatePermissionDto } from 'prisma/src/generated/dto/update-permission.dto';
 import { CustomerDto } from 'src/customers/dto/customer.dto';
@@ -42,6 +43,18 @@ export class PermissionsRepository {
       ),
       meta,
     };
+  }
+
+  async findAllPermissions(role?: string): Promise<PermissionDto[]> {
+    const permissions = await this.prismaService.client.permission.findMany({
+      where: {
+        role: role ? role : undefined,
+      },
+    });
+
+    return permissions.map((permission) =>
+      transformResponse(PermissionDto, permission),
+    );
   }
 
   async findById(id: string): Promise<PermissionDto> {
