@@ -70,7 +70,13 @@ export class AddressesController {
     if (limit > MAX_PAGE_SIZE) {
       throw new BadRequestException(`Limit cannot exceed ${MAX_PAGE_SIZE}`);
     }
-    return this.addressesService.findAll(limit, page);
+    return this.addressesService.findAllPaging(limit, page);
+  }
+
+  @Get('all')
+  @ApiOkResponse({ type: [AddressDto] })
+  findAllAddresses() {
+    return this.addressesService.findAll();
   }
 
   @Get(':id')

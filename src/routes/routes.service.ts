@@ -13,7 +13,11 @@ export class RoutesService {
     return this.routesRepository.create(createRouteDto);
   }
 
-  findAll(limit = 10, page = 1, search?: string): Promise<PagingResultDto<RouteDto>> {
+  findAll(
+    limit = 10,
+    page = 1,
+    search?: string,
+  ): Promise<PagingResultDto<RouteDto & { ordersCount: number }>> {
     return this.routesRepository.findAll(limit, page, search);
   }
 

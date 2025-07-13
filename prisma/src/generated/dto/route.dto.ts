@@ -1,9 +1,10 @@
-
-
-
+import { Expose } from 'class-transformer';
 
 export class RouteDto {
-  routeId: string ;
-name: string ;
-deleted: boolean ;
+  @Expose()
+  routeId: string;
+  @Expose()
+  name: string;
+  @Expose()
+  deleted: boolean;
 }

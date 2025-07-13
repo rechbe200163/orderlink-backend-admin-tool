@@ -13,8 +13,12 @@ export class AddressesService {
     return this.addressesRepository.create(createAddressDto);
   }
 
-  findAll(limit = 10, page = 1): Promise<PagingResultDto<AddressDto>> {
-    return this.addressesRepository.findAll(limit, page);
+  findAllPaging(limit = 10, page = 1): Promise<PagingResultDto<AddressDto>> {
+    return this.addressesRepository.findAllPaging(limit, page);
+  }
+
+  findAll(): Promise<AddressDto[]> {
+    return this.addressesRepository.findAll();
   }
 
   findById(id: string): Promise<AddressDto> {

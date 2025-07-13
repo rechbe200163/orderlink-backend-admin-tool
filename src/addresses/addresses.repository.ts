@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { CreateAddressDto } from 'prisma/src/generated/dto/create-address.dto';
@@ -20,7 +25,10 @@ export class AddressesRepository {
     return transformResponse(AddressDto, address);
   }
 
-  async findAll(limit = 10, page = 1): Promise<PagingResultDto<AddressDto>> {
+  async findAllPaging(
+    limit = 10,
+    page = 1,
+  ): Promise<PagingResultDto<AddressDto>> {
     const [addresses, meta] = await this.prismaService.client.address
       .paginate({ where: { deleted: false } })
       .withPages({ limit, page, includePageCount: true });
@@ -29,6 +37,13 @@ export class AddressesRepository {
       data: addresses.map((a: AddressDto) => transformResponse(AddressDto, a)),
       meta,
     };
+  }
+
+  async findAll(): Promise<AddressDto[]> {
+    const addresses = await this.prismaService.client.address.findMany({
+      where: { deleted: false },
+    });
+    return addresses.map((a: AddressDto) => transformResponse(AddressDto, a));
   }
 
   async findById(addressId: string): Promise<AddressDto> {
@@ -49,7 +64,9 @@ export class AddressesRepository {
       throw new NotFoundException(`Address with ID ${addressId} not found`);
     }
     if (isNoChange<UpdateAddressDto>(data, existing)) {
-      throw new BadRequestException(`No changes detected for address ${addressId}`);
+      throw new BadRequestException(
+        `No changes detected for address ${addressId}`,
+      );
     }
     const address = await this.prismaService.client.address.update({
       where: { addressId },

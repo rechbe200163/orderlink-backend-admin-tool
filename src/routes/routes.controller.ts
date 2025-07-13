@@ -54,11 +54,21 @@ export class RoutesController {
   }
 
   @Get()
-  @ApiQuery({ name: 'limit', type: Number, required: false, default: 10, maximum: MAX_PAGE_SIZE })
+  @ApiQuery({
+    name: 'limit',
+    type: Number,
+    required: false,
+    default: 10,
+    maximum: MAX_PAGE_SIZE,
+  })
   @ApiQuery({ name: 'page', type: Number, required: false, default: 1 })
   @ApiQuery({ name: 'search', type: String, required: false })
-  @ApiOkResponse({ type: PagingResultDto<RouteDto> })
-  findAll(
+  @ApiOkResponse({
+    type: PagingResultDto<RouteDto & { ordersCount: number }>,
+    isArray: false,
+    description: 'Returns a paginated list of routes',
+  })
+  async findAll(
     @Query('limit', ParseIntPipe) limit = 10,
     @Query('page', ParseIntPipe) page = 1,
     @Query('search') search?: string,

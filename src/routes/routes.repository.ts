@@ -1,4 +1,9 @@
-import { BadRequestException, Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { CreateRouteDto } from 'prisma/src/generated/dto/create-route.dto';
@@ -20,24 +25,42 @@ export class RoutesRepository {
       where: { name: data.name },
     });
     if (existing) {
-      throw new BadRequestException(`Route with name ${data.name} already exists`);
+      throw new BadRequestException(
+        `Route with name ${data.name} already exists`,
+      );
     }
     const route = await this.prismaService.client.route.create({ data });
     return transformResponse(RouteDto, route);
   }
 
-  async findAll(limit = 10, page = 1, search?: string): Promise<PagingResultDto<RouteDto>> {
+  async findAll(
+    limit = 10,
+    page = 1,
+    search?: string,
+  ): Promise<PagingResultDto<RouteDto & { ordersCount: number }>> {
     const [routes, meta] = await this.prismaService.client.route
       .paginate({
         where: {
           deleted: false,
           name: search ? { contains: search, mode: 'insensitive' } : undefined,
         },
+        include: {
+          _count: {
+            select: {
+              order: true,
+            },
+          },
+        },
       })
       .withPages({ limit, page, includePageCount: true });
 
+    const data = routes.map((r: any) => ({
+      ...transformResponse(RouteDto, r),
+      ordersCount: r._count.order,
+    }));
+
     return {
-      data: routes.map((r: RouteDto) => transformResponse(RouteDto, r)),
+      data,
       meta,
     };
   }
