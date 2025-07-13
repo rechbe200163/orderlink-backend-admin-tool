@@ -32,7 +32,6 @@ import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { CreatePermissionDto } from 'prisma/src/generated/dto/create-permission.dto';
 import { CreatePermissionsDto } from './dto/create-permissions.dto';
 import { UpdatePermissionDto } from 'prisma/src/generated/dto/update-permission.dto';
-import { PermissionDto } from 'prisma/src/generated/dto/permission.dto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
 import { PermissionPagingResultDto } from './dto/permissions-paging';
 import { PermissionDto } from 'prisma/src/generated/dto/permission.dto';
@@ -87,6 +86,8 @@ export class PermissionsController {
   })
   createMany(@Body() createPermissionsDto: CreatePermissionsDto) {
     return this.permissionsService.createMany(createPermissionsDto);
+  }
+
   @Get('all')
   @ApiOkResponse({
     description: 'All permissions found successfully',
