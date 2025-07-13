@@ -1,5 +1,6 @@
 
-import {Actions,Ressources} from '@prisma/client'
+import { Actions } from '@prisma/client';
+import { Resources } from '../../../src/rbac/resources.enum';
 import {ApiProperty} from '@nestjs/swagger'
 import {Role} from './role.entity'
 import {ResourceAction} from './resourceAction.entity'
@@ -13,9 +14,9 @@ role: string ;
 })
 action: Actions ;
 @ApiProperty({
-  enum: Ressources,
+  enum: Resources,
 })
-resource: Ressources ;
+resource: Resources ;
 Role?: Role ;
 resourceAction?: ResourceAction ;
 allowed: boolean ;

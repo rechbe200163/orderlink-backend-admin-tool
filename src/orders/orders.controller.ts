@@ -25,8 +25,8 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { CacheInterceptor } from '@nestjs/cache-manager';
-import { Ressources } from '@prisma/client';
-import { Resource } from 'lib/decorators/ressource-decorator';
+import { Resources } from '../rbac/resources.enum';
+import { Resource } from 'lib/decorators/resource.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
@@ -35,7 +35,7 @@ import { MAX_PAGE_SIZE } from 'lib/constants';
 
 @Controller('orders')
 @UseInterceptors(CacheInterceptor)
-@Resource(Ressources.ORDER)
+@Resource(Resources.ORDER)
 @ApiInternalServerErrorResponse({ description: 'Internal server error' })
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, PermissionsGuard)

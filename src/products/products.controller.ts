@@ -24,8 +24,8 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { CacheInterceptor } from '@nestjs/cache-manager';
-import { Ressources } from '@prisma/client';
-import { Resource } from 'lib/decorators/ressource-decorator';
+import { Resources } from '../rbac/resources.enum';
+import { Resource } from 'lib/decorators/resource.decorator';
 import { CreateProductDto } from 'src/products/dto/create-product.dto';
 import { UpdateProductDto } from 'src/products/dto/update-product.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
@@ -38,14 +38,14 @@ import { MAX_PAGE_SIZE } from 'lib/constants';
 
 @Controller('products')
 @UseInterceptors(CacheInterceptor)
-@Resource(Ressources.PRODUCT)
+@Resource(Resources.PRODUCT)
 @ApiInternalServerErrorResponse({
   description: 'Internal server error',
 })
 @ApiBearerAuth()
 @ApiForbiddenResponse({
   description:
-    'Role does not have the permissions to perform this action on the requeseted ressource',
+    'Role does not have the permissions to perform this action on the requeseted resource',
 })
 // @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ProductsController {

@@ -15,8 +15,8 @@ import {
 } from '@nestjs/common';
 import { PermissionsService } from './permissions.service';
 import { CacheInterceptor } from '@nestjs/cache-manager';
-import { Resource } from 'lib/decorators/ressource-decorator';
-import { Ressources } from '@prisma/client';
+import { Resource } from 'lib/decorators/resource.decorator';
+import { Resources } from '../rbac/resources.enum';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -38,7 +38,7 @@ import { CreatePermissionDto } from 'prisma/src/generated/dto/create-permission.
 
 @Controller('permissions')
 @UseInterceptors(CacheInterceptor)
-@Resource(Ressources.PERMISSION)
+@Resource(Resources.PERMISSION)
 @ApiInternalServerErrorResponse({
   description: 'Internal server error',
 })
@@ -46,7 +46,7 @@ import { CreatePermissionDto } from 'prisma/src/generated/dto/create-permission.
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiForbiddenResponse({
   description:
-    'Role does not have the permissions to perform this action on the requeseted ressource',
+    'Role does not have the permissions to perform this action on the requeseted resource',
 })
 export class PermissionsController {
   constructor(private readonly permissionsService: PermissionsService) {}

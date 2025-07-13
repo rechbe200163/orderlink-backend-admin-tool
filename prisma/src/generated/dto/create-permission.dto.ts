@@ -1,5 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Actions, Ressources } from '@prisma/client';
+import { Actions } from '@prisma/client';
+import { Resources } from '../../../src/rbac/resources.enum';
 import {
   IsBoolean,
   isBoolean,
@@ -23,7 +24,7 @@ export class CreatePermissionDto {
 
   @IsString()
   @ApiProperty({
-    enum: Ressources,
+    enum: Resources,
     description: 'The resource for which the permission is granted',
     example: 'CUSTOMER',
   })
@@ -31,7 +32,7 @@ export class CreatePermissionDto {
     message:
       'Resource must be in uppercase and can only contain letters and underscores',
   })
-  resource: Ressources;
+  resource: Resources;
 
   @IsString()
   @ApiProperty({

@@ -10,7 +10,8 @@ import { Request } from 'express';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { SanitizedEmployee } from '../../../lib/types';
-import { Actions, Ressources } from '@prisma/client';
+import { Actions } from '@prisma/client';
+import { Resources } from '../../rbac/resources.enum';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
 
 @Injectable()
@@ -31,8 +32,8 @@ export class PermissionsGuard implements CanActivate {
     const controller = context.getClass();
 
     const resource =
-      this.reflector.get<Ressources>('resource', handler) ||
-      this.reflector.get<Ressources>('resource', controller);
+      this.reflector.get<Resources>('resource', handler) ||
+      this.reflector.get<Resources>('resource', controller);
 
     console.log(
       `Checking permissions for user: ${employee?.email}, method: ${method}, resource: ${resource}, role: ${employee?.role}`,

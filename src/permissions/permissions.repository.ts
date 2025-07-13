@@ -8,7 +8,8 @@ import { CreatePermissionDto } from 'prisma/src/generated/dto/create-permission.
 import { CreatePermissionsDto } from './dto/create-permissions.dto';
 import { UpdatePermissionDto } from 'prisma/src/generated/dto/update-permission.dto';
 import { CustomerDto } from 'src/customers/dto/customer.dto';
-import { Actions, Ressources } from '@prisma/client';
+import { Actions } from '@prisma/client';
+import { Resources } from '../rbac/resources.enum';
 import { RolesRepository } from 'src/roles/roles.repository';
 
 @Injectable()
@@ -77,9 +78,9 @@ export class PermissionsRepository {
         );
       }
 
-      if (!Object.values(Ressources).includes(dto.resource)) {
+      if (!Object.values(Resources).includes(dto.resource)) {
         throw new BadRequestException(
-          `Invalid resource type: ${dto.resource}. Must be one of ${Object.values(Ressources).join(', ')}`,
+          `Invalid resource type: ${dto.resource}. Must be one of ${Object.values(Resources).join(', ')}`,
         );
       }
 

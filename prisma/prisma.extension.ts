@@ -1,5 +1,5 @@
 import { readReplicas } from '@prisma/extension-read-replicas';
-import { Actions, PrismaClient, Ressources } from '@prisma/client';
+import { Actions, PrismaClient, Resources } from '@prisma/client';
 import { pagination } from 'prisma-extension-pagination';
 
 export const extendedPrismaClient = new PrismaClient()
@@ -63,7 +63,7 @@ export const extendedPrismaClient = new PrismaClient()
             page: number;
           },
           permissions: {
-            resource: Ressources;
+            resource: Resources;
             action: Actions;
             allowed: boolean;
           },

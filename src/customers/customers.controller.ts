@@ -13,8 +13,9 @@ import {
   UseInterceptors,
 } from '@nestjs/common';
 import { CustomersService } from './customers.service';
-import { Resource } from 'lib/decorators/ressource-decorator';
-import { BusinessSector, Ressources } from '@prisma/client';
+import { Resource } from 'lib/decorators/resource.decorator';
+import { BusinessSector } from '@prisma/client';
+import { Resources } from '../rbac/resources.enum';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import {
   ApiBearerAuth,
@@ -38,14 +39,14 @@ import { MAX_PAGE_SIZE } from 'lib/constants';
 
 @Controller('customers')
 @UseInterceptors(CacheInterceptor)
-@Resource(Ressources.CUSTOMER)
+@Resource(Resources.CUSTOMER)
 @ApiInternalServerErrorResponse({
   description: 'Internal server error',
 })
 @ApiBearerAuth()
 @ApiForbiddenResponse({
   description:
-    'Role does not have the permissions to perform this action on the requeseted ressource',
+    'Role does not have the permissions to perform this action on the requeseted resource',
 })
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class CustomersController {

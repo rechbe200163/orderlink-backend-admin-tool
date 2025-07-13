@@ -25,8 +25,8 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { Ressources } from '@prisma/client';
-import { Resource } from 'lib/decorators/ressource-decorator';
+import { Resources } from '../rbac/resources.enum';
+import { Resource } from 'lib/decorators/resource.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { CacheInterceptor } from '@nestjs/cache-manager';
@@ -37,14 +37,14 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Controller('categories')
 @UseInterceptors(CacheInterceptor)
-@Resource(Ressources.CATEGORY)
+@Resource(Resources.CATEGORY)
 @ApiInternalServerErrorResponse({
   description: 'Internal server error',
 })
 @ApiBearerAuth()
 @ApiForbiddenResponse({
   description:
-    'Role does not have the permissions to perform this action on the requeseted ressource',
+    'Role does not have the permissions to perform this action on the requeseted resource',
 })
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class CategoriesController {

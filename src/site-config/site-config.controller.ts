@@ -14,8 +14,8 @@ import {
 } from '@nestjs/common';
 import { SiteConfigService } from './site-config.service';
 import { CacheInterceptor } from '@nestjs/cache-manager';
-import { Ressources } from '@prisma/client';
-import { Resource } from 'lib/decorators/ressource-decorator';
+import { Resources } from '../rbac/resources.enum';
+import { Resource } from 'lib/decorators/resource.decorator';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -35,13 +35,13 @@ import { MAX_PAGE_SIZE } from 'lib/constants';
 
 @Controller('site-config')
 @UseInterceptors(CacheInterceptor)
-@Resource(Ressources.SITE_CONFIG)
+@Resource(Resources.SITE_CONFIG)
 @ApiInternalServerErrorResponse({ description: 'Internal server error' })
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiForbiddenResponse({
   description:
-    'Role does not have the permissions to perform this action on the requested ressource',
+    'Role does not have the permissions to perform this action on the requested resource',
 })
 export class SiteConfigController {
   constructor(private readonly siteConfigService: SiteConfigService) {}
