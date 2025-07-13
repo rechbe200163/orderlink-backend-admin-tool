@@ -17,4 +17,7 @@ export class SanitizedEmployeeDto {
 
   @ApiProperty()
   role: Role;
+
+  @ApiProperty()
+  superAdmin: boolean;
 }

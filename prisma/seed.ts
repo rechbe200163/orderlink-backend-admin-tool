@@ -59,6 +59,7 @@ async function main() {
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
       role: role.name,
+      superAdmin: true,
     },
   });
 
