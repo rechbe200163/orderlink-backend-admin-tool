@@ -27,6 +27,9 @@ export class EmployeesDto {
   deleted: boolean;
 
   @Expose()
+  superAdmin: boolean;
+
+  @Expose()
   @IsString()
   role: string;
 }

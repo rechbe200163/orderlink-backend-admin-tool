@@ -36,11 +36,15 @@ export class PermissionsGuard implements CanActivate {
       this.reflector.get<Resources>('resource', controller);
 
     console.log(
-      `Checking permissions for user: ${employee?.email}, method: ${method}, resource: ${resource}, role: ${employee?.role}`,
+      `Checking permissions for user: ${employee?.email}, method: ${method}, resource: ${resource}, role: ${employee?.role}, superAdmin: ${employee?.superAdmin}`,
     );
 
     if (!employee || !employee.role || !resource) {
       throw new ForbiddenException('Missing user role or resource.');
+    }
+
+    if (employee.superAdmin) {
+      return true;
     }
 
     const action = this.mapMethodToAction(method);

@@ -264,6 +264,7 @@ model Employees {
   firstName  String  @db.VarChar(255)
   lastName   String  @db.VarChar(255)
   deleted    Boolean @default(false)
+  superAdmin Boolean @default(false)
   Role       Role    @relation(fields: [role], references: [name])
   role       String  @db.VarChar(255)
 

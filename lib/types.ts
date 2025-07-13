@@ -17,7 +17,7 @@ export type SanitizedCustomer = Pick<
 
 export type SanitizedEmployee = Pick<
   Employees,
-  'email' | 'firstName' | 'lastName' | 'employeeId' | 'role'
+  'email' | 'firstName' | 'lastName' | 'employeeId' | 'role' | 'superAdmin'
 >;
 
 export type PagingData<T> = [
