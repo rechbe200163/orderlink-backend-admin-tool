@@ -12,12 +12,7 @@ export class PermissionsService {
     return this.permissionsRepository.create(createPermissionsDto);
   }
 
-  createMany(createPermissionsDto: CreatePermissionsDto) {
-    return this.permissionsRepository.createMany(createPermissionsDto);
-  }
-
   findAllPaging(limit: number = 10, page: number = 1, role?: string) {
-
     return this.permissionsRepository.findAll(limit, page, role);
   }
 
