@@ -43,6 +43,13 @@ export class RolesRepository {
     return transformResponse(RoleDto, role);
   }
 
+  async findAllRoleNames() {
+    const roles = await this.prismaService.client.role.findMany({
+      select: { name: true },
+    });
+    return roles.map((role) => role.name);
+  }
+
   async findAll(limit: number = 10, page: number = 1, search: string = '') {
     const [roles, meta] = await this.prismaService.client.role
       .paginate({
