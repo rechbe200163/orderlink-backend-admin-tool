@@ -157,7 +157,7 @@ export class EmployeesRepository {
 
   async findAdminEmails(): Promise<string[]> {
     const admins = await this.prismaService.client.employees.findMany({
-      where: { role: 'ADMIN', deleted: false },
+      where: { role: 'ADMIN', superAdmin: true, deleted: false },
       select: { email: true },
     });
     return admins.map((admin) => admin.email);
