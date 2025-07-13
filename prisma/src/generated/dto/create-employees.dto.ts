@@ -40,4 +40,8 @@ export class CreateEmployeesDto {
   })
   @IsString()
   role: string;
+
+  @ApiProperty({ required: false, default: false })
+  @Expose()
+  superAdmin?: boolean;
 }

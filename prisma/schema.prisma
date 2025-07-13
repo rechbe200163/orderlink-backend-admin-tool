@@ -33,7 +33,7 @@ enum Actions {
   CREATE
 }
 
-enum Ressources {
+enum Resources {
   PRODUCT
   ORDER
   CUSTOMER
@@ -264,6 +264,7 @@ model Employees {
   firstName  String  @db.VarChar(255)
   lastName   String  @db.VarChar(255)
   deleted    Boolean @default(false)
+  superAdmin Boolean @default(false)
   Role       Role    @relation(fields: [role], references: [name])
   role       String  @db.VarChar(255)
 
@@ -305,18 +306,20 @@ model Action {
   resourceLinks ResourceAction[]
 }
 
-model Ressource {
-  name        Ressources       @id
+model Resource {
+  name        Resources       @id
   description String?          @db.VarChar(255)
   deleted     Boolean          @default(false)
   actionLinks ResourceAction[]
+
+  @@map("resources")
 }
 
 model ResourceAction {
   action      Actions
-  resource    Ressources
+  resource    Resources
   Action      Action       @relation(fields: [action], references: [name])
-  Ressource   Ressource    @relation(fields: [resource], references: [name])
+  Resource    Resource    @relation(fields: [resource], references: [name])
   permissions Permission[]
 
   @@id([action, resource]) // Composite primary key for action and resource
@@ -340,7 +343,7 @@ model Permission {
   id             String         @id @default(uuid(7)) 
   role           String         @db.VarChar(255)
   action         Actions
-  resource       Ressources
+  resource       Resources
   Role           Role           @relation(fields: [role], references: [name])
   resourceAction ResourceAction @relation(fields: [action, resource], references: [action, resource])
   allowed        Boolean        @default(false)

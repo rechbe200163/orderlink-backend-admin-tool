@@ -2,7 +2,7 @@ import {
   Actions,
   BusinessSector,
   PrismaClient,
-  Ressources,
+  Resources,
 } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import { hash } from 'bcryptjs';
@@ -23,16 +23,16 @@ async function main() {
     actionEnums.map((name) => prisma.action.create({ data: { name } })),
   );
 
-  // 2. Seed Ressources
-  const resourceEnums = Object.values(Ressources);
-  const ressources = await Promise.all(
-    resourceEnums.map((name) => prisma.ressource.create({ data: { name } })),
+  // 2. Seed Resources
+  const resourceEnums = Object.values(Resources);
+  const resources = await Promise.all(
+    resourceEnums.map((name) => prisma.resource.create({ data: { name } })),
   );
 
   // 3. Create ResourceActions (all combinations)
   await Promise.all(
     actions.flatMap((action) =>
-      ressources.map((resource) =>
+      resources.map((resource) =>
         prisma.resourceAction.create({
           data: {
             action: action.name,
@@ -59,6 +59,7 @@ async function main() {
       firstName: faker.person.firstName(),
       lastName: faker.person.lastName(),
       role: role.name,
+      superAdmin: true,
     },
   });
 

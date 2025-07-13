@@ -9,4 +9,5 @@ export class UpdateEmployeesDto {
 password?: string;
 firstName?: string;
 lastName?: string;
+ superAdmin?: boolean;
 }

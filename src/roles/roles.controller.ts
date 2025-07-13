@@ -13,8 +13,8 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { RolesService } from './roles.service';
-import { Resource } from 'lib/decorators/ressource-decorator';
-import { Ressources } from '@prisma/client';
+import { Resource } from 'lib/decorators/resource.decorator';
+import { Resources } from '../rbac/resources.enum';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import {
   ApiBadRequestResponse,
@@ -37,7 +37,7 @@ import { RolePagingResultDto } from './dto/role-paging';
 
 @Controller('roles')
 @UseInterceptors(CacheInterceptor)
-@Resource(Ressources.ROLE)
+@Resource(Resources.ROLE)
 @ApiInternalServerErrorResponse({
   description: 'Internal server error',
 })
@@ -45,7 +45,7 @@ import { RolePagingResultDto } from './dto/role-paging';
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiForbiddenResponse({
   description:
-    'Role does not have the permissions to perform this action on the requeseted ressource',
+    'Role does not have the permissions to perform this action on the requeseted resource',
 })
 export class RolesController {
   constructor(private readonly rolesService: RolesService) {}
