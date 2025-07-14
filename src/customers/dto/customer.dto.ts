@@ -78,4 +78,7 @@ export class CustomerDto {
   })
   @Expose()
   businessSector: BusinessSector | null;
+
+  @Expose()
+  addressId: string;
 }
