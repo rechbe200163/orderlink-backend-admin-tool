@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  Put,
   Param,
   Query,
   ParseUUIDPipe,
@@ -54,7 +54,13 @@ export class InvoicesController {
   }
 
   @Get()
-  @ApiQuery({ name: 'limit', type: Number, required: false, default: 10, maximum: MAX_PAGE_SIZE })
+  @ApiQuery({
+    name: 'limit',
+    type: Number,
+    required: false,
+    default: 10,
+    maximum: MAX_PAGE_SIZE,
+  })
   @ApiQuery({ name: 'page', type: Number, required: false, default: 1 })
   @ApiOkResponse({ type: PagingResultDto<InvoiceDto> })
   findAll(
@@ -74,7 +80,7 @@ export class InvoicesController {
     return this.invoicesService.findById(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @ApiParam({ name: 'id', type: String })
   @ApiBody({ type: UpdateInvoiceDto })
   @ApiOkResponse({ type: InvoiceDto })

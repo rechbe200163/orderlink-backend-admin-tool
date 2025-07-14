@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  Put,
   Param,
   Query,
   ParseUUIDPipe,
@@ -66,7 +66,7 @@ export class SiteConfigController {
     return this.siteConfigService.findById(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @ApiParam({ name: 'id', type: String })
   @ApiBody({ type: UpdateSiteConfigDto })
   @ApiOkResponse({ type: SiteConfigDto })

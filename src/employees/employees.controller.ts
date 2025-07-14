@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  Put,
   Param,
   Delete,
   UseInterceptors,
@@ -118,7 +118,7 @@ export class EmployeesController {
     return this.employeesService.findById(employeeId);
   }
 
-  @Patch(':employeeId')
+  @Put(':employeeId')
   update(
     @Param('employeeId', ParseUUIDPipe) employeeId: string,
     @Body() updateEmployeeDto: UpdateEmployeesDto,

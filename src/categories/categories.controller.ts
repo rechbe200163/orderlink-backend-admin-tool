@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  Put,
   Param,
   Delete,
   ParseUUIDPipe,
@@ -139,7 +139,7 @@ export class CategoriesController {
     return this.categoriesService.findByName(name);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @ApiBody({
     type: UpdateCategoryDto,
     description: 'Update an existing category',

@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  Put,
   Param,
   Delete,
   UseInterceptors,
@@ -134,7 +134,7 @@ export class RolesController {
     return this.rolesService.findOne(name);
   }
 
-  @Patch(':name')
+  @Put(':name')
   @ApiParam({
     name: 'name',
     description: 'Name of the role to update',

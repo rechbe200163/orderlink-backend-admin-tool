@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  Put,
   Param,
   Query,
   ParseUUIDPipe,
@@ -86,7 +86,7 @@ export class RoutesController {
     return this.routesService.findById(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @ApiParam({ name: 'id', type: String })
   @ApiBody({ type: UpdateRouteDto })
   @ApiOkResponse({ type: RouteDto })

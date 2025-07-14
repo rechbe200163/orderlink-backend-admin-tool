@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Patch,
+  Put,
   Param,
   Delete,
   Query,
@@ -83,7 +83,7 @@ export class OrdersController {
     return this.ordersService.findOne(id);
   }
 
-  @Patch(':id')
+  @Put(':id')
   @ApiParam({ name: 'id', type: String })
   @ApiBody({ type: UpdateOrderDto })
   @ApiOkResponse({ type: OrderDto })

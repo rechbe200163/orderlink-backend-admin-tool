@@ -6,7 +6,7 @@ import {
   Param,
   ParseEnumPipe,
   ParseIntPipe,
-  Patch,
+  Put,
   Post,
   Query,
   UseGuards,
@@ -148,7 +148,7 @@ export class CustomersController {
     return data;
   }
 
-  @Patch(':reference')
+  @Put(':reference')
   @ApiParam({
     name: 'reference',
     description: 'Customer reference number',
@@ -164,6 +164,9 @@ export class CustomersController {
     @Param('reference', ParseIntPipe) reference: number,
     @Body() updateCustomerDto: UpdateCustomerDto,
   ) {
+    console.log(
+      `Updating customer with reference: ${reference}, data: ${JSON.stringify(updateCustomerDto)}`,
+    );
     return await this.customersService.updateCustomer(
       reference,
       updateCustomerDto,
