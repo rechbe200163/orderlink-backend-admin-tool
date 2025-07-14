@@ -20,9 +20,15 @@ export class CustomersService {
   async getCustomers(
     limit: number = 10,
     page: number = 1,
+    query?: string | undefined,
     businessSector?: BusinessSector,
   ) {
-    return this.customerRepository.getCustomers(limit, page, businessSector);
+    return this.customerRepository.getCustomers(
+      limit,
+      page,
+      query,
+      businessSector,
+    );
   }
 
   async createCustomer(customerData: CreateCustomerDto) {

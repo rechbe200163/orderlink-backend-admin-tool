@@ -96,10 +96,19 @@ export class CustomersController {
     example: BusinessSector.RETAIL,
     default: undefined,
   })
+  @ApiQuery({
+    name: 'query',
+    description: 'Search query to filter customers by name or email',
+    type: String,
+    required: false,
+    example: 'John Doe',
+    default: undefined,
+  })
   @ApiOkResponse({ type: CustomerPagingResultDto })
   async getCustomers(
     @Query('limit', ParseIntPipe) limit: number = 10,
     @Query('page', ParseIntPipe) page: number = 1,
+    @Query('query') query?: string | undefined,
     @Query(
       'businessSector',
       new ParseEnumPipe(BusinessSector, { optional: true }),
@@ -116,6 +125,7 @@ export class CustomersController {
     return await this.customersService.getCustomers(
       limit,
       page,
+      query,
       businessSector,
     );
   }

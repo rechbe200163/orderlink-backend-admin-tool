@@ -51,6 +51,7 @@ export class CustomersRepository {
   async getCustomers(
     limit?: number,
     page?: number,
+    query?: string | undefined,
     businessSector?: BusinessSector,
   ): Promise<CustomerPagingResultDto> {
     console.log('businessSector', businessSector);
@@ -58,6 +59,13 @@ export class CustomersRepository {
       .paginate({
         where: {
           ...(businessSector && { businessSector }),
+          ...(query && {
+            OR: [
+              { firstName: { contains: query, mode: 'insensitive' } },
+              { lastName: { contains: query, mode: 'insensitive' } },
+              { email: { contains: query, mode: 'insensitive' } },
+            ],
+          }),
         },
       })
       .withPages({
