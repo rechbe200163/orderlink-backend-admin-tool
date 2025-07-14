@@ -56,6 +56,21 @@ export class OrdersRepository {
     };
   }
 
+  findAllOrders(): Promise<any> {
+    return this.prismaService.client.order.findMany({
+      // with address of customer
+      include: {
+        customer: {
+          include: {
+            address: true,
+          },
+        },
+      },
+      where: { deleted: false },
+      orderBy: { orderDate: 'desc' },
+    });
+  }
+
   async findById(orderId: string): Promise<OrderDto> {
     const order = await this.prismaService.client.order.findUnique({
       where: { orderId },

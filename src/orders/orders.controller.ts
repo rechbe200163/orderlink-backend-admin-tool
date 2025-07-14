@@ -83,6 +83,11 @@ export class OrdersController {
     return this.ordersService.findOne(id);
   }
 
+  @Get('all')
+  findAllOrders() {
+    return this.ordersService.findAllOrders();
+  }
+
   @Put(':id')
   @ApiParam({ name: 'id', type: String })
   @ApiBody({ type: UpdateOrderDto })

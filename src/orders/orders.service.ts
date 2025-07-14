@@ -25,6 +25,10 @@ export class OrdersService {
     return this.ordersRepository.findById(id);
   }
 
+  findAllOrders(): Promise<any> {
+    return this.ordersRepository.findAllOrders();
+  }
+
   update(id: string, updateOrderDto: UpdateOrderDto): Promise<OrderDto> {
     return this.ordersRepository.update(id, updateOrderDto);
   }

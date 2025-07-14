@@ -143,6 +143,10 @@ export class EmployeesRepository {
     if (!existingEmployee) {
       throw new NotFoundException(`Employee with ID ${employeeId} not found`);
     }
+    console.log(
+      `Updating employee with ID ${employeeId} with data:`,
+      updateEmployee,
+    );
     if (isNoChange(updateEmployee, existingEmployee)) {
       throw new BadRequestException(
         `No changes detected for employee ${employeeId}`,
