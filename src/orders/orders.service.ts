@@ -4,6 +4,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { OrderDto } from './dto/order.dto';
+import { OrderState } from '@prisma/client';
 
 @Injectable()
 export class OrdersService {
@@ -16,9 +17,19 @@ export class OrdersService {
   findAll(
     limit = 10,
     page = 1,
+    orderState?: OrderState,
+    startDate?: Date,
+    endDate?: Date,
     customerReference?: number,
   ): Promise<PagingResultDto<OrderDto>> {
-    return this.ordersRepository.findAll(limit, page, customerReference);
+    return this.ordersRepository.findAll(
+      limit,
+      page,
+      orderState,
+      startDate,
+      endDate,
+      customerReference,
+    );
   }
 
   findOne(id: string): Promise<OrderDto> {

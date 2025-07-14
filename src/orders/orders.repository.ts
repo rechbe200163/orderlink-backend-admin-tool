@@ -12,6 +12,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrderDto } from './dto/order.dto';
 import { isNoChange } from 'lib/utils/isNoChange';
+import { OrderState } from '@prisma/client';
 
 @Injectable()
 export class OrdersRepository {
@@ -34,13 +35,20 @@ export class OrdersRepository {
   async findAll(
     limit = 10,
     page = 1,
+    orderState?: OrderState,
+    startDate?: Date,
+    endDate?: Date,
     customerReference?: number,
   ): Promise<PagingResultDto<OrderDto>> {
     const [orders, meta] = await this.prismaService.client.order
       .paginate({
         where: {
           deleted: false,
+
           ...(customerReference && { customerReference }),
+          ...(orderState && { status }),
+          ...(startDate && { orderDate: { gte: new Date(startDate) } }),
+          ...(endDate && { orderDate: { lte: new Date(endDate) } }),
         },
         orderBy: { orderDate: 'desc' },
       })
