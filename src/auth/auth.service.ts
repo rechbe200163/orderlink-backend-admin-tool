@@ -12,9 +12,15 @@ type AuthInput = {
   password: string;
 };
 
+type Token = {
+  accessToken: string;
+  issuedAt: number;
+  expiresAt: number;
+};
+
 type AuthResult = {
   // iat: number;
-  token: string;
+  token: Token;
   user: SanitizedEmployee;
 };
 
@@ -64,7 +70,11 @@ export class AuthService {
     const accessToken = this.jwtService.sign(tokenPayload);
     return {
       // iat: Math.floor(Date.now() / 1000), // Issued at time
-      token: accessToken,
+      token: {
+        accessToken,
+        issuedAt: Math.floor(Date.now() / 1000), // Current time in seconds
+        expiresAt: Math.floor(Date.now() / 1000) + 30 * 60, // 30 minutes later
+      },
       user: tokenPayload as SanitizedEmployee,
     };
   }
