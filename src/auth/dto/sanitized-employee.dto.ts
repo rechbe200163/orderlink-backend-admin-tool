@@ -15,8 +15,8 @@ export class SanitizedEmployeeDto {
   @ApiProperty()
   lastName: string;
 
-  @ApiProperty()
-  role: Role;
+  @ApiProperty({ type: String })
+  role: string;
 
   @ApiProperty()
   superAdmin: boolean;

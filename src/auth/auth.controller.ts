@@ -37,7 +37,19 @@ export class AuthController {
     return this.authService.authenticate(body);
   }
 
-  @Get('profile')
+  @Get('renew')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: AuthResultDto })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid credentials',
+  })
+  @UseGuards(JwtAuthGuard, ThrottlerGuard)
+  renewToken(@Request() request) {
+    if (!request.user) {
+      throw new NotImplementedException('User not found in request');
+    }
+    return this.authService.signIn(request.user);
+  }
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, ThrottlerGuard)
   getProfile(@Request() request) {

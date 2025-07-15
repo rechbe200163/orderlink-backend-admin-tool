@@ -12,14 +12,13 @@ type AuthInput = {
   password: string;
 };
 
-type Token = {
+export type Token = {
   accessToken: string;
   issuedAt: number;
   expiresAt: number;
 };
 
 type AuthResult = {
-  // iat: number;
   token: Token;
   user: SanitizedEmployee;
 };
@@ -72,8 +71,8 @@ export class AuthService {
       // iat: Math.floor(Date.now() / 1000), // Issued at time
       token: {
         accessToken,
-        issuedAt: Math.floor(Date.now() / 1000), // Current time in seconds
-        expiresAt: Math.floor(Date.now() / 1000) + 30 * 60, // 30 minutes later
+        issuedAt: Math.floor(Date.now()), // Current time in milliseconds
+        expiresAt: Math.floor(Date.now()) + 30 * 60 * 1000, // 30 seconds later
       },
       user: tokenPayload as SanitizedEmployee,
     };
