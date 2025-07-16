@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Put,
+  Patch,
   Param,
   Query,
   ParseUUIDPipe,
@@ -86,7 +86,7 @@ export class AddressesController {
     return this.addressesService.findById(id);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @ApiParam({ name: 'id', type: String })
   @ApiBody({ type: UpdateAddressDto })
   @ApiOkResponse({ type: AddressDto })
