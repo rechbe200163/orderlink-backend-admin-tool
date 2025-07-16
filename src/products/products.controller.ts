@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Put,
+  Patch,
   Param,
   UseInterceptors,
   UploadedFile,
@@ -121,7 +121,7 @@ export class ProductsController {
     return this.productsService.findOne(id);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'Update product',

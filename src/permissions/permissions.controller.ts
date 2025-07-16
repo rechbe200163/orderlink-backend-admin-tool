@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Put,
+  Patch,
   Param,
   Delete,
   UseInterceptors,
@@ -156,7 +156,7 @@ export class PermissionsController {
     return this.permissionsService.findOne(id);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @ApiBody({
     type: UpdatePermissionDto,
     description: 'Update an existing permission',
