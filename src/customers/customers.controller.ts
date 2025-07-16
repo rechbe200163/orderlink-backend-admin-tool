@@ -16,7 +16,7 @@ import { CustomersService } from './customers.service';
 import { Resource } from 'lib/decorators/resource.decorator';
 import { BusinessSector } from '@prisma/client';
 import { Resources } from '../rbac/resources.enum';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+import { ResourceCacheInterceptor } from '../cache/resource-cache.interceptor';
 import {
   ApiBearerAuth,
   ApiBody,
@@ -38,7 +38,7 @@ import { UpdateCustomerDto } from 'src/customers/dto/update-customer.dto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
 
 @Controller('customers')
-@UseInterceptors(CacheInterceptor)
+@UseInterceptors(ResourceCacheInterceptor)
 @Resource(Resources.CUSTOMER)
 @ApiInternalServerErrorResponse({
   description: 'Internal server error',

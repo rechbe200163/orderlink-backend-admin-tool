@@ -16,7 +16,7 @@ import {
 } from '@nestjs/common';
 import { PermissionsService } from './permissions.service';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+import { ResourceCacheInterceptor } from '../cache/resource-cache.interceptor';
 import { Resource } from 'lib/decorators/resource.decorator';
 import { Resources } from '../rbac/resources.enum';
 import {
@@ -39,7 +39,7 @@ import { PermissionPagingResultDto } from './dto/permissions-paging';
 import { CreatePermissionDto } from 'prisma/src/generated/dto/create-permission.dto';
 
 @Controller('permissions')
-@UseInterceptors(CacheInterceptor)
+@UseInterceptors(ResourceCacheInterceptor)
 @Resource(Resources.PERMISSION)
 @ApiInternalServerErrorResponse({
   description: 'Internal server error',
