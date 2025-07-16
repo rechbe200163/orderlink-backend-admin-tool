@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Put,
+  Patch,
   Param,
   Query,
   ParseUUIDPipe,
@@ -80,7 +80,7 @@ export class InvoicesController {
     return this.invoicesService.findById(id);
   }
 
-  @Put(':id')
+  @Patch(':id')
   @ApiParam({ name: 'id', type: String })
   @ApiBody({ type: UpdateInvoiceDto })
   @ApiOkResponse({ type: InvoiceDto })

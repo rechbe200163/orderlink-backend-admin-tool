@@ -3,7 +3,7 @@ import {
   Get,
   Post,
   Body,
-  Put,
+  Patch,
   Param,
   Delete,
   UseInterceptors,
@@ -53,7 +53,7 @@ export class EmployeesController {
     return this.employeesService.findById(employeeId);
   }
 
-  @Put('me')
+  @Patch('me')
   @UseGuards(JwtAuthGuard)
   @ApiBody({ type: UpdateEmployeesDto })
   @ApiOkResponse({ type: EmployeesDto })
@@ -136,7 +136,7 @@ export class EmployeesController {
     return this.employeesService.findById(employeeId);
   }
 
-  @Put(':employeeId')
+  @Patch(':employeeId')
   update(
     @Param('employeeId', ParseUUIDPipe) employeeId: string,
     @Body() updateEmployeeDto: UpdateEmployeesDto,

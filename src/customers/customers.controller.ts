@@ -6,7 +6,7 @@ import {
   Param,
   ParseEnumPipe,
   ParseIntPipe,
-  Put,
+  Patch,
   Post,
   Query,
   UseGuards,
@@ -148,7 +148,7 @@ export class CustomersController {
     return data;
   }
 
-  @Put(':reference')
+  @Patch(':reference')
   @ApiParam({
     name: 'reference',
     description: 'Customer reference number',
