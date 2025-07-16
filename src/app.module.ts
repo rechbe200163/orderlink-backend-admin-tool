@@ -12,7 +12,6 @@ import { CacheModule } from '@nestjs/cache-manager';
 import { CacheableMemory } from 'cacheable';
 import { createKeyv } from '@keyv/redis';
 import { Keyv } from 'keyv';
-import { CacheInvalidationInterceptor } from '../lib/interceptors/cache-invalidation.interceptor';
 import { RolesModule } from './roles/roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
 import { EmployeesModule } from './employees/employees.module';
@@ -81,12 +80,5 @@ import { SiteConfigModule } from './site-config/site-config.module';
     StatisticsModule,
   ],
   controllers: [AppController],
-  providers: [
-    AppService,
-    {
-      provide: APP_INTERCEPTOR,
-      useClass: CacheInvalidationInterceptor,
-    },
-  ],
 })
 export class AppModule {}
