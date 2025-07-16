@@ -45,6 +45,23 @@ import { EmployeesDto } from 'prisma/src/generated/dto/employees.dto';
 export class EmployeesController {
   constructor(private readonly employeesService: EmployeesService) {}
 
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiOkResponse({ type: EmployeesDto })
+  getProfile(@Request() req) {
+    const { employeeId } = req.user;
+    return this.employeesService.findById(employeeId);
+  }
+
+  @Put('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBody({ type: UpdateEmployeesDto })
+  @ApiOkResponse({ type: EmployeesDto })
+  updateProfile(@Request() req, @Body() updateEmployeeDto: UpdateEmployeesDto) {
+    const { employeeId } = req.user;
+    return this.employeesService.updateProfile(employeeId, updateEmployeeDto);
+  }
+
   @Post()
   @ApiBody({
     type: CreateEmployeesDto,
@@ -125,22 +142,5 @@ export class EmployeesController {
     @Body() updateEmployeeDto: UpdateEmployeesDto,
   ) {
     return this.employeesService.update(employeeId, updateEmployeeDto);
-  }
-
-  @Get('me')
-  @UseGuards(JwtAuthGuard)
-  @ApiOkResponse({ type: EmployeesDto })
-  getProfile(@Request() req) {
-    const { employeeId } = req.user;
-    return this.employeesService.findById(employeeId);
-  }
-
-  @Put('me')
-  @UseGuards(JwtAuthGuard)
-  @ApiBody({ type: UpdateEmployeesDto })
-  @ApiOkResponse({ type: EmployeesDto })
-  updateProfile(@Request() req, @Body() updateEmployeeDto: UpdateEmployeesDto) {
-    const { employeeId } = req.user;
-    return this.employeesService.updateProfile(employeeId, updateEmployeeDto);
   }
 }
