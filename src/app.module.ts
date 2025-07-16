@@ -25,6 +25,8 @@ import { InvoicesModule } from './invoices/invoices.module';
 import { RoutesModule } from './routes/routes.module';
 import { StatisticsModule } from './statistics/statistics.module';
 import { SiteConfigModule } from './site-config/site-config.module';
+import { CacheInvalidationService } from './cache/cache-invalidation.service';
+import { ResourceCacheInterceptor } from './cache/resource-cache.interceptor';
 
 @Module({
   imports: [
@@ -79,6 +81,6 @@ import { SiteConfigModule } from './site-config/site-config.module';
     StatisticsModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, CacheInvalidationService, ResourceCacheInterceptor],
 })
 export class AppModule {}

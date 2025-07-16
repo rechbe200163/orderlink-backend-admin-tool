@@ -13,7 +13,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { InvoicesService } from './invoices.service';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+import { ResourceCacheInterceptor } from '../cache/resource-cache.interceptor';
 import { Resources } from '../rbac/resources.enum';
 import { Resource } from 'lib/decorators/resource.decorator';
 import {
@@ -34,7 +34,7 @@ import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
 
 @Controller('invoices')
-@UseInterceptors(CacheInterceptor)
+@UseInterceptors(ResourceCacheInterceptor)
 @Resource(Resources.INVOICE)
 @ApiInternalServerErrorResponse({ description: 'Internal server error' })
 @ApiBearerAuth()
