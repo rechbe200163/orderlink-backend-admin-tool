@@ -25,7 +25,7 @@ import {
   ApiParam,
   ApiQuery,
 } from '@nestjs/swagger';
-import { ResourceCacheInterceptor } from '../cache/resource-cache.interceptor';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 import { Resources } from '../rbac/resources.enum';
 import { Resource } from 'lib/decorators/resource.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
@@ -36,7 +36,7 @@ import { MAX_PAGE_SIZE } from 'lib/constants';
 import { OrderState } from '@prisma/client';
 
 @Controller('orders')
-@UseInterceptors(ResourceCacheInterceptor)
+@UseInterceptors(CacheInterceptor)
 @Resource(Resources.ORDER)
 @ApiInternalServerErrorResponse({ description: 'Internal server error' })
 @ApiBearerAuth()

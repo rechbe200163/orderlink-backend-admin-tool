@@ -23,7 +23,7 @@ import {
   ApiOkResponse,
   ApiQuery,
 } from '@nestjs/swagger';
-import { ResourceCacheInterceptor } from '../cache/resource-cache.interceptor';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 import { Resources } from '../rbac/resources.enum';
 import { Resource } from 'lib/decorators/resource.decorator';
 import { CreateProductDto } from 'src/products/dto/create-product.dto';
@@ -37,7 +37,7 @@ import { CustomerPagingResultDto } from 'src/customers/dto/customer-paging.dto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
 
 @Controller('products')
-@UseInterceptors(ResourceCacheInterceptor)
+@UseInterceptors(CacheInterceptor)
 @Resource(Resources.PRODUCT)
 @ApiInternalServerErrorResponse({
   description: 'Internal server error',

@@ -14,7 +14,7 @@ import {
   Request,
 } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
-import { ResourceCacheInterceptor } from '../cache/resource-cache.interceptor';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 import { Actions } from '@prisma/client';
 import { Resources } from '../rbac/resources.enum';
 import { Resource } from 'lib/decorators/resource.decorator';
@@ -35,7 +35,7 @@ import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { EmployeesDto } from 'prisma/src/generated/dto/employees.dto';
 
 @Controller('employees')
-@UseInterceptors(ResourceCacheInterceptor)
+@UseInterceptors(CacheInterceptor)
 @Resource(Resources.EMPLOYEE)
 @ApiInternalServerErrorResponse({
   description: 'Internal server error',

@@ -29,14 +29,14 @@ import { Resources } from '../rbac/resources.enum';
 import { Resource } from 'lib/decorators/resource.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
-import { ResourceCacheInterceptor } from '../cache/resource-cache.interceptor';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { CategoryDto } from './dto/category.dto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 
 @Controller('categories')
-@UseInterceptors(ResourceCacheInterceptor)
+@UseInterceptors(CacheInterceptor)
 @Resource(Resources.CATEGORY)
 @ApiInternalServerErrorResponse({
   description: 'Internal server error',

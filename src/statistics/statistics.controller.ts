@@ -1,5 +1,5 @@
 import { Controller, Get, UseInterceptors, UseGuards } from '@nestjs/common';
-import { ResourceCacheInterceptor } from '../cache/resource-cache.interceptor';
+import { CacheInterceptor } from '@nestjs/cache-manager';
 import { StatisticsService } from './statistics.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import {
@@ -16,7 +16,7 @@ import { AverageOrderValueStatsDto } from './dto/average-order-value-stats.dto';
 import { CustomerStatsDto } from './dto/customer-stats.dto';
 
 @Controller('statistics')
-@UseInterceptors(ResourceCacheInterceptor)
+@UseInterceptors(CacheInterceptor)
 @ApiInternalServerErrorResponse({ description: 'Internal server error' })
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard)

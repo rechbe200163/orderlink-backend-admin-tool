@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { CustomersService } from './customers.service';
 import { CustomersController } from './customers.controller';
+import { CacheModule } from '@nestjs/cache-manager';
 import { CustomersRepository } from './customer.repository';
 import { TypedEventEmitterModule } from 'src/event-emitter/event-emitter.module';
 
