@@ -55,16 +55,16 @@ export class OrdersController {
   @ApiQuery({
     name: 'limit',
     type: Number,
-    required: false,
     example: 10,
     maximum: MAX_PAGE_SIZE,
   })
-  @ApiQuery({ name: 'page', type: Number, required: false, example: 1 })
-  @ApiQuery({
+  @ApiQuery({ name: 'page', type: Number, example: 1 })
+  @ApiParam({
     name: 'customerReference',
+    description: 'Customer reference number',
     type: Number,
     required: false,
-    example: 123,
+    example: 123456789,
   })
   @ApiQuery({
     name: 'orderState',
@@ -87,15 +87,26 @@ export class OrdersController {
     example: new Date('2023-12-31'),
     default: undefined,
   })
-  @ApiOkResponse({ type: PagingResultDto<OrderDto> })
+  @ApiOkResponse({
+    type: PagingResultDto<
+      OrderDto & {
+        customer: {
+          customerReference: number;
+          firstName: string;
+          lastName: string;
+        };
+      }
+    >,
+  })
   findAll(
-    @Query('limit', ParseIntPipe) limit = 10,
-    @Query('page', ParseIntPipe) page = 1,
+    @Query('limit', new ParseIntPipe()) limit = 10,
+    @Query('page', new ParseIntPipe()) page = 1,
     @Query('orderState', new ParseEnumPipe(OrderState, { optional: true }))
     orderState?: OrderState,
     @Query('startDate') startDate?: Date,
     @Query('endDate') endDate?: Date,
-    @Query('customerReference', ParseIntPipe) customerReference?: number,
+    @Query('customerReference', new ParseIntPipe({ optional: true }))
+    customerReference?: number,
   ) {
     if (limit > MAX_PAGE_SIZE) {
       throw new BadRequestException(`Limit cannot exceed ${MAX_PAGE_SIZE}`);

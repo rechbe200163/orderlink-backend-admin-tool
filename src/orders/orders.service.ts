@@ -21,7 +21,17 @@ export class OrdersService {
     startDate?: Date,
     endDate?: Date,
     customerReference?: number,
-  ): Promise<PagingResultDto<OrderDto>> {
+  ): Promise<
+    PagingResultDto<
+      OrderDto & {
+        customer: {
+          customerReference: number;
+          firstName: string;
+          lastName: string;
+        };
+      }
+    >
+  > {
     return this.ordersRepository.findAll(
       limit,
       page,

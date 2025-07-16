@@ -17,6 +17,10 @@ export class CustomersService {
     return this.customerRepository.findCustomerByReference(customerReference);
   }
 
+  async findAllCustomers(query?: string) {
+    return this.customerRepository.findAllCustomers(query);
+  }
+
   async getCustomers(
     limit: number = 10,
     page: number = 1,

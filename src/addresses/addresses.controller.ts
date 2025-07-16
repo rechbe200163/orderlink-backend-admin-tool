@@ -50,6 +50,7 @@ export class AddressesController {
   @ApiBody({ type: CreateAddressDto })
   @ApiOkResponse({ type: AddressDto })
   create(@Body() createAddressDto: CreateAddressDto) {
+    console.log('Creating address with data:', createAddressDto);
     return this.addressesService.create(createAddressDto);
   }
 

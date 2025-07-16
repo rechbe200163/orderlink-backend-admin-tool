@@ -33,6 +33,29 @@ export class CustomersRepository {
     return transformResponse(CustomerDto, customer);
   }
 
+  async findAllCustomers(query?: string): Promise<CreateCustomerDto[]> {
+    const where: Prisma.CustomerWhereInput = {
+      deleted: false,
+    };
+
+    if (query) {
+      where.OR = [
+        { firstName: { contains: query, mode: 'insensitive' } },
+        { lastName: { contains: query, mode: 'insensitive' } },
+        { email: { contains: query, mode: 'insensitive' } },
+      ];
+    }
+
+    const customers = await this.prismaService.client.customer.findMany({
+      where,
+      orderBy: { signedUp: 'desc' },
+    });
+
+    return customers.map((customer) =>
+      transformResponse(CustomerDto, customer),
+    );
+  }
+
   async findCustomerByReference(
     customerReference: number,
   ): Promise<CustomerDto> {

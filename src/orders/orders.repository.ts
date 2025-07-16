@@ -13,6 +13,7 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrderDto } from './dto/order.dto';
 import { isNoChange } from 'lib/utils/isNoChange';
 import { OrderState } from '@prisma/client';
+import { ProductDto } from 'src/products/dto/product.dto';
 
 @Injectable()
 export class OrdersRepository {
@@ -39,17 +40,48 @@ export class OrdersRepository {
     startDate?: Date,
     endDate?: Date,
     customerReference?: number,
-  ): Promise<PagingResultDto<OrderDto>> {
+  ): Promise<
+    PagingResultDto<
+      OrderDto & {
+        products: {
+          productAmount: number;
+          product: ProductDto;
+        }[];
+        customer: {
+          customerReference: number;
+          firstName: string;
+          lastName: string;
+        };
+      }
+    >
+  > {
     const [orders, meta] = await this.prismaService.client.order
       .paginate({
         where: {
           deleted: false,
 
           ...(customerReference && { customerReference }),
-          ...(orderState && { status }),
+          ...(orderState && { orderState }),
           ...(startDate && { orderDate: { gte: new Date(startDate) } }),
           ...(endDate && { orderDate: { lte: new Date(endDate) } }),
         },
+        include: {
+          products: {
+            select: {
+              productAmount: true,
+
+              product: true,
+            },
+          },
+          customer: {
+            select: {
+              customerReference: true,
+              firstName: true,
+              lastName: true,
+            },
+          },
+        },
+
         orderBy: { orderDate: 'desc' },
       })
       .withPages({
@@ -58,8 +90,28 @@ export class OrdersRepository {
         includePageCount: true,
       });
 
+    console.log(
+      'Found orders:',
+      JSON.stringify(orders, null, 2),
+      'with meta:',
+      meta,
+    );
+
+    const data = orders.map((o: any) => ({
+      ...transformResponse(OrderDto, o),
+      products: o.products.map((p: any) => ({
+        productAmount: p.productAmount,
+        product: transformResponse(ProductDto, p.product),
+      })),
+      customer: {
+        customerReference: o.customer.customerReference,
+        firstName: o.customer.firstName,
+        lastName: o.customer.lastName,
+      },
+    }));
+
     return {
-      data: orders.map((order) => transformResponse(OrderDto, order)),
+      data,
       meta,
     };
   }
