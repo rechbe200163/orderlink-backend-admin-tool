@@ -60,4 +60,8 @@ export class EmployeesService {
   update(id: string, updateEmployeeDto: UpdateEmployeesDto) {
     return this.employeesRepository.update(id, updateEmployeeDto);
   }
+
+  updateProfile(id: string, updateEmployeeDto: UpdateEmployeesDto) {
+    return this.employeesRepository.update(id, updateEmployeeDto);
+  }
 }

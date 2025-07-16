@@ -21,4 +21,10 @@ export interface EventPayloads {
     resource: string;
     action: string;
   };
+  'permission.requested': {
+    employeeId: string;
+    role: string;
+    resource: string;
+    actions: string[];
+  };
 }

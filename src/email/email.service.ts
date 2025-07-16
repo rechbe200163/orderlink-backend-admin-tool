@@ -84,4 +84,18 @@ export class EmailService {
       });
     }
   }
+
+  @OnEvent('permission.requested')
+  async permissionRequestEmail(data: EventPayloads['permission.requested']) {
+    const adminEmails = await this.employeeRepository.findAdminEmails();
+    const { employeeId, role, resource, actions } = data;
+
+    for (const adminEmail of adminEmails) {
+      await this.mailerService.sendMail({
+        to: adminEmail,
+        template: './access-violation',
+        context: { employeeId, role, resource, actions },
+      });
+    }
+  }
 }

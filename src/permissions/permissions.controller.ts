@@ -12,8 +12,10 @@ import {
   Query,
   ParseIntPipe,
   BadRequestException,
+  Request,
 } from '@nestjs/common';
 import { PermissionsService } from './permissions.service';
+import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { Resource } from 'lib/decorators/resource.decorator';
 import { Resources } from '../rbac/resources.enum';
@@ -49,7 +51,10 @@ import { CreatePermissionDto } from 'prisma/src/generated/dto/create-permission.
     'Role does not have the permissions to perform this action on the requeseted resource',
 })
 export class PermissionsController {
-  constructor(private readonly permissionsService: PermissionsService) {}
+  constructor(
+    private readonly permissionsService: PermissionsService,
+    private readonly eventEmitter: TypedEventEmitter,
+  ) {}
 
   @Post()
   @ApiBody({
@@ -69,6 +74,21 @@ export class PermissionsController {
   })
   create(@Body() createPermissionsDto: CreatePermissionsDto) {
     return this.permissionsService.create(createPermissionsDto);
+  }
+
+  @Post('request')
+  @UseGuards(JwtAuthGuard)
+  @ApiBody({ type: CreatePermissionsDto })
+  @ApiOkResponse({ description: 'Permission request submitted' })
+  requestPermission(@Request() req, @Body() dto: CreatePermissionsDto) {
+    const { employeeId } = req.user;
+    this.eventEmitter.emit('permission.requested', {
+      employeeId,
+      role: dto.role,
+      resource: dto.resource,
+      actions: dto.actions,
+    });
+    return { success: true };
   }
 
   @Get('all')

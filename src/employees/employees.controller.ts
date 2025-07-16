@@ -11,6 +11,7 @@ import {
   ParseUUIDPipe,
   Query,
   BadRequestException,
+  Request,
 } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { CacheInterceptor } from '@nestjs/cache-manager';
@@ -124,5 +125,22 @@ export class EmployeesController {
     @Body() updateEmployeeDto: UpdateEmployeesDto,
   ) {
     return this.employeesService.update(employeeId, updateEmployeeDto);
+  }
+
+  @Get('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiOkResponse({ type: EmployeesDto })
+  getProfile(@Request() req) {
+    const { employeeId } = req.user;
+    return this.employeesService.findById(employeeId);
+  }
+
+  @Put('me')
+  @UseGuards(JwtAuthGuard)
+  @ApiBody({ type: UpdateEmployeesDto })
+  @ApiOkResponse({ type: EmployeesDto })
+  updateProfile(@Request() req, @Body() updateEmployeeDto: UpdateEmployeesDto) {
+    const { employeeId } = req.user;
+    return this.employeesService.updateProfile(employeeId, updateEmployeeDto);
   }
 }
