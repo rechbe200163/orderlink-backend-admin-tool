@@ -13,12 +13,17 @@ export class FileRepositoryService {
   }
 
   async getFile(filename: string) {
-    return await this.minioService.presignedUrl(
-      'GET',
-      this._bucketName,
-      filename,
-      24 * 60 * 60, // 1 day in seconds
-    );
+    try {
+      return await this.minioService.presignedUrl(
+        'GET',
+        this._bucketName,
+        filename,
+        24 * 60 * 60, // 1 day in seconds
+      );
+    } catch (error) {
+      console.error('Could not generate minio URL', error);
+      return '';
+    }
   }
 
   uploadFile(file: Express.Multer.File): Promise<string> {
