@@ -28,9 +28,20 @@ export class AddressesRepository {
   async findAllPaging(
     limit = 10,
     page = 1,
+    query?: string,
   ): Promise<PagingResultDto<AddressDto>> {
     const [addresses, meta] = await this.prismaService.client.address
-      .paginate({ where: { deleted: false } })
+      .paginate({
+        where: {
+          deleted: false,
+          ...(query && {
+            OR: [
+              { streetName: { contains: query, mode: 'insensitive' } },
+              { city: { contains: query, mode: 'insensitive' } },
+            ],
+          }),
+        },
+      })
       .withPages({ limit, page, includePageCount: true });
 
     return {

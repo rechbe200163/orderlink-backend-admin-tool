@@ -63,15 +63,23 @@ export class AddressesController {
     maximum: MAX_PAGE_SIZE,
   })
   @ApiQuery({ name: 'page', type: Number, required: false, default: 1 })
+  @ApiQuery({
+    name: 'query',
+    type: String,
+    required: false,
+    description: 'Optional search query to filter addresses',
+    example: '123 Main St',
+  })
   @ApiOkResponse({ type: PagingResultDto<AddressDto> })
   findAll(
     @Query('limit', ParseIntPipe) limit = 10,
     @Query('page', ParseIntPipe) page = 1,
+    @Query('query') query?: string,
   ) {
     if (limit > MAX_PAGE_SIZE) {
       throw new BadRequestException(`Limit cannot exceed ${MAX_PAGE_SIZE}`);
     }
-    return this.addressesService.findAllPaging(limit, page);
+    return this.addressesService.findAllPaging(limit, page, query);
   }
 
   @Get('all')
