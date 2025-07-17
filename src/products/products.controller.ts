@@ -98,13 +98,6 @@ export class ProductsController {
     default: undefined,
   })
   @ApiQuery({
-    name: 'filter',
-    description: 'Filter products by name',
-    required: false,
-    example: 'example product name',
-    type: String,
-  })
-  @ApiQuery({
     name: 'category',
     description: 'Category to filter products',
     required: false,
@@ -118,17 +111,10 @@ export class ProductsController {
   findAll(
     @Query('limit', ParseIntPipe) limit: number = 10,
     @Query('page', ParseIntPipe) page: number = 1,
-    @Query('filter') filter?: string,
     @Query('category') categoryId?: string,
     @Query('search') search?: string,
   ) {
-    return this.productsService.findAll(
-      limit,
-      page,
-      categoryId,
-      search,
-      filter,
-    );
+    return this.productsService.findAll(limit, page, categoryId, search);
   }
 
   @Get(':id')
