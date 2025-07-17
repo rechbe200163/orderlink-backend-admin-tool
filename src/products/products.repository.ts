@@ -36,19 +36,26 @@ export class ProductsRepository {
   async findAll(
     limit: number = 10,
     page: number = 1,
-    searchTerm?: string,
+    search?: string,
     categoryId?: string,
+    filter?: string,
   ): Promise<PagingResultDto<ProductDto>> {
     const [products, meta] = await this.prismaService.client.product
       .paginate({
         where: {
-          ...(searchTerm && {
+          ...(search && {
             name: {
-              contains: searchTerm,
+              contains: search,
               mode: 'insensitive',
             },
           }),
           ...(categoryId && { categoryId }),
+          ...(filter && {
+            name: {
+              contains: filter,
+              mode: 'insensitive',
+            },
+          }),
         },
         orderBy: {
           createdAt: 'desc',

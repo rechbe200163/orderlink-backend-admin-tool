@@ -73,6 +73,14 @@ export class ProductsController {
 
   @Get()
   @ApiQuery({
+    name: 'page',
+    description: 'Page number to return',
+    type: Number,
+    default: 1,
+    required: true,
+    example: 1,
+  })
+  @ApiQuery({
     name: 'limit',
     description: 'Number of products to return per page',
     type: Number,
@@ -82,20 +90,26 @@ export class ProductsController {
     example: 10,
   })
   @ApiQuery({
-    name: 'page',
-    description: 'Page number to return',
-    type: Number,
-    default: 1,
-    required: true,
-    example: 1,
-  })
-  @ApiQuery({
     name: 'search',
     description: 'Search term to filter products by name or description',
     required: false,
     example: 'example search term',
     type: String,
     default: undefined,
+  })
+  @ApiQuery({
+    name: 'filter',
+    description: 'Filter products by name',
+    required: false,
+    example: 'example product name',
+    type: String,
+  })
+  @ApiQuery({
+    name: 'category',
+    description: 'Category to filter products',
+    required: false,
+    example: 'electronics',
+    type: String,
   })
   @ApiOkResponse({
     description: 'List of all products',
@@ -104,9 +118,17 @@ export class ProductsController {
   findAll(
     @Query('limit', ParseIntPipe) limit: number = 10,
     @Query('page', ParseIntPipe) page: number = 1,
+    @Query('filter') filter?: string,
+    @Query('category') categoryId?: string,
     @Query('search') search?: string,
   ) {
-    return this.productsService.findAll(limit, page, search);
+    return this.productsService.findAll(
+      limit,
+      page,
+      categoryId,
+      search,
+      filter,
+    );
   }
 
   @Get(':id')

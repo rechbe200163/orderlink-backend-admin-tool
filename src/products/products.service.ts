@@ -29,14 +29,16 @@ export class ProductsService {
   async findAll(
     limit = 10,
     page = 1,
-    searchTerm?: string,
+    search?: string,
     categoryId?: string,
+    filter?: string,
   ): Promise<PagingResultDto<ProductDto>> {
     const { data: products, meta } = await this.productRepository.findAll(
       limit,
       page,
-      searchTerm,
+      search,
       categoryId,
+      filter,
     );
 
     // Falls paginate ein { data, meta }-Objekt zurückgibt:
