@@ -112,12 +112,12 @@ export class ProductsController {
   findAll(
     @Query('limit', ParseIntPipe) limit: number = 10,
     @Query('page', ParseIntPipe) page: number = 1,
-    @Query('categoryId') categoryId?: string,
     @Query('search') search?: string,
+    @Query('categoryId') categoryId?: string,
   ) {
     console.log('Query parameters:', { limit, page, categoryId, search });
 
-    return this.productsService.findAll(limit, page, categoryId, search);
+    return this.productsService.findAll(limit, page, search, categoryId);
   }
 
   @Get(':productId')
