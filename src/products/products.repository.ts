@@ -48,7 +48,7 @@ export class ProductsRepository {
               mode: 'insensitive',
             },
           }),
-          ...(categoryId && { categoryId }),
+          categoryId: categoryId ? { equals: categoryId } : undefined,
         },
         orderBy: {
           createdAt: 'desc',

@@ -98,11 +98,12 @@ export class ProductsController {
     default: undefined,
   })
   @ApiQuery({
-    name: 'category',
+    name: 'categoryId',
     description: 'Category to filter products',
     required: false,
     example: 'electronics',
     type: String,
+    default: undefined,
   })
   @ApiOkResponse({
     description: 'List of all products',
@@ -111,9 +112,11 @@ export class ProductsController {
   findAll(
     @Query('limit', ParseIntPipe) limit: number = 10,
     @Query('page', ParseIntPipe) page: number = 1,
-    @Query('category') categoryId?: string,
+    @Query('categoryId') categoryId?: string,
     @Query('search') search?: string,
   ) {
+    console.log('Query parameters:', { limit, page, categoryId, search });
+
     return this.productsService.findAll(limit, page, categoryId, search);
   }
 
