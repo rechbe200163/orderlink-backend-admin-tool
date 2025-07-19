@@ -73,21 +73,21 @@ export class InvoicesController {
     return this.invoicesService.findAll(limit, page);
   }
 
-  @Get(':id')
-  @ApiParam({ name: 'id', type: String })
+  @Get(':invoiceId')
+  @ApiParam({ name: 'invoiceId', type: String })
   @ApiOkResponse({ type: InvoiceDto })
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.invoicesService.findById(id);
+  findOne(@Param('invoiceId', ParseUUIDPipe) invoiceId: string) {
+    return this.invoicesService.findById(invoiceId);
   }
 
-  @Patch(':id')
-  @ApiParam({ name: 'id', type: String })
+  @Patch(':invoiceId')
+  @ApiParam({ name: 'invoiceId', type: String })
   @ApiBody({ type: UpdateInvoiceDto })
   @ApiOkResponse({ type: InvoiceDto })
   update(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('invoiceId', ParseUUIDPipe) invoiceId: string,
     @Body() updateInvoiceDto: UpdateInvoiceDto,
   ) {
-    return this.invoicesService.update(id, updateInvoiceDto);
+    return this.invoicesService.update(invoiceId, updateInvoiceDto);
   }
 }

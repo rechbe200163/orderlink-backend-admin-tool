@@ -59,21 +59,21 @@ export class SiteConfigController {
     return this.siteConfigService.findFirst();
   }
 
-  @Get(':id')
-  @ApiParam({ name: 'id', type: String })
+  @Get(':siteConfigId')
+  @ApiParam({ name: 'siteConfigId', type: String })
   @ApiOkResponse({ type: SiteConfigDto })
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.siteConfigService.findById(id);
+  findOne(@Param('siteConfigId', ParseUUIDPipe) siteConfigId: string) {
+    return this.siteConfigService.findById(siteConfigId);
   }
 
-  @Patch(':id')
-  @ApiParam({ name: 'id', type: String })
+  @Patch(':siteConfigId')
+  @ApiParam({ name: 'siteConfigId', type: String })
   @ApiBody({ type: UpdateSiteConfigDto })
   @ApiOkResponse({ type: SiteConfigDto })
   update(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('siteConfigId', ParseUUIDPipe) siteConfigId: string,
     @Body() updateDto: UpdateSiteConfigDto,
   ) {
-    return this.siteConfigService.update(id, updateDto);
+    return this.siteConfigService.update(siteConfigId, updateDto);
   }
 }

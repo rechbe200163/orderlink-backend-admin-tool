@@ -117,7 +117,7 @@ export class ProductsController {
     return this.productsService.findAll(limit, page, categoryId, search);
   }
 
-  @Get(':id')
+  @Get(':productId')
   @ApiOkResponse({
     description: 'List of all products',
     type: ProductDto,
@@ -125,11 +125,11 @@ export class ProductsController {
   @ApiBadRequestResponse({
     description: 'Invalid product ID format',
   })
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.productsService.findOne(id);
+  findOne(@Param('productId', ParseUUIDPipe) productId: string) {
+    return this.productsService.findOne(productId);
   }
 
-  @Patch(':id')
+  @Patch(':productId')
   @ApiConsumes('multipart/form-data')
   @ApiBody({
     description: 'Update product',
@@ -141,10 +141,10 @@ export class ProductsController {
   })
   @UseInterceptors(FileInterceptor('productImage'))
   update(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('productId', ParseUUIDPipe) productId: string,
     @Body() updateProductDto: UpdateProductDto,
     @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.productsService.update(id, updateProductDto, file);
+    return this.productsService.update(productId, updateProductDto, file);
   }
 }

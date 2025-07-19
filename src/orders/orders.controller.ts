@@ -126,21 +126,21 @@ export class OrdersController {
     return this.ordersService.findAllOrders();
   }
 
-  @Get(':id')
-  @ApiParam({ name: 'id', type: String })
+  @Get(':orderId')
+  @ApiParam({ name: 'orderId', type: String })
   @ApiOkResponse({ type: OrderDto })
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.ordersService.findOne(id);
+  findOne(@Param('orderId', ParseUUIDPipe) orderId: string) {
+    return this.ordersService.findOne(orderId);
   }
 
-  @Patch(':id')
-  @ApiParam({ name: 'id', type: String })
+  @Patch(':orderId')
+  @ApiParam({ name: 'orderId', type: String })
   @ApiBody({ type: UpdateOrderDto })
   @ApiOkResponse({ type: OrderDto })
   update(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('orderId', ParseUUIDPipe) orderId: string,
     @Body() updateOrderDto: UpdateOrderDto,
   ) {
-    return this.ordersService.update(id, updateOrderDto);
+    return this.ordersService.update(orderId, updateOrderDto);
   }
 }

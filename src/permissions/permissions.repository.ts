@@ -58,16 +58,15 @@ export class PermissionsRepository {
     );
   }
 
-  async findById(id: string): Promise<PermissionDto> {
+  async findById(permissionId: string): Promise<PermissionDto> {
     const permission = await this.prismaService.client.permission.findUnique({
-      where: { id },
+      where: { permissionId },
     });
     if (!permission) {
-      throw new Error(`Permission with ID ${id} not found`);
+      throw new Error(`Permission with ID ${permissionId} not found`);
     }
     return transformResponse(PermissionDto, permission);
   }
-
 
   async create(dto: CreatePermissionsDto): Promise<PermissionDto[]> {
     const results: PermissionDto[] = [];
@@ -92,13 +91,14 @@ export class PermissionsRepository {
         );
       }
 
-      const existingPermission = await this.prismaService.client.permission.findFirst({
-        where: {
-          action,
-          resource: dto.resource,
-          role: dto.role,
-        },
-      });
+      const existingPermission =
+        await this.prismaService.client.permission.findFirst({
+          where: {
+            action,
+            resource: dto.resource,
+            role: dto.role,
+          },
+        });
 
       if (existingPermission) {
         throw new BadRequestException(
@@ -106,26 +106,27 @@ export class PermissionsRepository {
         );
       }
 
-      const createdPermission = await this.prismaService.client.permission.create({
-        data: {
-          role: dto.role,
-          resource: dto.resource,
-          action,
-          allowed: dto.allowed,
-        },
-      });
+      const createdPermission =
+        await this.prismaService.client.permission.create({
+          data: {
+            role: dto.role,
+            resource: dto.resource,
+            action,
+            allowed: dto.allowed,
+          },
+        });
       results.push(transformResponse(PermissionDto, createdPermission));
     }
 
     return results;
   }
   async update(
-    id: string,
+    permissionId: string,
     permissionData: Partial<UpdatePermissionDto>,
   ): Promise<PermissionDto> {
     const updatedPermission = await this.prismaService.client.permission.update(
       {
-        where: { id },
+        where: { permissionId },
         data: permissionData,
       },
     );

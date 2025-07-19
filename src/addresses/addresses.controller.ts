@@ -88,21 +88,21 @@ export class AddressesController {
     return this.addressesService.findAll();
   }
 
-  @Get(':id')
-  @ApiParam({ name: 'id', type: String })
+  @Get(':addressId')
+  @ApiParam({ name: 'addressId', type: String })
   @ApiOkResponse({ type: AddressDto })
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.addressesService.findById(id);
+  findOne(@Param('addressId', ParseUUIDPipe) addressId: string) {
+    return this.addressesService.findById(addressId);
   }
 
-  @Patch(':id')
-  @ApiParam({ name: 'id', type: String })
+  @Patch(':addressId')
+  @ApiParam({ name: 'addressId', type: String })
   @ApiBody({ type: UpdateAddressDto })
   @ApiOkResponse({ type: AddressDto })
   update(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('addressId', ParseUUIDPipe) addressId: string,
     @Body() updateAddressDto: UpdateAddressDto,
   ) {
-    return this.addressesService.update(id, updateAddressDto);
+    return this.addressesService.update(addressId, updateAddressDto);
   }
 }

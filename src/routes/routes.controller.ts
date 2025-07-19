@@ -79,21 +79,21 @@ export class RoutesController {
     return this.routesService.findAll(limit, page, search);
   }
 
-  @Get(':id')
-  @ApiParam({ name: 'id', type: String })
+  @Get(':routeId')
+  @ApiParam({ name: 'routeId', type: String })
   @ApiOkResponse({ type: RouteDto })
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.routesService.findById(id);
+  findOne(@Param('routeId', ParseUUIDPipe) routeId: string) {
+    return this.routesService.findById(routeId);
   }
 
-  @Patch(':id')
-  @ApiParam({ name: 'id', type: String })
+  @Patch(':routeId')
+  @ApiParam({ name: 'routeId', type: String })
   @ApiBody({ type: UpdateRouteDto })
   @ApiOkResponse({ type: RouteDto })
   update(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('routeId', ParseUUIDPipe) routeId: string,
     @Body() updateRouteDto: UpdateRouteDto,
   ) {
-    return this.routesService.update(id, updateRouteDto);
+    return this.routesService.update(routeId, updateRouteDto);
   }
 }

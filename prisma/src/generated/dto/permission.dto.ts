@@ -12,7 +12,7 @@ export class PermissionDto {
   })
   @IsUUID()
   @Expose()
-  id: string;
+  permissionId: string;
   @ApiProperty({
     type: String,
     description: 'The role associated with the permission',

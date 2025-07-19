@@ -340,7 +340,7 @@ model Role {
 }
 
 model Permission {
-  id             String         @id @default(uuid(7)) 
+  permissionId             String         @id @default(uuid(7)) 
   role           String         @db.VarChar(255)
   action         Actions
   resource       Resources

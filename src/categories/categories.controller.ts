@@ -107,20 +107,20 @@ export class CategoriesController {
     return this.categoriesService.findAll(limit, page, search);
   }
 
-  @Get(':id')
+  @Get(':categoryId')
   @ApiOkResponse({
     description: 'Category found successfully',
     type: CategoryDto,
   })
   @ApiParam({
-    name: 'id',
+    name: 'categoryId',
     description: 'The UUID of the category to find',
     type: String,
     required: true,
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  findOne(@Param('id', ParseUUIDPipe) id: string) {
-    return this.categoriesService.findById(id);
+  findOne(@Param('categoryId', ParseUUIDPipe) categoryId: string) {
+    return this.categoriesService.findById(categoryId);
   }
 
   @Get('name/:name')
@@ -139,7 +139,7 @@ export class CategoriesController {
     return this.categoriesService.findByName(name);
   }
 
-  @Patch(':id')
+  @Patch(':categoryId')
   @ApiBody({
     type: UpdateCategoryDto,
     description: 'Update an existing category',
@@ -152,16 +152,16 @@ export class CategoriesController {
     description: 'Category with this name already exists',
   })
   @ApiParam({
-    name: 'id',
+    name: 'categoryId',
     description: 'The UUID of the category to update',
     type: String,
     required: true,
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   update(
-    @Param('id', ParseUUIDPipe) id: string,
+    @Param('categoryId', ParseUUIDPipe) categoryId: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
-    return this.categoriesService.update(id, updateCategoryDto);
+    return this.categoriesService.update(categoryId, updateCategoryDto);
   }
 }
