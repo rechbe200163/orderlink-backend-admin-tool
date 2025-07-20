@@ -26,6 +26,7 @@ import { InvoicesModule } from './invoices/invoices.module';
 import { RoutesModule } from './routes/routes.module';
 import { StatisticsModule } from './statistics/statistics.module';
 import { SiteConfigModule } from './site-config/site-config.module';
+import { ProductHistoryModule } from './product-history/product-history.module';
 
 @Module({
   imports: [
@@ -78,6 +79,7 @@ import { SiteConfigModule } from './site-config/site-config.module';
     RoutesModule,
     SiteConfigModule,
     StatisticsModule,
+    ProductHistoryModule,
   ],
   controllers: [AppController],
   providers: [AppService],

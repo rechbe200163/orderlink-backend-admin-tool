@@ -27,4 +27,22 @@ export interface EventPayloads {
     resource: string;
     actions: string[];
   };
+  'product.updated': {
+    productId: string;
+    name: string;
+    price: number;
+    description: string;
+    stock: number;
+    imagePath: string | null;
+    categoryId: string;
+  };
+  'product.created': {
+    productId: string;
+    name: string;
+    price: number;
+    description: string;
+    stock: number;
+    imagePath: string | null;
+    categoryId: string;
+  };
 }
