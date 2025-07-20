@@ -6,6 +6,7 @@ import { UpdateProductDto } from 'src/products/dto/update-product.dto';
 import { ProductsRepository } from './products.repository';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { ProductDto } from './dto/product.dto';
+import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
 import { ProductHistoryDto } from './dto/product-history';
 
 @Injectable()
@@ -13,6 +14,7 @@ export class ProductsService {
   constructor(
     private readonly fileService: FileRepositoryService,
     private readonly productRepository: ProductsRepository,
+    private readonly eventEmitter: TypedEventEmitter,
   ) {}
   // products.service.ts
   async create(createProductDto: CreateProductDto, file: Express.Multer.File) {
@@ -25,7 +27,22 @@ export class ProductsService {
       console.log('Image filename:', imageFilename);
     }
 
-    return this.productRepository.create(createProductDto, imageFilename);
+    const product = await this.productRepository.create(
+      createProductDto,
+      imageFilename,
+    );
+
+    this.eventEmitter.emit('product.created', {
+      productId: product.productId,
+      name: product.name,
+      price: product.price,
+      description: product.description,
+      stock: product.stock,
+      imagePath: product.imagePath ?? null,
+      categoryId: product.categoryId,
+    });
+
+    return product;
   }
 
   async getHistory(productId: string): Promise<ProductHistoryDto[]> {
@@ -91,13 +108,31 @@ export class ProductsService {
   ) {
     let imageFilename: string | undefined;
 
+    const originalProduct = await this.productRepository.findById(id);
+
     if (file) {
       const uploadResult = await this.fileService.uploadFile(file);
       console.log('File uploaded successfully:', uploadResult);
       imageFilename = uploadResult;
     }
 
-    return this.productRepository.update(id, updateProductDto, imageFilename);
+    const product = await this.productRepository.update(
+      id,
+      updateProductDto,
+      imageFilename,
+    );
+
+    this.eventEmitter.emit('product.updated', {
+      productId: originalProduct.productId,
+      name: originalProduct.name,
+      price: originalProduct.price,
+      description: originalProduct.description,
+      stock: originalProduct.stock,
+      imagePath: originalProduct.imagePath ?? null,
+      categoryId: originalProduct.categoryId,
+    });
+
+    return product;
   }
 
   remove(id: string) {
