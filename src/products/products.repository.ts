@@ -8,6 +8,7 @@ import { ProductDto } from './dto/product.dto';
 import { transformResponse } from 'lib/utils/transform';
 import { NotFoundError } from 'rxjs';
 import { UpdateProductDto } from './dto/update-product.dto';
+import { ProductHistoryDto } from './dto/product-history';
 
 @Injectable()
 export class ProductsRepository {
@@ -31,6 +32,18 @@ export class ProductsRepository {
       },
     });
     // Kategorien zuordnen
+  }
+
+  async getHistory(productId: string): Promise<ProductHistoryDto[]> {
+    const product = await this.prismaService.client.productHistory.findMany({
+      where: { productId },
+    });
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${productId} not found`);
+    }
+    return product.map((history) =>
+      transformResponse(ProductHistoryDto, history),
+    );
   }
 
   async findAll(
@@ -84,12 +97,8 @@ export class ProductsRepository {
     const product = await this.prismaService.client.product.update({
       where: { productId },
       data: {
-        name: updateProductDto.name,
-        price: updateProductDto.price,
-        description: updateProductDto.description,
-        stock: updateProductDto.stock,
-        imagePath: imageName, // in DB speichern
-        categoryId: updateProductDto.categoryId, // Kategorie zuordnen
+        ...updateProductDto,
+        imagePath: imageName,
       },
     });
     if (!product) {
