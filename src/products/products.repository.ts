@@ -9,6 +9,7 @@ import { transformResponse } from 'lib/utils/transform';
 import { NotFoundError } from 'rxjs';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { ProductHistoryDto } from './dto/product-history';
+import { Prisma } from '@prisma/client';
 
 @Injectable()
 export class ProductsRepository {
@@ -97,7 +98,11 @@ export class ProductsRepository {
     const product = await this.prismaService.client.product.update({
       where: { productId },
       data: {
-        ...updateProductDto,
+        name: updateProductDto.name,
+        price: updateProductDto.price,
+        description: updateProductDto.description,
+        stock: updateProductDto.stock,
+        categoryId: updateProductDto.categoryId,
         imagePath: imageName,
       },
     });
@@ -105,5 +110,15 @@ export class ProductsRepository {
       throw new NotFoundException(`Product with ID ${productId} not found`);
     }
     return transformResponse(ProductDto, product);
+  }
+
+  async findOriginalProductById(productId: string) {
+    const product = await this.prismaService.client.product.findUnique({
+      where: { productId },
+    });
+    if (!product) {
+      throw new NotFoundException(`Product with ID ${productId} not found`);
+    }
+    return product;
   }
 }

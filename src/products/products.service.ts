@@ -108,7 +108,8 @@ export class ProductsService {
   ) {
     let imageFilename: string | undefined;
 
-    const originalProduct = await this.productRepository.findById(id);
+    const originalProduct =
+      await this.productRepository.findOriginalProductById(id);
 
     if (file) {
       const uploadResult = await this.fileService.uploadFile(file);
