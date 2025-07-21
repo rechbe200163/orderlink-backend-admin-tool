@@ -97,4 +97,12 @@ export class ProductHistoryDto {
     description: 'Category of the product',
   })
   category: CategoryDto;
+
+  @ApiProperty({
+    type: Number,
+    description: 'Version of the product history entry',
+  })
+  @Expose()
+  @IsInt()
+  version: number;
 }

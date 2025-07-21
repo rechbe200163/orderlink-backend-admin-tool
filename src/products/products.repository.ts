@@ -38,6 +38,7 @@ export class ProductsRepository {
   async getHistory(productId: string): Promise<ProductHistoryDto[]> {
     const product = await this.prismaService.client.productHistory.findMany({
       where: { productId },
+      orderBy: { version: 'desc' },
     });
     if (!product) {
       throw new NotFoundException(`Product with ID ${productId} not found`);

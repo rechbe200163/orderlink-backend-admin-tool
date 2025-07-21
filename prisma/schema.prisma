@@ -182,6 +182,7 @@ model ProductHistory {
   modifiedAt  DateTime? @default(dbgenerated("null")) @updatedAt
   deleted     Boolean   @default(false)
   categoryId  String    
+  version     Int        @default(autoincrement())
 
   category Category @relation(fields: [categoryId], references: [categoryId])
 
