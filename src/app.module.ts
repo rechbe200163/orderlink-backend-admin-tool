@@ -27,6 +27,7 @@ import { RoutesModule } from './routes/routes.module';
 import { StatisticsModule } from './statistics/statistics.module';
 import { SiteConfigModule } from './site-config/site-config.module';
 import { ProductHistoryModule } from './product-history/product-history.module';
+import { OtpModule } from './otp/otp.module';
 
 @Module({
   imports: [
@@ -80,6 +81,7 @@ import { ProductHistoryModule } from './product-history/product-history.module';
     SiteConfigModule,
     StatisticsModule,
     ProductHistoryModule,
+    OtpModule,
   ],
   controllers: [AppController],
   providers: [AppService],

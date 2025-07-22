@@ -22,6 +22,7 @@ export class EmployeesService {
     if (employee) {
       // Emit an event after creating a employee
       this.eventEmitter.emit('employee.created', {
+        employeeId: employee.employeeId,
         firstName: employee.firstName || '',
         lastName: employee.lastName,
         email: employee.email,

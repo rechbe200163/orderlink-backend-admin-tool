@@ -6,6 +6,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './strategy/jwt.strategy';
 import { EmployeesModule } from 'src/employees/employees.module';
 import { TypedEventEmitterModule } from 'src/event-emitter/event-emitter.module';
+import { OtpModule } from 'src/otp/otp.module';
 
 @Module({
   providers: [AuthService, JwtStrategy],
@@ -19,6 +20,8 @@ import { TypedEventEmitterModule } from 'src/event-emitter/event-emitter.module'
       signOptions: { expiresIn: '1d' },
     }),
     PassportModule,
+    OtpModule,
+    EmployeesModule,
   ],
 })
 export class AuthModule {}

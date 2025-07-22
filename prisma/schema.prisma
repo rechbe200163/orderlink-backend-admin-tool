@@ -75,7 +75,7 @@ enum BusinessSector {
 }
 
 model Customer {
-  customerId        String          @id @default(uuid(7)) 
+  customerId        String          @id @default(uuid(7))
   customerReference Int             @unique()
   email             String          @unique
   phoneNumber       String          @db.VarChar(15)
@@ -87,7 +87,7 @@ model Customer {
   deleted           Boolean         @default(false)
   signedUp          DateTime        @default(now())
   avatarPath        String?         @db.VarChar(255)
-  addressId         String          
+  addressId         String
   businessSector    BusinessSector?
 
   address Address           @relation(fields: [addressId], references: [addressId])
@@ -102,9 +102,9 @@ model Customer {
 }
 
 model CustomerHistory {
-  historyId         String          @id @default(uuid(7)) 
+  historyId         String          @id @default(uuid(7))
   customerReference Int
-  email             String
+  email         String
   phoneNumber       String          @db.VarChar(15)
   password          String          @db.VarChar(255)
   firstName         String?         @db.VarChar(255)
@@ -114,7 +114,7 @@ model CustomerHistory {
   deleted           Boolean         @default(false)
   signedUp          DateTime        @default(now())
   avatarPath        String?         @db.VarChar(255)
-  addressId         String          
+  addressId         String
   businessSector    BusinessSector?
 
   customer Customer @relation(fields: [customerReference], references: [customerReference])
@@ -123,7 +123,7 @@ model CustomerHistory {
 }
 
 model Cart {
-  cartId            String           @id @default(uuid(7)) 
+  cartId            String           @id @default(uuid(7))
   customerReference Int?             @unique
   customer          Customer?        @relation(fields: [customerReference], references: [customerReference])
   products          CartOnProducts[]
@@ -132,7 +132,7 @@ model Cart {
 }
 
 model Address {
-  addressId    String    @id @default(uuid(7)) 
+  addressId    String    @id @default(uuid(7))
   city         String    @db.VarChar(100)
   country      String    @db.VarChar(40)
   postCode     String    @db.VarChar(10)
@@ -150,7 +150,7 @@ model Address {
 }
 
 model Product {
-  productId   String    @id @default(uuid(7)) 
+  productId   String    @id @default(uuid(7))
   name        String    @db.VarChar(255)
   price       Int
   description String    @db.VarChar(255)
@@ -159,7 +159,7 @@ model Product {
   createdAt   DateTime  @default(now())
   modifiedAt  DateTime? @default(dbgenerated("null")) @updatedAt
   deleted     Boolean   @default(false)
-  categoryId  String    
+  categoryId  String
 
   category       Category          @relation(fields: [categoryId], references: [categoryId])
   carts          CartOnProducts[]
@@ -171,8 +171,8 @@ model Product {
 }
 
 model ProductHistory {
-  historyId   String    @id @default(uuid(7)) 
-  productId   String     
+  historyId   String    @id @default(uuid(7))
+  productId   String
   name        String    @db.VarChar(255)
   price       Int
   description String    @db.VarChar(255)
@@ -181,8 +181,8 @@ model ProductHistory {
   createdAt   DateTime  @default(now())
   modifiedAt  DateTime? @default(dbgenerated("null")) @updatedAt
   deleted     Boolean   @default(false)
-  categoryId  String    
-  version     Int        @default(autoincrement())
+  categoryId  String
+  version     Int       @default(autoincrement())
 
   category Category @relation(fields: [categoryId], references: [categoryId])
 
@@ -192,7 +192,7 @@ model ProductHistory {
 }
 
 model Category {
-  categoryId String  @id @default(uuid(7)) 
+  categoryId String  @id @default(uuid(7))
   name       String  @unique @db.VarChar(255)
   imagePath  String? @db.VarChar(255)
   deleted    Boolean @default(false)
@@ -207,7 +207,7 @@ model Category {
  * Order
  */
 model Order {
-  orderId           String     @id @default(uuid(7)) 
+  orderId           String     @id @default(uuid(7))
   customerReference Int
   orderDate         DateTime   @default(now())
   deliveryDate      DateTime?
@@ -230,8 +230,8 @@ model Order {
  * Invoice
  */
 model Invoice {
-  invoiceId     String    @id @default(uuid(7)) 
-  orderId       String    @unique 
+  invoiceId     String    @id @default(uuid(7))
+  orderId       String    @unique
   invoiceAmount Int //price in cents
   paymentDate   DateTime? @default(now())
   pdfUrl        String    @db.VarChar(255)
@@ -246,7 +246,7 @@ model Invoice {
  * Route
  */
 model Route {
-  routeId String           @id @default(uuid(7)) 
+  routeId String           @id @default(uuid(7))
   name    String           @db.VarChar(255)
   deleted Boolean          @default(false)
   order   RoutesOnOrders[]
@@ -259,7 +259,7 @@ model Route {
  * Employees
  */
 model Employees {
-  employeeId String  @id @default(uuid(7)) 
+  employeeId String  @id @default(uuid(7))
   email      String  @unique @db.VarChar(255)
   password   String  @db.VarChar(255)
   firstName  String  @db.VarChar(255)
@@ -268,6 +268,7 @@ model Employees {
   superAdmin Boolean @default(false)
   Role       Role    @relation(fields: [role], references: [name])
   role       String  @db.VarChar(255)
+  Otp        Otp[]
 
   @@index([email], name: "employee_email_index")
   @@index([lastName], name: "employee_last_name_index")
@@ -278,7 +279,7 @@ model Employees {
  * SiteConfig
  */
 model SiteConfig {
-  siteConfigId String @id @default(uuid(7)) 
+  siteConfigId String @id @default(uuid(7))
   companyName  String @db.VarChar(255)
   //? should probably also have a slogan or a short description field
   //? should probably also have a relation to a socialMedia model with links to social media
@@ -288,7 +289,7 @@ model SiteConfig {
   phoneNumber      String    @db.VarChar(15)
   iban             String    @db.VarChar(40)
   companyNumber    String    @db.VarChar(255)
-  addressId        String     
+  addressId        String
   modifiedAt       DateTime? @default(dbgenerated("null")) @updatedAt
   isPremium        Boolean   @default(false)
   deleted          Boolean   @default(false)
@@ -308,7 +309,7 @@ model Action {
 }
 
 model Resource {
-  name        Resources       @id
+  name        Resources        @id
   description String?          @db.VarChar(255)
   deleted     Boolean          @default(false)
   actionLinks ResourceAction[]
@@ -320,7 +321,7 @@ model ResourceAction {
   action      Actions
   resource    Resources
   Action      Action       @relation(fields: [action], references: [name])
-  Resource    Resource    @relation(fields: [resource], references: [name])
+  Resource    Resource     @relation(fields: [resource], references: [name])
   permissions Permission[]
 
   @@id([action, resource]) // Composite primary key for action and resource
@@ -341,7 +342,7 @@ model Role {
 }
 
 model Permission {
-  permissionId             String         @id @default(uuid(7)) 
+  permissionId   String         @id @default(uuid(7))
   role           String         @db.VarChar(255)
   action         Actions
   resource       Resources
@@ -351,6 +352,18 @@ model Permission {
   createdAt      DateTime       @default(now())
 
   @@unique([role, action, resource])
+}
+
+model Otp {
+  id         String    @id @default(uuid())
+  code       String    @unique @db.VarChar(6)
+  employeeId String
+  employee   Employees @relation(fields: [employeeId], references: [employeeId])
+  expiresAt  DateTime
+  used       Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+
+  @@index([code, employeeId])
 }
 
 // model CategoriesOnProducts {
@@ -364,9 +377,9 @@ model Permission {
 // }
 
 model CartOnProducts {
-  cartId    String   
+  cartId    String
   cart      Cart    @relation(fields: [cartId], references: [cartId])
-  productId String   
+  productId String
   product   Product @relation(fields: [productId], references: [productId])
   quantity  Int     @default(1) @map("productAmount")
 
@@ -375,9 +388,9 @@ model CartOnProducts {
 }
 
 model OrderOnProducts {
-  orderId       String    
+  orderId       String
   order         Order    @relation(fields: [orderId], references: [orderId])
-  productId     String   
+  productId     String
   product       Product  @relation(fields: [productId], references: [productId])
   orderDate     DateTime @default(now())
   productAmount Int      @default(1)
@@ -387,9 +400,9 @@ model OrderOnProducts {
 }
 
 model RoutesOnOrders {
-  routeId String  
+  routeId String
   route   Route  @relation(fields: [routeId], references: [routeId])
-  orderId String  
+  orderId String
   order   Order  @relation(fields: [orderId], references: [orderId])
 
   @@id([routeId, orderId])

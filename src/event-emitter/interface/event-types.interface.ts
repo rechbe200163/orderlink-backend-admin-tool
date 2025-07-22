@@ -7,6 +7,7 @@ export interface EventPayloads {
     password: string;
   };
   'employee.created': {
+    employeeId: string;
     firstName: string;
     lastName: string;
     email: string;

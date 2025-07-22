@@ -1,3 +1,4 @@
+import { OtpService } from './../otp/otp.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -9,6 +10,7 @@ export class EmailService {
   constructor(
     private readonly mailerService: MailerService,
     private readonly employeeRepository: EmployeesRepository,
+    private readonly OtpService: OtpService,
   ) {}
 
   @OnEvent('customer.created')
@@ -35,13 +37,15 @@ export class EmailService {
 
   @OnEvent('employee.created')
   async employeeCreatedEmail(data: EventPayloads['employee.created']) {
-    const { email, firstName, lastName, password } = data;
+    const { email, firstName, lastName, password, employeeId } = data;
 
     console.log(
       `Sending employee created email to ${email} with firstName: ${firstName}`,
       `with lastName: ${lastName}`,
       `with password: ${password}`,
     );
+
+    const otp = await this.OtpService.createOTP(employeeId);
 
     await this.mailerService.sendMail({
       to: email,
@@ -51,6 +55,7 @@ export class EmailService {
         lastName,
         email,
         password,
+        otp,
       },
     });
   }

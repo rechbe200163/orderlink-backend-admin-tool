@@ -6,6 +6,7 @@ import {
   HttpStatus,
   NotImplementedException,
   Post,
+  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
@@ -17,6 +18,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOkResponse,
+  ApiQuery,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
 import { AuthInputDto } from './dto/auth-input.dto';
@@ -34,6 +36,7 @@ export class AuthController {
     description: 'Invalid credentials',
   })
   login(@Body() body: AuthInputDto) {
+    console.log('Received login request:', body);
     return this.authService.authenticate(body);
   }
 
@@ -54,5 +57,22 @@ export class AuthController {
   @UseGuards(JwtAuthGuard, ThrottlerGuard)
   getProfile(@Request() request) {
     return request.user;
+  }
+
+  @Post('otp')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: AuthResultDto })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid credentials',
+  })
+  @ApiQuery({
+    name: 'otp',
+    required: true,
+    type: String,
+    description: 'One-time password for validation',
+  })
+  async validateOtp(@Query('otp') otp: string) {
+    console.log('Received OTP validation request:', otp);
+    return this.authService.signInWithOtp(otp);
   }
 }
