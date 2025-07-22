@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { InjectMinio } from 'src/minio/minio.decorator';
 import * as Minio from 'minio';
 import { randomUUID } from 'crypto';
+import slugify from 'slugify';
 @Injectable()
 export class FileRepositoryService {
   protected _bucketName = 'product-images';
@@ -28,7 +29,13 @@ export class FileRepositoryService {
 
   uploadFile(file: Express.Multer.File): Promise<string> {
     return new Promise((resolve, reject) => {
-      const filename = `${randomUUID().toString()}-${file.originalname}`;
+      const cleanName = slugify(file.originalname, {
+        lower: true,
+        remove: /[0-9]/g,
+        trim: true,
+        strict: true,
+      });
+      const filename = `${randomUUID()}-${cleanName}`;
       this.minioService.putObject(
         this._bucketName,
         filename,

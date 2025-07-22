@@ -63,6 +63,7 @@
     "redoc-express": "^2.1.0",
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
+    "slugify": "^1.6.6",
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {

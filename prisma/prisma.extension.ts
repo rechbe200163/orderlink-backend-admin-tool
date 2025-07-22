@@ -1,4 +1,3 @@
-import { readReplicas } from '@prisma/extension-read-replicas';
 import { Actions, PrismaClient, Resources } from '@prisma/client';
 import { pagination } from 'prisma-extension-pagination';
 
