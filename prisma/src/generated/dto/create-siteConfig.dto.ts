@@ -20,7 +20,6 @@ export class CreateSiteConfigDto {
     description: 'The logo path for the site configuration',
     required: true,
   })
-  @IsString()
   logoPath: string;
 
   @ApiProperty({

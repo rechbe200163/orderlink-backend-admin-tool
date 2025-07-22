@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { SiteConfigRepository } from './site-config.repository';
 import { CreateSiteConfigDto } from 'prisma/src/generated/dto/create-siteConfig.dto';
 import { UpdateSiteConfigDto } from 'prisma/src/generated/dto/update-siteConfig.dto';
@@ -24,11 +24,33 @@ export class SiteConfigService {
   }
 
   findFirst(): Promise<SiteConfigDto> {
-    return this.siteConfigRepository.findFirst();
+    const siteConfig = this.siteConfigRepository.findFirst();
+    if (!siteConfig) {
+      throw new NotFoundException('Site configuration not found');
+    }
+    const configPromise = siteConfig.then(async (config) => {
+      if (config && config.logoPath) {
+        config.logoPath = await this.fileService.getFile(config.logoPath);
+      }
+      console.log('Site configuration:', config);
+      return config;
+    });
+    return configPromise;
   }
 
   findById(id: string): Promise<SiteConfigDto> {
-    return this.siteConfigRepository.findById(id);
+    const siteConfig = this.siteConfigRepository.findById(id);
+    if (!siteConfig) {
+      throw new NotFoundException('Site configuration not found');
+    }
+    const configPromise = siteConfig.then(async (config) => {
+      if (config && config.logoPath) {
+        config.logoPath = await this.fileService.getFile(config.logoPath);
+      }
+      console.log('Site configuration:', config);
+      return config;
+    });
+    return configPromise;
   }
 
   async update(
