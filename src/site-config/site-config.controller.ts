@@ -5,12 +5,10 @@ import {
   Body,
   Patch,
   Param,
-  Query,
   ParseUUIDPipe,
-  ParseIntPipe,
   UseInterceptors,
   UseGuards,
-  BadRequestException,
+  UploadedFile,
 } from '@nestjs/common';
 import { SiteConfigService } from './site-config.service';
 import { CacheInterceptor } from '@nestjs/cache-manager';
@@ -19,19 +17,18 @@ import { Resource } from 'lib/decorators/resource.decorator';
 import {
   ApiBearerAuth,
   ApiBody,
+  ApiConsumes,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
   ApiParam,
-  ApiQuery,
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { CreateSiteConfigDto } from 'prisma/src/generated/dto/create-siteConfig.dto';
 import { UpdateSiteConfigDto } from 'prisma/src/generated/dto/update-siteConfig.dto';
 import { SiteConfigDto } from 'prisma/src/generated/dto/siteConfig.dto';
-import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
-import { MAX_PAGE_SIZE } from 'lib/constants';
+import { FileInterceptor } from '@nestjs/platform-express';
 
 @Controller('site-config')
 @UseInterceptors(CacheInterceptor)
@@ -47,10 +44,15 @@ export class SiteConfigController {
   constructor(private readonly siteConfigService: SiteConfigService) {}
 
   @Post()
+  @ApiConsumes('multipart/form-data')
   @ApiBody({ type: CreateSiteConfigDto })
   @ApiOkResponse({ type: SiteConfigDto })
-  create(@Body() createDto: CreateSiteConfigDto) {
-    return this.siteConfigService.create(createDto);
+  @UseInterceptors(FileInterceptor('logo'))
+  create(
+    @Body() createDto: CreateSiteConfigDto,
+    @UploadedFile() file: Express.Multer.File,
+  ) {
+    return this.siteConfigService.create(createDto, file);
   }
 
   @Get()
@@ -67,13 +69,16 @@ export class SiteConfigController {
   }
 
   @Patch(':siteConfigId')
+  @ApiConsumes('multipart/form-data')
   @ApiParam({ name: 'siteConfigId', type: String })
   @ApiBody({ type: UpdateSiteConfigDto })
   @ApiOkResponse({ type: SiteConfigDto })
+  @UseInterceptors(FileInterceptor('logo'))
   update(
     @Param('siteConfigId', ParseUUIDPipe) siteConfigId: string,
     @Body() updateDto: UpdateSiteConfigDto,
+    @UploadedFile() file: Express.Multer.File,
   ) {
-    return this.siteConfigService.update(siteConfigId, updateDto);
+    return this.siteConfigService.update(siteConfigId, updateDto, file);
   }
 }

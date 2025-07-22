@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { IsIBAN, IsPhoneNumber, IsString, IsUUID } from 'class-validator';
+import { IsIBAN, IsPhoneNumber, IsString, IsUUID, IsOptional } from 'class-validator';
 
 export class CreateSiteConfigDto {
   @ApiProperty({
@@ -11,10 +11,11 @@ export class CreateSiteConfigDto {
 
   @ApiProperty({
     description: 'The logo path for the site configuration',
-    required: true,
+    required: false,
   })
   @IsString()
-  logoPath: string;
+  @IsOptional()
+  logoPath?: string;
 
   @ApiProperty({
     description: 'The email address for the site configuration',

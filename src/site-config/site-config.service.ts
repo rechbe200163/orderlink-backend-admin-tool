@@ -3,13 +3,23 @@ import { SiteConfigRepository } from './site-config.repository';
 import { CreateSiteConfigDto } from 'prisma/src/generated/dto/create-siteConfig.dto';
 import { UpdateSiteConfigDto } from 'prisma/src/generated/dto/update-siteConfig.dto';
 import { SiteConfigDto } from 'prisma/src/generated/dto/siteConfig.dto';
-import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
+import { FileRepositoryService } from 'src/file-repository/file-repository.service';
 
 @Injectable()
 export class SiteConfigService {
-  constructor(private readonly siteConfigRepository: SiteConfigRepository) {}
+  constructor(
+    private readonly siteConfigRepository: SiteConfigRepository,
+    private readonly fileService: FileRepositoryService,
+  ) {}
 
-  create(createDto: CreateSiteConfigDto): Promise<SiteConfigDto> {
+  async create(
+    createDto: CreateSiteConfigDto,
+    file?: Express.Multer.File,
+  ): Promise<SiteConfigDto> {
+    if (file) {
+      const filename = await this.fileService.uploadFile(file);
+      createDto.logoPath = filename;
+    }
     return this.siteConfigRepository.create(createDto);
   }
 
@@ -21,7 +31,15 @@ export class SiteConfigService {
     return this.siteConfigRepository.findById(id);
   }
 
-  update(id: string, updateDto: UpdateSiteConfigDto): Promise<SiteConfigDto> {
+  async update(
+    id: string,
+    updateDto: UpdateSiteConfigDto,
+    file?: Express.Multer.File,
+  ): Promise<SiteConfigDto> {
+    if (file) {
+      const filename = await this.fileService.uploadFile(file);
+      updateDto.logoPath = filename;
+    }
     return this.siteConfigRepository.update(id, updateDto);
   }
 }
