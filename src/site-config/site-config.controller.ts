@@ -47,7 +47,7 @@ export class SiteConfigController {
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: CreateSiteConfigDto })
   @ApiOkResponse({ type: SiteConfigDto })
-  @UseInterceptors(FileInterceptor('logo'))
+  @UseInterceptors(FileInterceptor('logoPath'))
   create(
     @Body() createDto: CreateSiteConfigDto,
     @UploadedFile() file: Express.Multer.File,
