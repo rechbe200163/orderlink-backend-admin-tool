@@ -1,4 +1,4 @@
-import { OtpService } from './../otp/otp.service';
+import { OtpService } from '../otp/otp.service';
 import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
@@ -102,5 +102,30 @@ export class EmailService {
         context: { employeeId, role, resource, actions },
       });
     }
+  }
+
+  @OnEvent('otp.resend')
+  async resendOtpEmail(data: EventPayloads['otp.resend']) {
+    const { employeeId, otpCode } = data;
+
+    const employee = await this.employeeRepository.findById(employeeId);
+    if (!employee) {
+      console.error(`Employee with ID ${employeeId} not found`);
+      return;
+    }
+
+    console.log(
+      `Resending OTP to ${employee.email} for employeeId: ${employeeId}`,
+    );
+
+    await this.mailerService.sendMail({
+      to: employee.email,
+      template: './otp-resend',
+      context: {
+        firstName: employee.firstName,
+        lastName: employee.lastName,
+        otpCode,
+      },
+    });
   }
 }

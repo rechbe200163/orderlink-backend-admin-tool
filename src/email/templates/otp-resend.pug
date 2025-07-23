@@ -1,0 +1,77 @@
+doctype html
+html(lang="de")
+  head
+    meta(charset="UTF-8")
+    meta(name="viewport" content="width=device-width, initial-scale=1.0")
+    title Einmal-Code erneut gesendet – OrderLink
+    style.
+      body {
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        background-color: #e3f2fd;
+        margin: 0;
+        padding: 0;
+        -webkit-font-smoothing: antialiased;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+      }
+      .header {
+        background-color: #1565c0;
+        padding: 25px 0;
+        text-align: center;
+        border-bottom: 4px solid #1976d2;
+      }
+      .logo {
+        width: 180px;
+        margin: 0 auto;
+      }
+      .content {
+        padding: 40px 30px;
+        background-color: #ffffff;
+      }
+      h2 {
+        color: #0d47a1;
+        font-size: 24px;
+        margin: 0 0 20px;
+      }
+      p {
+        color: #555555;
+        font-size: 16px;
+        line-height: 1.6;
+        margin: 0 0 20px;
+      }
+      .otp {
+        font-size: 18px;
+        font-weight: bold;
+        color: #1976d2;
+        margin: 0 0 20px;
+        word-break: break-all;
+      }
+      .footer {
+        background-color: #1565c0;
+        color: #ffffff;
+        padding: 30px;
+        text-align: center;
+      }
+      .powered {
+        font-size: 14px;
+        color: #aaaaaa;
+        margin-top: 10px;
+      }
+  body
+    .container
+      .header
+        img.logo(src="https://placeholder.svg?height=60&width=180" alt="OrderLink Logo")
+      .content
+        h2 Hallo #{firstName} #{lastName},
+        p Ihr Einmal-Code (OTP) für den Login wurde erneut gesendet.
+        p Bitte verwenden Sie den folgenden Code, um sich anzumelden:
+        p
+          span.otp #{otpCode}
+        p Aus Sicherheitsgründen empfehlen wir, nach dem Login Ihr Passwort zu setzen.
+        p Bei Fragen wenden Sie sich bitte an Ihren Administrator.
+      .footer
+        p &copy; #{new Date().getFullYear()} OrderLink. Alle Rechte vorbehalten.
+        .powered Powered by OrderLink

@@ -48,6 +48,7 @@ enum Resources {
   ACTION
   PERMISSION
   STATISTICS
+  OTP
 }
 
 enum OrderState {
@@ -356,7 +357,7 @@ model Permission {
 
 model Otp {
   id         String    @id @default(uuid())
-  code       String    @unique @db.VarChar(6)
+  code       Int       @unique @db.Integer()
   employeeId String
   employee   Employees @relation(fields: [employeeId], references: [employeeId])
   expiresAt  DateTime

@@ -46,4 +46,8 @@ export interface EventPayloads {
     imagePath: string | null;
     categoryId: string;
   };
+  'otp.resend': {
+    employeeId: string;
+    otpCode: number;
+  };
 }

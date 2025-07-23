@@ -5,6 +5,8 @@ import {
   HttpCode,
   HttpStatus,
   NotImplementedException,
+  Param,
+  ParseIntPipe,
   Post,
   Query,
   Request,
@@ -18,6 +20,7 @@ import {
   ApiBearerAuth,
   ApiBody,
   ApiOkResponse,
+  ApiParam,
   ApiQuery,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
@@ -59,20 +62,19 @@ export class AuthController {
     return request.user;
   }
 
-  @Post('otp')
+  @Post('otp/:otp')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: AuthResultDto })
   @ApiUnauthorizedResponse({
     description: 'Invalid credentials',
   })
-  @ApiQuery({
+  @ApiParam({
     name: 'otp',
     required: true,
     type: String,
     description: 'One-time password for validation',
   })
-  async validateOtp(@Query('otp') otp: string) {
-    console.log('Received OTP validation request:', otp);
+  async validateOtp(@Param('otp', ParseIntPipe) otp: number) {
     return this.authService.signInWithOtp(otp);
   }
 }

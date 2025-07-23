@@ -80,7 +80,7 @@ export class AuthService {
     };
   }
 
-  async signInWithOtp(code: string): Promise<AuthResult> {
+  async signInWithOtp(code: number): Promise<AuthResult> {
     const otp = await this.otpService.validateOTP(code);
     if (!otp) {
       throw new UnauthorizedException('Invalid or expired OTP');
