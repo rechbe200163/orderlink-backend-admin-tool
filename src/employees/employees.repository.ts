@@ -7,7 +7,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Actions } from '@prisma/client';
+import { Actions, Otp } from '@prisma/client';
 import { Resources } from '../rbac/resources.enum';
 import { isNoChange } from 'lib/utils/isNoChange';
 import { transformResponse } from 'lib/utils/transform';
@@ -113,10 +113,10 @@ export class EmployeesRepository {
   }
 
   async findById(employeeId: string, includeOtp = false) {
-    const employee = await this.prismaService.client.employees.findUnique({
+    const employee = (await this.prismaService.client.employees.findUnique({
       where: { employeeId },
       ...(includeOtp && { include: { Otp: true } }),
-    });
+    })) as EmployeesDto & { Otp?: Otp };
     const base = transformResponse(EmployeesDto, employee);
     return includeOtp ? { ...base, Otp: employee?.Otp } : base;
   }
