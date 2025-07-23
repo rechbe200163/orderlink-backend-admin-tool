@@ -112,10 +112,13 @@ export class EmployeesRepository {
     };
   }
 
-  async findById(employeeId: string) {
-    const employee =
-      await this.prismaService.client.employees.findById(employeeId);
-    return transformResponse(EmployeesDto, employee);
+  async findById(employeeId: string, includeOtp = false) {
+    const employee = await this.prismaService.client.employees.findUnique({
+      where: { employeeId },
+      ...(includeOtp && { include: { Otp: true } }),
+    });
+    const base = transformResponse(EmployeesDto, employee);
+    return includeOtp ? { ...base, Otp: employee?.Otp } : base;
   }
 
   async findByRole(role: string) {

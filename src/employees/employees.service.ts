@@ -46,8 +46,8 @@ export class EmployeesService {
     return this.employeesRepository.findAll(page, limit, search, permissions);
   }
 
-  findById(id: string) {
-    return this.employeesRepository.findById(id);
+  findById(id: string, includeOtp = false) {
+    return this.employeesRepository.findById(id, includeOtp);
   }
 
   findByEmail(email: string) {

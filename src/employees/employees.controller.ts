@@ -132,8 +132,19 @@ export class EmployeesController {
   }
 
   @Get(':employeeId')
-  findById(@Param('employeeId', ParseUUIDPipe) employeeId: string) {
-    return this.employeesService.findById(employeeId);
+  @ApiQuery({
+    name: 'includeOtp',
+    required: false,
+    type: Boolean,
+    example: true,
+    description: 'Include OTP data in the response',
+  })
+  findById(
+    @Param('employeeId', ParseUUIDPipe) employeeId: string,
+    @Query('includeOtp') includeOtp?: string,
+  ) {
+    const withOtp = includeOtp === 'true';
+    return this.employeesService.findById(employeeId, withOtp);
   }
 
   @Patch(':employeeId')
