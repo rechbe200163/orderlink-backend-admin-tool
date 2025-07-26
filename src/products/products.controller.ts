@@ -110,10 +110,10 @@ export class ProductsController {
     type: PagingResultDto<ProductDto>,
   })
   findAll(
-    @Query('limit', ParseIntPipe) limit: number = 10,
-    @Query('page', ParseIntPipe) page: number = 1,
     @Query('search') search?: string,
     @Query('categoryId') categoryId?: string,
+    @Query('page', ParseIntPipe) page: number = 1,
+    @Query('limit', ParseIntPipe) limit: number = 10,
   ) {
     console.log('Query parameters:', { limit, page, categoryId, search });
 
