@@ -1,9 +1,6 @@
 import {
   Controller,
   Get,
-  Post,
-  Body,
-  Patch,
   Param,
   Query,
   ParseUUIDPipe,
@@ -18,7 +15,6 @@ import { Resources } from '../rbac/resources.enum';
 import { Resource } from 'lib/decorators/resource.decorator';
 import {
   ApiBearerAuth,
-  ApiBody,
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
   ApiOkResponse,
@@ -27,8 +23,6 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
-import { CreateInvoiceDto } from './dto/create-invoice.dto';
-import { UpdateInvoiceDto } from './dto/update-invoice.dto';
 import { InvoiceDto } from 'prisma/src/generated/dto/invoice.dto';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
@@ -45,13 +39,6 @@ import { MAX_PAGE_SIZE } from 'lib/constants';
 })
 export class InvoicesController {
   constructor(private readonly invoicesService: InvoicesService) {}
-
-  @Post()
-  @ApiBody({ type: CreateInvoiceDto })
-  @ApiOkResponse({ type: InvoiceDto })
-  create(@Body() createInvoiceDto: CreateInvoiceDto) {
-    return this.invoicesService.create(createInvoiceDto);
-  }
 
   @Get()
   @ApiQuery({
@@ -78,16 +65,5 @@ export class InvoicesController {
   @ApiOkResponse({ type: InvoiceDto })
   findOne(@Param('invoiceId', ParseUUIDPipe) invoiceId: string) {
     return this.invoicesService.findById(invoiceId);
-  }
-
-  @Patch(':invoiceId')
-  @ApiParam({ name: 'invoiceId', type: String })
-  @ApiBody({ type: UpdateInvoiceDto })
-  @ApiOkResponse({ type: InvoiceDto })
-  update(
-    @Param('invoiceId', ParseUUIDPipe) invoiceId: string,
-    @Body() updateInvoiceDto: UpdateInvoiceDto,
-  ) {
-    return this.invoicesService.update(invoiceId, updateInvoiceDto);
   }
 }

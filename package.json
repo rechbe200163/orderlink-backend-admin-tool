@@ -64,7 +64,8 @@
     "reflect-metadata": "^0.2.2",
     "rxjs": "^7.8.2",
     "slugify": "^1.6.6",
-    "swagger-ui-express": "^5.0.1"
+    "swagger-ui-express": "^5.0.1",
+    "pdfkit": "^0.15.1"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3.3.1",

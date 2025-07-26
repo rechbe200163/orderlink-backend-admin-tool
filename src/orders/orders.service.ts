@@ -5,13 +5,19 @@ import { UpdateOrderDto } from './dto/update-order.dto';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { OrderDto } from './dto/order.dto';
 import { OrderState } from '@prisma/client';
+import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
 
 @Injectable()
 export class OrdersService {
-  constructor(private readonly ordersRepository: OrdersRepository) {}
+  constructor(
+    private readonly ordersRepository: OrdersRepository,
+    private readonly eventEmitter: TypedEventEmitter,
+  ) {}
 
-  create(createOrderDto: CreateOrderDto): Promise<OrderDto> {
-    return this.ordersRepository.create(createOrderDto);
+  async create(createOrderDto: CreateOrderDto): Promise<OrderDto> {
+    const order = await this.ordersRepository.create(createOrderDto);
+    this.eventEmitter.emit('order.created', { orderId: order.orderId });
+    return order;
   }
 
   findAll(
