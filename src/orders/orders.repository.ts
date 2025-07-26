@@ -165,13 +165,25 @@ export class OrdersRepository {
     if (!existing) {
       throw new NotFoundException(`Order with ID ${orderId} not found`);
     }
-    //!TODO: fix this type issue
     if (isNoChange<UpdateOrderDto>(updateOrderDto, existing as any)) {
       throw new BadRequestException(`No changes detected for order ${orderId}`);
     }
+    const { products, ...rest } = updateOrderDto;
     const order = await this.prismaService.client.order.update({
       where: { orderId },
-      data: updateOrderDto,
+      data: {
+        ...rest,
+        ...(products && {
+          products: {
+            // Remove all existing products and add new ones
+            deleteMany: {},
+            create: products.map((p) => ({
+              productId: p.productId,
+              productAmount: p.productAmount,
+            })),
+          },
+        }),
+      },
     });
     return transformResponse(OrderDto, order);
   }
