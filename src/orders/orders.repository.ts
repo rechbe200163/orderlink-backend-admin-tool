@@ -139,6 +139,24 @@ export class OrdersRepository {
     });
   }
 
+  async findDetailedById(orderId: string) {
+    const order = await this.prismaService.client.order.findUnique({
+      where: { orderId },
+      include: {
+        products: {
+          include: {
+            product: true,
+          },
+        },
+        customer: true,
+      },
+    });
+    if (!order) {
+      throw new NotFoundException(`Order with ID ${orderId} not found`);
+    }
+    return order;
+  }
+
   async findById(orderId: string): Promise<OrderDto> {
     const order = await this.prismaService.client.order.findUnique({
       where: { orderId },
