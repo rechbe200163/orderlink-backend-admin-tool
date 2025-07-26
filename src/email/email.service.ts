@@ -37,12 +37,11 @@ export class EmailService {
 
   @OnEvent('employee.created')
   async employeeCreatedEmail(data: EventPayloads['employee.created']) {
-    const { email, firstName, lastName, password, employeeId } = data;
+    const { email, firstName, lastName, employeeId } = data;
 
     console.log(
       `Sending employee created email to ${email} with firstName: ${firstName}`,
       `with lastName: ${lastName}`,
-      `with password: ${password}`,
     );
 
     const otp = await this.OtpService.createOTP(employeeId);
@@ -54,7 +53,6 @@ export class EmailService {
         firstName,
         lastName,
         email,
-        password,
         otp,
       },
     });

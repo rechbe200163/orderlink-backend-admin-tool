@@ -29,7 +29,6 @@ export class EmployeesRepository {
 
   async create(createEmployeeDto: CreateEmployeesDto): Promise<{
     employee: EmployeesDto;
-    password: string;
   }> {
     const existingEmployee =
       await this.prismaService.client.employees.findEmployeeByEmail(
@@ -47,18 +46,14 @@ export class EmployeesRepository {
       );
     }
 
-    const password = this.generateEmployeePassword();
-    const hashedPassword = await hash(password, 10);
-
     const createdEmployee = await this.prismaService.client.employees.create({
       data: {
         ...createEmployeeDto,
-        password: hashedPassword,
+        password: '',
       },
     });
     return {
       employee: transformResponse(EmployeesDto, createdEmployee),
-      password,
     };
   }
 
@@ -146,11 +141,16 @@ export class EmployeesRepository {
     if (!existingEmployee) {
       throw new NotFoundException(`Employee with ID ${employeeId} not found`);
     }
+    if (updateEmployee.password) {
+      updateEmployee.password = await hash(updateEmployee.password, 10);
+    }
     console.log(
       `Updating employee with ID ${employeeId} with data:`,
       updateEmployee,
     );
     if (isNoChange(updateEmployee, existingEmployee)) {
+      console.log('No changes detected for employee', updateEmployee);
+      console.log('Existing employee data:', existingEmployee);
       throw new BadRequestException(
         `No changes detected for employee ${employeeId}`,
       );

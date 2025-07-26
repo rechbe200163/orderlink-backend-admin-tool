@@ -17,7 +17,7 @@ export class EmployeesService {
   async create(
     createEmployeeDto: CreateEmployeesDto,
   ): Promise<CreateEmployeesDto> {
-    const { employee, password } =
+    const { employee } =
       await this.employeesRepository.create(createEmployeeDto);
     if (employee) {
       // Emit an event after creating a employee
@@ -26,9 +26,7 @@ export class EmployeesService {
         firstName: employee.firstName || '',
         lastName: employee.lastName,
         email: employee.email,
-        password: password || '', // Ensure password is included if available
       });
-      console.log(`Employee created with password: ${password}`);
     }
     return transformResponse(EmployeesDto, employee);
   }

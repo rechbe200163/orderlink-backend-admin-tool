@@ -80,4 +80,13 @@ export class ProductDto {
   @Expose()
   @IsBoolean()
   deleted: boolean;
+
+  @ApiProperty({
+    type: String,
+    format: 'uuid',
+    description: 'Category ID of the product',
+  })
+  @Expose()
+  @IsUUID()
+  categoryId: string;
 }

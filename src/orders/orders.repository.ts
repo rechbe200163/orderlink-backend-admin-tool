@@ -62,8 +62,16 @@ export class OrdersRepository {
 
           ...(customerReference && { customerReference }),
           ...(orderState && { orderState }),
-          ...(startDate && { orderDate: { gte: new Date(startDate) } }),
-          ...(endDate && { orderDate: { lte: new Date(endDate) } }),
+          ...(startDate || endDate
+            ? {
+                orderDate: {
+                  ...(startDate && {
+                    gte: new Date(`${startDate}T00:00:00.000Z`),
+                  }),
+                  ...(endDate && { lte: new Date(`${endDate}T23:59:59.999Z`) }),
+                },
+              }
+            : {}),
         },
         include: {
           products: {

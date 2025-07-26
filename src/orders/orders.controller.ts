@@ -108,6 +108,14 @@ export class OrdersController {
     @Query('customerReference', new ParseIntPipe({ optional: true }))
     customerReference?: number,
   ) {
+    console.log('Fetching orders with parameters:', {
+      limit,
+      page,
+      orderState,
+      startDate,
+      endDate,
+      customerReference,
+    });
     if (limit > MAX_PAGE_SIZE) {
       throw new BadRequestException(`Limit cannot exceed ${MAX_PAGE_SIZE}`);
     }

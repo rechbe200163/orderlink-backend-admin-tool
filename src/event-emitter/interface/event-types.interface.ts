@@ -11,7 +11,6 @@ export interface EventPayloads {
     firstName: string;
     lastName: string;
     email: string;
-    password: string;
   };
   'access-violation': {
     employeeId: string;
