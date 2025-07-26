@@ -1,6 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer';
-import { IsBoolean, IsDateString, IsInt, IsOptional } from 'class-validator';
+import {
+  IsArray,
+  IsBoolean,
+  IsDateString,
+  IsInt,
+  IsOptional,
+  ValidateNested,
+} from 'class-validator';
+import { CreateOrderProductDto } from './create-order-product.dto';
 
 export class CreateOrderDto {
   @ApiProperty({ type: Number, example: 123 })
@@ -18,12 +26,9 @@ export class CreateOrderDto {
   @IsBoolean()
   selfCollect?: boolean;
 
-  // product ids
-  @ApiProperty({
-    type: [String],
-    required: false,
-    description: 'List of product IDs',
-  })
-  @IsOptional()
-  productIds?: string[];
+  @ApiProperty({ type: [CreateOrderProductDto] })
+  @IsArray()
+  @ValidateNested({ each: true })
+  @Type(() => CreateOrderProductDto)
+  products: CreateOrderProductDto[];
 }
