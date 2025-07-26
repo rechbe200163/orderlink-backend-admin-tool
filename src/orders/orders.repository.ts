@@ -28,6 +28,15 @@ export class OrdersRepository {
         customerReference: createOrderDto.customerReference,
         deliveryDate: createOrderDto.deliveryDate,
         selfCollect: createOrderDto.selfCollect ?? false,
+        ...(createOrderDto.productIds && createOrderDto.productIds.length > 0
+          ? {
+              products: {
+                create: createOrderDto.productIds.map((productId) => ({
+                  productId,
+                })),
+              },
+            }
+          : {}),
       },
     });
     return transformResponse(OrderDto, order);

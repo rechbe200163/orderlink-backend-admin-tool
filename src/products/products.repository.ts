@@ -53,6 +53,7 @@ export class ProductsRepository {
     page: number = 1,
     search?: string,
     categoryId?: string,
+    includeStock?: boolean,
   ): Promise<PagingResultDto<ProductDto>> {
     const [products, meta] = await this.prismaService.client.product
       .paginate({

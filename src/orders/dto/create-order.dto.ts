@@ -17,4 +17,13 @@ export class CreateOrderDto {
   @IsOptional()
   @IsBoolean()
   selfCollect?: boolean;
+
+  // product ids
+  @ApiProperty({
+    type: [String],
+    required: false,
+    description: 'List of product IDs',
+  })
+  @IsOptional()
+  productIds?: string[];
 }
