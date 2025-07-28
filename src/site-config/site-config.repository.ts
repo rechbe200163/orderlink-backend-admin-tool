@@ -13,17 +13,26 @@ import { UpdateSiteConfigDto } from 'prisma/src/generated/dto/update-siteConfig.
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { transformResponse } from 'lib/utils/transform';
 import { isNoChange } from 'lib/utils/isNoChange';
+import { Tenant } from 'src/tenants/entities/tenant.entity';
+import { TenantsService } from 'src/tenants/tenants.service';
 
 @Injectable()
 export class SiteConfigRepository {
   constructor(
     @Inject('PrismaService')
     private readonly prismaService: CustomPrismaService<ExtendedPrismaClient>,
+    private readonly tenantService: TenantsService,
   ) {}
 
   async create(data: CreateSiteConfigDto): Promise<SiteConfigDto> {
     const siteConfig = await this.prismaService.client.siteConfig.create({
       data,
+    });
+    this.tenantService.create({
+      companyName: siteConfig.companyName,
+      slug: encodeURIComponent(
+        siteConfig.companyName.toLowerCase().replace(/\s+/g, '-'),
+      ),
     });
     return transformResponse(SiteConfigDto, siteConfig);
   }
