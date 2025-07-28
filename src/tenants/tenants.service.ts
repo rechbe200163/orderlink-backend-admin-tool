@@ -7,6 +7,7 @@ export class TenantsService {
   constructor(@Inject(ServiceName) private tenantsService: ClientProxy) {}
 
   create(data: CreateTenantDto) {
-    return this.tenantsService.send('create_tenant', data);
+    console.log('Creating tenant with data:', data);
+    return this.tenantsService.emit('create_tenant', { ...data });
   }
 }
