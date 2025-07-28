@@ -28,7 +28,7 @@ export class SiteConfigRepository {
     const siteConfig = await this.prismaService.client.siteConfig.create({
       data,
     });
-    this.tenantService.create({
+    await this.tenantService.create({
       companyName: siteConfig.companyName,
       slug: encodeURIComponent(
         siteConfig.companyName.toLowerCase().replace(/\s+/g, '-'),

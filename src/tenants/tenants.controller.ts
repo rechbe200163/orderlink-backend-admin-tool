@@ -8,8 +8,9 @@ export class TenantsController {
   constructor(private readonly tenantsService: TenantsService) {}
 
   @MessagePattern('createTenant')
-  create(@Payload() createTenantDto: CreateTenantDto) {
-    return this.tenantsService.create(createTenantDto);
+  async create(@Payload() createTenantDto: CreateTenantDto) {
+    const data = await this.tenantsService.create(createTenantDto);
+    return data;
   }
 
   // @MessagePattern('findAllTenants')
