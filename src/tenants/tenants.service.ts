@@ -4,10 +4,12 @@ import { CreateTenantDto } from './dto/create-tenant.dto';
 const ServiceName = 'TENANTS_SERVICE';
 @Injectable()
 export class TenantsService {
-  constructor(@Inject(ServiceName) private tenantsService: ClientProxy) {}
+  constructor(@Inject(ServiceName) private tenantsClient: ClientProxy) {}
 
-  create(data: CreateTenantDto) {
+  async create(data: CreateTenantDto) {
     console.log('Creating tenant with data:', data);
-    return this.tenantsService.emit('create_tenant', { ...data });
+    const tenant = await this.tenantsClient.send('create_tenant', { ...data });
+    console.log('Created tenant:', tenant);
+    return tenant;
   }
 }

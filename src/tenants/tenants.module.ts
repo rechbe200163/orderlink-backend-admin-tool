@@ -16,6 +16,14 @@ import { TenantsController } from './tenants.controller';
           queue: 'tenant_queue',
         },
       },
+      // {
+      //   name: 'TENANTS_SERVICE',
+      //   transport: Transport.TCP,
+      //   options: {
+      //     host: 'localhost',
+      //     port: 3005,
+      //   },
+      // },
     ]),
   ],
   exports: [TenantsService],

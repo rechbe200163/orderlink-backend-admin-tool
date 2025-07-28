@@ -32,7 +32,6 @@ export class SiteConfigService {
       if (config && config.logoPath) {
         config.logoPath = await this.fileService.getFile(config.logoPath);
       }
-      console.log('Site configuration:', config);
       return config;
     });
     return configPromise;
@@ -47,7 +46,6 @@ export class SiteConfigService {
       if (config && config.logoPath) {
         config.logoPath = await this.fileService.getFile(config.logoPath);
       }
-      console.log('Site configuration:', config);
       return config;
     });
     return configPromise;
