@@ -7,6 +7,8 @@ import { EmployeesRepository } from 'src/employees/employees.repository';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { OtpService } from 'src/otp/otp.service';
+import { TenantsService } from 'src/tenants/tenants.service';
+import { TenantDto } from 'src/tenants/dto/tenant-entity.dto';
 
 type AuthInput = {
   email: string;
@@ -22,6 +24,7 @@ export type Token = {
 type AuthResult = {
   token: Token;
   user: SanitizedEmployee;
+  // tenant: TenantDto;
 };
 
 @Injectable()
@@ -31,6 +34,7 @@ export class AuthService {
     private readonly prismaService: CustomPrismaService<ExtendedPrismaClient>,
     private readonly otpService: OtpService,
     private readonly jwtService: JwtService,
+    private readonly tenantService: TenantsService,
   ) {}
 
   async authenticate(input: AuthInput): Promise<AuthResult> {
@@ -77,8 +81,21 @@ export class AuthService {
         expiresAt: Math.floor(Date.now()) + 30 * 60 * 1000, // 30 seconds later
       },
       user: tokenPayload as SanitizedEmployee,
+      // tenant: await this.getTenantInformation(),
     };
   }
+
+  // async getTenantInformation(): Promise<TenantDto> {
+  //   const siteConfig = await this.prismaService.client.siteConfig.findFirst();
+  //   if (!siteConfig) {
+  //     throw new UnauthorizedException('Site configuration not found');
+  //   }
+  //   const tenant = await this.tenantService.getTenantById(siteConfig.tenantId);
+  //   if (!tenant) {
+  //     throw new UnauthorizedException('Tenant not found');
+  //   }
+  //   return tenant;
+  // }
 
   async signInWithOtp(code: number): Promise<AuthResult> {
     const otp = await this.otpService.validateOTP(code);

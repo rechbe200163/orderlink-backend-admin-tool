@@ -37,6 +37,8 @@ export class SiteConfigDto {
   })
   modifiedAt: Date | null;
   @Expose()
+  tenantId: string;
+  @Expose()
   deleted: boolean;
   @Expose()
   address: AddressDto;

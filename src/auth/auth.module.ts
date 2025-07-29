@@ -7,11 +7,14 @@ import { JwtStrategy } from './strategy/jwt.strategy';
 import { EmployeesModule } from 'src/employees/employees.module';
 import { TypedEventEmitterModule } from 'src/event-emitter/event-emitter.module';
 import { OtpModule } from 'src/otp/otp.module';
+import { SiteConfigModule } from 'src/site-config/site-config.module';
+import { TenantsModule } from 'src/tenants/tenants.module';
 
 @Module({
   providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
   imports: [
+    TenantsModule,
     TypedEventEmitterModule,
     EmployeesModule,
     JwtModule.register({

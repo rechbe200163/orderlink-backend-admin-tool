@@ -1,4 +1,4 @@
-import { Expose } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import {
   IsDate,
   IsEnum,
@@ -8,20 +8,20 @@ import {
   IsUUID,
 } from 'class-validator';
 
-class TenantDto {
-  @Expose()
+export class TenantDto {
+  @Exclude()
   @IsUUID()
   tenantId: string;
 
-  @Expose()
+  @Exclude()
   @IsString()
   companyName: string;
 
-  @Expose()
+  @Exclude()
   @IsString()
   slug: string;
 
-  @Expose()
+  @Exclude()
   @IsString()
   backendUrl: string;
 
@@ -51,11 +51,11 @@ class TenantDto {
   @IsString()
   billingCustomerId: string;
 
-  @Expose()
+  @Exclude()
   @IsDate()
   createdAt: Date;
 
-  @Expose()
+  @Exclude()
   @IsDate()
   updatedAt: Date;
 }
