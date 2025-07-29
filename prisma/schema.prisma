@@ -293,6 +293,7 @@ model SiteConfig {
   addressId        String
   modifiedAt       DateTime? @default(dbgenerated("null")) @updatedAt
   deleted          Boolean   @default(false)
+  tenantId        String    @db.VarChar(255)
   address          Address   @relation(fields: [addressId], references: [addressId])
 
   @@map("siteConfigs")

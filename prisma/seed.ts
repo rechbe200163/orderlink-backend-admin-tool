@@ -233,17 +233,17 @@ async function main() {
   );
 
   // 18. Create Site Config
-  await prisma.siteConfig.create({
-    data: {
-      companyName: faker.company.name(),
-      logoPath: faker.image.urlPicsumPhotos(),
-      email: faker.internet.email(),
-      phoneNumber: faker.phone.number({ style: 'international' }),
-      iban: faker.finance.iban(),
-      companyNumber: faker.string.uuid(),
-      addressId: addresses[0].addressId,
-    },
-  });
+  // await prisma.siteConfig.create({
+  //   data: {
+  //     companyName: faker.company.name(),
+  //     logoPath: faker.image.urlPicsumPhotos(),
+  //     email: faker.internet.email(),
+  //     phoneNumber: faker.phone.number({ style: 'international' }),
+  //     iban: faker.finance.iban(),
+  //     companyNumber: faker.string.uuid(),
+  //     addressId: addresses[0].addressId,
+  //   },
+  // });
 
   console.log('✅ Seeding complete!');
 }

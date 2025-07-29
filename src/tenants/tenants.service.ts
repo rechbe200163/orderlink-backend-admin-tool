@@ -8,13 +8,11 @@ export class TenantsService {
   constructor(@Inject(ServiceName) private tenantsClient: ClientProxy) {}
 
   async create(data: CreateTenantDto): Promise<{
-    message: string;
-    tenant: CreateTenantDto;
+    tenantId: string;
   }> {
     console.log('Creating tenant with data:', data);
     const tenant$ = this.tenantsClient.send('create_tenant', { ...data });
-    const tenant: { message: string; tenant: CreateTenantDto } =
-      await firstValueFrom(tenant$);
+    const tenant: { tenantId: string } = await firstValueFrom(tenant$);
     console.log('Created tenant:', tenant);
     return tenant;
   }

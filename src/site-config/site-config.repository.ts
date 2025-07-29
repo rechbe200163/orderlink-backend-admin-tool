@@ -26,14 +26,17 @@ export class SiteConfigRepository {
   ) {}
 
   async create(data: CreateSiteConfigDto): Promise<SiteConfigDto> {
-    await this.tenantService.create({
+    const tenant = await this.tenantService.create({
       companyName: data.companyName,
       slug: encodeURIComponent(
         data.companyName.toLowerCase().replace(/\s+/g, '-'),
       ),
     });
     const siteConfig = await this.prismaService.client.siteConfig.create({
-      data,
+      data: {
+        ...data,
+        tenantId: tenant.tenantId,
+      },
     });
     return transformResponse(SiteConfigDto, siteConfig);
   }
