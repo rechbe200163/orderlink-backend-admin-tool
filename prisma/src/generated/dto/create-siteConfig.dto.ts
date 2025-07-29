@@ -47,19 +47,6 @@ export class CreateSiteConfigDto {
   })
   @IsString()
   companyNumber: string;
-  @ApiProperty({
-    description: 'The Stripe customer ID for the site configuration',
-    required: false,
-  })
-  @IsString()
-  stripeCustomerId?: string;
-
-  @ApiProperty({
-    description: 'The Stripe customer ID for the site configuration',
-    required: false,
-  })
-  @IsString()
-  stripeAccountId?: string;
 
   @ApiProperty({
     description: 'The address ID for the site configuration',

@@ -43,18 +43,4 @@ export class UpdateSiteConfigDto {
   })
   @IsOptional()
   companyNumber?: string;
-
-  @ApiProperty({
-    description: 'The Stripe customer ID for the site configuration',
-    required: false,
-  })
-  @IsOptional()
-  stripeCustomerId?: string | null;
-
-  @ApiProperty({
-    description: 'The Stripe account ID for the site configuration',
-    required: false,
-  })
-  @IsOptional()
-  stripeAccountId?: string | null;
 }

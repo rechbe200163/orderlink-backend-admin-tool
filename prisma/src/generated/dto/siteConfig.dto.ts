@@ -37,15 +37,7 @@ export class SiteConfigDto {
   })
   modifiedAt: Date | null;
   @Expose()
-  isPremium: boolean;
-  @Expose()
   deleted: boolean;
-  @Expose()
-  stripeCustomerId: string | null;
-  @Expose()
-  stripeAccountId: string | null;
-  @Expose()
-  stripeConfigured: boolean;
   @Expose()
   address: AddressDto;
 }

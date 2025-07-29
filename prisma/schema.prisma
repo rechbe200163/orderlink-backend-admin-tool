@@ -79,7 +79,7 @@ model Customer {
   customerId        String          @id @default(uuid(7))
   customerReference Int             @unique()
   email             String          @unique
-  phoneNumber       String          @db.VarChar(15)
+  phoneNumber       String          @db.VarChar(255)
   password          String          @db.VarChar(255)
   firstName         String?         @db.VarChar(255)
   lastName          String          @db.VarChar(255)
@@ -106,7 +106,7 @@ model CustomerHistory {
   historyId         String          @id @default(uuid(7))
   customerReference Int
   email         String
-  phoneNumber       String          @db.VarChar(15)
+  phoneNumber       String          @db.VarChar(255)
   password          String          @db.VarChar(255)
   firstName         String?         @db.VarChar(255)
   lastName          String          @db.VarChar(255)
@@ -287,16 +287,12 @@ model SiteConfig {
 
   logoPath         String    @db.VarChar(255)
   email            String    @unique @db.VarChar(255)
-  phoneNumber      String    @db.VarChar(15)
-  iban             String    @db.VarChar(40)
+  phoneNumber      String    @db.VarChar(255)
+  iban             String    @db.VarChar(255)
   companyNumber    String    @db.VarChar(255)
   addressId        String
   modifiedAt       DateTime? @default(dbgenerated("null")) @updatedAt
-  isPremium        Boolean   @default(false)
   deleted          Boolean   @default(false)
-  stripeCustomerId String?   @db.VarChar(255)
-  stripeAccountId  String?   @db.VarChar(255)
-  stripeConfigured Boolean   @default(false)
   address          Address   @relation(fields: [addressId], references: [addressId])
 
   @@map("siteConfigs")

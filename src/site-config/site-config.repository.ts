@@ -15,6 +15,7 @@ import { transformResponse } from 'lib/utils/transform';
 import { isNoChange } from 'lib/utils/isNoChange';
 import { Tenant } from 'src/tenants/entities/tenant.entity';
 import { TenantsService } from 'src/tenants/tenants.service';
+import { da } from '@faker-js/faker/.';
 
 @Injectable()
 export class SiteConfigRepository {
@@ -25,14 +26,14 @@ export class SiteConfigRepository {
   ) {}
 
   async create(data: CreateSiteConfigDto): Promise<SiteConfigDto> {
+    await this.tenantService.create({
+      companyName: data.companyName,
+      slug: encodeURIComponent(
+        data.companyName.toLowerCase().replace(/\s+/g, '-'),
+      ),
+    });
     const siteConfig = await this.prismaService.client.siteConfig.create({
       data,
-    });
-    await this.tenantService.create({
-      companyName: siteConfig.companyName,
-      slug: encodeURIComponent(
-        siteConfig.companyName.toLowerCase().replace(/\s+/g, '-'),
-      ),
     });
     return transformResponse(SiteConfigDto, siteConfig);
   }

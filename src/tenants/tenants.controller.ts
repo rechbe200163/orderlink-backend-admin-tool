@@ -7,7 +7,6 @@ import { CreateTenantDto } from './dto/create-tenant.dto';
 export class TenantsController {
   constructor(private readonly tenantsService: TenantsService) {}
 
-  @MessagePattern('createTenant')
   async create(@Payload() createTenantDto: CreateTenantDto) {
     const data = await this.tenantsService.create(createTenantDto);
     return data;
