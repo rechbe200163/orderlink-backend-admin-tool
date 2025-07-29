@@ -29,6 +29,7 @@ import { CreateSiteConfigDto } from 'prisma/src/generated/dto/create-siteConfig.
 import { UpdateSiteConfigDto } from 'prisma/src/generated/dto/update-siteConfig.dto';
 import { SiteConfigDto } from 'prisma/src/generated/dto/siteConfig.dto';
 import { FileInterceptor } from '@nestjs/platform-express';
+import { SiteConfigWithTenantDto } from './dto/siteConfig-with-tenant.dto';
 
 @Controller('site-config')
 @UseInterceptors(CacheInterceptor)
@@ -56,7 +57,7 @@ export class SiteConfigController {
   }
 
   @Get()
-  @ApiOkResponse({ type: SiteConfigDto })
+  @ApiOkResponse({ type: SiteConfigWithTenantDto })
   findAll() {
     return this.siteConfigService.findFirst();
   }

@@ -34,7 +34,6 @@ export class AuthService {
     private readonly prismaService: CustomPrismaService<ExtendedPrismaClient>,
     private readonly otpService: OtpService,
     private readonly jwtService: JwtService,
-    private readonly tenantService: TenantsService,
   ) {}
 
   async authenticate(input: AuthInput): Promise<AuthResult> {
@@ -78,24 +77,16 @@ export class AuthService {
       token: {
         accessToken,
         issuedAt: Math.floor(Date.now()), // Current time in milliseconds
-        expiresAt: Math.floor(Date.now()) + 30 * 60 * 1000, // 30 seconds later
+        expiresAt: Math.floor(Date.now()) + 30 * 60 * 1000, // 30 minutes later
       },
       user: tokenPayload as SanitizedEmployee,
       // tenant: await this.getTenantInformation(),
     };
   }
 
-  // async getTenantInformation(): Promise<TenantDto> {
-  //   const siteConfig = await this.prismaService.client.siteConfig.findFirst();
-  //   if (!siteConfig) {
-  //     throw new UnauthorizedException('Site configuration not found');
-  //   }
-  //   const tenant = await this.tenantService.getTenantById(siteConfig.tenantId);
-  //   if (!tenant) {
-  //     throw new UnauthorizedException('Tenant not found');
-  //   }
-  //   return tenant;
-  // }
+  async renewSession(user: SanitizedEmployee): Promise<AuthResult> {
+    return this.signIn(user);
+  }
 
   async signInWithOtp(code: number): Promise<AuthResult> {
     const otp = await this.otpService.validateOTP(code);

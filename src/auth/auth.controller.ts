@@ -77,4 +77,19 @@ export class AuthController {
   async validateOtp(@Param('otp', ParseIntPipe) otp: number) {
     return this.authService.signInWithOtp(otp);
   }
+
+  ///renewSession
+  @Post('renewSession')
+  @HttpCode(HttpStatus.OK)
+  @ApiOkResponse({ type: AuthResultDto })
+  @ApiUnauthorizedResponse({
+    description: 'Invalid credentials',
+  })
+  @UseGuards(JwtAuthGuard, ThrottlerGuard)
+  renewSession(@Request() request) {
+    if (!request.user) {
+      throw new NotImplementedException('User not found in request');
+    }
+    return this.authService.renewSession(request.user);
+  }
 }
