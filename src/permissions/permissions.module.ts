@@ -4,9 +4,10 @@ import { PermissionsController } from './permissions.controller';
 import { PermissionsRepository } from './permissions.repository';
 import { RolesModule } from 'src/roles/roles.module';
 import { TypedEventEmitterModule } from 'src/event-emitter/event-emitter.module';
+import { TenantsModule } from 'src/tenants/tenants.module';
 
 @Module({
-  imports: [RolesModule, TypedEventEmitterModule],
+  imports: [RolesModule, TypedEventEmitterModule, TenantsModule],
   controllers: [PermissionsController],
   providers: [PermissionsService, PermissionsRepository],
   exports: [PermissionsService],

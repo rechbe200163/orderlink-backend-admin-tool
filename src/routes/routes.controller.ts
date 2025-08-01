@@ -11,6 +11,7 @@ import {
   UseInterceptors,
   UseGuards,
   BadRequestException,
+  Module,
 } from '@nestjs/common';
 import { RoutesService } from './routes.service';
 import { CacheInterceptor } from '@nestjs/cache-manager';
@@ -32,13 +33,17 @@ import { UpdateRouteDto } from 'prisma/src/generated/dto/update-route.dto';
 import { RouteDto } from 'prisma/src/generated/dto/route.dto';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
+import { ModulesGuard } from 'src/auth/guards/modules.guard';
+import { ModuleTag } from 'lib/decorators/module.decorators';
+import { ModuleEnum } from 'src/tenants/dto/modules-entity.dto';
 
 @Controller('routes')
 @UseInterceptors(CacheInterceptor)
+@ModuleTag(ModuleEnum.NAVIGATION)
 @Resource(Resources.ROUTES)
 @ApiInternalServerErrorResponse({ description: 'Internal server error' })
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard, ModulesGuard)
 @ApiForbiddenResponse({
   description:
     'Role does not have the permissions to perform this action on the requested resource',

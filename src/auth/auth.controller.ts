@@ -50,11 +50,12 @@ export class AuthController {
     description: 'Invalid credentials',
   })
   @UseGuards(JwtAuthGuard, ThrottlerGuard)
+  @ApiBearerAuth()
   renewToken(@Request() request) {
-    if (!request.user) {
+    if (!request.user && !request.user.tenantId) {
       throw new NotImplementedException('User not found in request');
     }
-    return this.authService.signIn(request.user);
+    return this.authService.signIn(request.user, request.user.tenantId);
   }
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, ThrottlerGuard)
@@ -87,9 +88,9 @@ export class AuthController {
   })
   @UseGuards(JwtAuthGuard, ThrottlerGuard)
   renewSession(@Request() request) {
-    if (!request.user) {
+    if (!request.user && !request.user.tenantId) {
       throw new NotImplementedException('User not found in request');
     }
-    return this.authService.renewSession(request.user);
+    return this.authService.renewSession(request.user, request.user.tenantId);
   }
 }

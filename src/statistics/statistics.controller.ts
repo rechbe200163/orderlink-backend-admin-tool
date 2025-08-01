@@ -1,3 +1,4 @@
+import { Ressource } from './../../prisma/src/generated/client/index.d';
 import { Controller, Get, UseInterceptors, UseGuards } from '@nestjs/common';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { StatisticsService } from './statistics.service';
@@ -14,12 +15,20 @@ import { RevenueStatsDto } from './dto/revenue-stats.dto';
 import { SalesStatsDto } from './dto/sales-stats.dto';
 import { AverageOrderValueStatsDto } from './dto/average-order-value-stats.dto';
 import { CustomerStatsDto } from './dto/customer-stats.dto';
+import { ModuleTag } from 'lib/decorators/module.decorators';
+import { ModuleEnum } from 'src/tenants/dto/modules-entity.dto';
+import { ModulesGuard } from 'src/auth/guards/modules.guard';
+import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
+import { Resource } from 'lib/decorators/resource.decorator';
+import { Resources } from '@prisma/client';
 
 @Controller('statistics')
 @UseInterceptors(CacheInterceptor)
 @ApiInternalServerErrorResponse({ description: 'Internal server error' })
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard)
+@ModuleTag(ModuleEnum.STATISTICS)
+@Resource(Resources.STATISTICS)
+@UseGuards(JwtAuthGuard, PermissionsGuard, ModulesGuard)
 export class StatisticsController {
   constructor(private readonly statisticsService: StatisticsService) {}
 

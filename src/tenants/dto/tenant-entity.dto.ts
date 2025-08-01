@@ -7,6 +7,7 @@ import {
   IsString,
   IsUUID,
 } from 'class-validator';
+import { EnabledModuleDto } from './modules-entity.dto';
 
 export class TenantDto {
   @Exclude()
@@ -40,12 +41,12 @@ export class TenantDto {
   @Expose()
   @IsNumber()
   @IsPositive()
-  maxUsers: number;
+  maxEmployees: number;
 
   @Expose()
   @IsNumber()
   @IsPositive()
-  enabledModules: number;
+  enabledModules: EnabledModuleDto[];
 
   @Expose()
   @IsString()

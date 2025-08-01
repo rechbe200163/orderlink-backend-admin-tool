@@ -37,15 +37,19 @@ import { PermissionDto } from 'prisma/src/generated/dto/permission.dto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
 import { PermissionPagingResultDto } from './dto/permissions-paging';
 import { CreatePermissionDto } from 'prisma/src/generated/dto/create-permission.dto';
+import { ModuleTag } from 'lib/decorators/module.decorators';
+import { ModuleEnum } from 'src/tenants/dto/modules-entity.dto';
+import { ModulesGuard } from 'src/auth/guards/modules.guard';
 
 @Controller('permissions')
 @UseInterceptors(CacheInterceptor)
+@ModuleTag(ModuleEnum.CUSTOM_ROLES)
 @Resource(Resources.PERMISSION)
 @ApiInternalServerErrorResponse({
   description: 'Internal server error',
 })
 @ApiBearerAuth()
-@UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard, ModulesGuard)
 @ApiForbiddenResponse({
   description:
     'Role does not have the permissions to perform this action on the requeseted resource',

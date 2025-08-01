@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
-import { SanitizedEmployee } from 'lib/types';
 import { ExtractJwt, Strategy } from 'passport-jwt';
+import { JwtPayload } from '../auth.service';
 
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy) {
@@ -16,7 +16,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(payload: SanitizedEmployee): SanitizedEmployee {
+  validate(payload: JwtPayload): JwtPayload {
     return payload;
   }
 }

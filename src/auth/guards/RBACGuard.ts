@@ -9,10 +9,10 @@ import { Reflector } from '@nestjs/core';
 import { Request } from 'express';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'prisma/prisma.extension';
-import { SanitizedEmployee } from '../../../lib/types';
 import { Actions } from '@prisma/client';
 import { Resources } from '../../rbac/resources.enum';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
+import { JwtPayload } from '../auth.service';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -25,7 +25,7 @@ export class PermissionsGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<Request>();
-    const employee = req.user as SanitizedEmployee;
+    const employee = req.user as JwtPayload;
 
     const method = req.method;
     const handler = context.getHandler();

@@ -33,6 +33,7 @@ import { UpdateEmployeesDto } from 'prisma/src/generated/dto/update-employees.dt
 import { MAX_PAGE_SIZE } from 'lib/constants';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { EmployeesDto } from 'prisma/src/generated/dto/employees.dto';
+import { MaxEmployeeGuard } from 'src/auth/guards/max-employee.guard';
 
 @Controller('employees')
 @UseInterceptors(CacheInterceptor)
@@ -67,6 +68,7 @@ export class EmployeesController {
     type: CreateEmployeesDto,
     description: 'Create a new employee',
   })
+  @UseGuards(MaxEmployeeGuard)
   create(@Body() createEmployeeDto: CreateEmployeesDto) {
     return this.employeesService.create(createEmployeeDto);
   }
