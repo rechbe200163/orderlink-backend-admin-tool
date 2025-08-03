@@ -1,4 +1,5 @@
 import { Injectable } from '@nestjs/common';
+import { MemoryStorageFile } from '@blazity/nest-file-fastify';
 import { InjectMinio } from 'src/minio/minio.decorator';
 import * as Minio from 'minio';
 import { randomUUID } from 'crypto';
@@ -27,15 +28,22 @@ export class FileRepositoryService {
     }
   }
 
-  uploadFile(file: Express.Multer.File): Promise<string> {
+  uploadFile(file: MemoryStorageFile): Promise<string> {
     return new Promise((resolve, reject) => {
-      const cleanName = slugify(file.originalname, {
+      const originalName =
+        (file as any).originalname ||
+        (file as any).filename ||
+        (file as any).originalFilename ||
+        file.fieldname;
+
+      const ext = file.mimetype?.split('/')[1] || '';
+      const cleanName = slugify(originalName, {
         lower: true,
         remove: /[0-9]/g,
         trim: true,
         strict: true,
       });
-      const filename = `${randomUUID()}-${cleanName}`;
+      const filename = `${randomUUID()}-${cleanName}${ext ? '.' + ext : ''}`;
       this.minioService.putObject(
         this._bucketName,
         filename,

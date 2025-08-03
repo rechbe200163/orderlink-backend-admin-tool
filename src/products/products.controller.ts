@@ -28,7 +28,7 @@ import { Resources } from '../rbac/resources.enum';
 import { Resource } from 'lib/decorators/resource.decorator';
 import { CreateProductDto } from 'src/products/dto/create-product.dto';
 import { UpdateProductDto } from 'src/products/dto/update-product.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, MemoryStorageFile } from '@blazity/nest-file-fastify';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { ProductDto } from './dto/product.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
@@ -64,7 +64,7 @@ export class ProductsController {
   @UseInterceptors(FileInterceptor('productImage'))
   create(
     @Body() createProductDto: CreateProductDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: MemoryStorageFile,
   ) {
     console.log('Received product data:', createProductDto);
     console.log('Received file:', file);
@@ -158,7 +158,7 @@ export class ProductsController {
   update(
     @Param('productId', ParseUUIDPipe) productId: string,
     @Body() updateProductDto: UpdateProductDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: MemoryStorageFile,
   ) {
     return this.productsService.update(productId, updateProductDto, file);
   }
