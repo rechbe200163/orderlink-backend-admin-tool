@@ -49,11 +49,13 @@ export class SiteConfigController {
   @ApiBody({ type: CreateSiteConfigDto })
   @ApiOkResponse({ type: SiteConfigDto })
   @UseInterceptors(FileInterceptor('logoPath'))
-  create(
+  async create(
     @Body() createDto: CreateSiteConfigDto,
-    @UploadedFile() file: MemoryStorageFile,
+    @UploadedFile()
+    file: MemoryStorageFile | (() => Promise<MemoryStorageFile>),
   ) {
-    return this.siteConfigService.create(createDto, file);
+    const memoryFile = typeof file === 'function' ? await file() : file;
+    return this.siteConfigService.create(createDto, memoryFile);
   }
 
   @Get()
@@ -75,11 +77,13 @@ export class SiteConfigController {
   @ApiBody({ type: UpdateSiteConfigDto })
   @ApiOkResponse({ type: SiteConfigDto })
   @UseInterceptors(FileInterceptor('logo'))
-  update(
+  async update(
     @Param('siteConfigId', ParseUUIDPipe) siteConfigId: string,
     @Body() updateDto: UpdateSiteConfigDto,
-    @UploadedFile() file: MemoryStorageFile,
+    @UploadedFile()
+    file: MemoryStorageFile | (() => Promise<MemoryStorageFile>),
   ) {
-    return this.siteConfigService.update(siteConfigId, updateDto, file);
+    const memoryFile = typeof file === 'function' ? await file() : file;
+    return this.siteConfigService.update(siteConfigId, updateDto, memoryFile);
   }
 }
