@@ -7,7 +7,6 @@ import {
   Param,
   UseInterceptors,
   UploadedFile,
-  UseGuards,
   ParseUUIDPipe,
   ParseIntPipe,
   Query,
@@ -28,13 +27,10 @@ import { Resources } from '../rbac/resources.enum';
 import { Resource } from 'lib/decorators/resource.decorator';
 import { CreateProductDto } from 'src/products/dto/create-product.dto';
 import { UpdateProductDto } from 'src/products/dto/update-product.dto';
-import { FileInterceptor, MemoryStorageFile } from '@blazity/nest-file-fastify';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { ProductDto } from './dto/product.dto';
-import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
-import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
-import { CustomerPagingResultDto } from 'src/customers/dto/customer-paging.dto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
+import { File, FileInterceptor } from '@nest-lab/fastify-multer';
 
 @Controller('products')
 @UseInterceptors(CacheInterceptor)
@@ -64,11 +60,11 @@ export class ProductsController {
   @UseInterceptors(FileInterceptor('productImage'))
   async create(
     @Body() createProductDto: CreateProductDto,
-    @UploadedFile()
-    file: MemoryStorageFile | (() => Promise<MemoryStorageFile>),
+    @UploadedFile() productImage: File,
   ) {
-    const memoryFile = typeof file === 'function' ? await file() : file;
-    return this.productsService.create(createProductDto, memoryFile);
+    console.log(createProductDto);
+    return console.log(productImage);
+    // return this.productsService.create(createProductDto, productImage);
   }
 
   @Get()
@@ -156,10 +152,8 @@ export class ProductsController {
   async update(
     @Param('productId', ParseUUIDPipe) productId: string,
     @Body() updateProductDto: UpdateProductDto,
-    @UploadedFile()
-    file: MemoryStorageFile | (() => Promise<MemoryStorageFile>),
+    @UploadedFile() productImage: File,
   ) {
-    const memoryFile = typeof file === 'function' ? await file() : file;
-    return this.productsService.update(productId, updateProductDto, memoryFile);
+    return console.log(productImage);
   }
 }

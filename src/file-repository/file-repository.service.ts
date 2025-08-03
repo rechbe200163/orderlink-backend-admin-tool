@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { MemoryStorageFile } from '@blazity/nest-file-fastify';
 import { InjectMinio } from 'src/minio/minio.decorator';
 import * as Minio from 'minio';
 import { randomUUID } from 'crypto';
 import slugify from 'slugify';
+import { File } from '@nest-lab/fastify-multer';
 @Injectable()
 export class FileRepositoryService {
   protected _bucketName = 'product-images';
@@ -28,23 +28,17 @@ export class FileRepositoryService {
     }
   }
 
-  uploadFile(file: MemoryStorageFile): Promise<string> {
+  uploadFile(productImage: File): Promise<string> {
+    console.log(
+      'Uploading file:',
+      productImage.encoding,
+      productImage.mimetype,
+      productImage.size,
+      productImage.fieldname,
+    );
     return new Promise((resolve, reject) => {
-      const source = file as Partial<MemoryStorageFile> & {
-        originalname?: string;
-        filename?: string;
-        originalFilename?: string;
-        fieldname?: string;
-      };
-
-      const originalName =
-        source.originalname ||
-        source.filename ||
-        source.originalFilename ||
-        source.fieldname ||
-        'file';
-
-      const ext = source.mimetype?.split('/')[1] || '';
+      const originalName = productImage.fieldname || 'file';
+      const ext = productImage.mimetype?.split('/')[1] ?? '';
       const cleanName = slugify(originalName, {
         lower: true,
         remove: /[0-9]/g,
@@ -55,9 +49,9 @@ export class FileRepositoryService {
       this.minioService.putObject(
         this._bucketName,
         filename,
-        source.buffer,
-        source.size,
-        (error) => {
+        productImage.buffer!,
+        productImage.size,
+        (error, objInfo) => {
           if (error) {
             reject(error);
           } else {

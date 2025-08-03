@@ -8,7 +8,7 @@ import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { ProductDto } from './dto/product.dto';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
 import { ProductHistoryDto } from './dto/product-history';
-import { MemoryStorageFile } from '@blazity/nest-file-fastify';
+import { File } from '@nest-lab/fastify-multer';
 
 @Injectable()
 export class ProductsService {
@@ -18,11 +18,11 @@ export class ProductsService {
     private readonly eventEmitter: TypedEventEmitter,
   ) {}
   // products.service.ts
-  async create(createProductDto: CreateProductDto, file?: MemoryStorageFile) {
+  async create(createProductDto: CreateProductDto, productImage?: File) {
     let imageFilename: string | undefined;
 
-    if (file) {
-      imageFilename = await this.fileService.uploadFile(file);
+    if (productImage) {
+      imageFilename = await this.fileService.uploadFile(productImage);
     }
 
     const product = await this.productRepository.create(
@@ -99,11 +99,7 @@ export class ProductsService {
     };
   }
 
-  async update(
-    id: string,
-    updateProductDto: UpdateProductDto,
-    file?: MemoryStorageFile,
-  ) {
+  async update(id: string, updateProductDto: UpdateProductDto, file?: File) {
     let imageFilename: string | undefined;
 
     const originalProduct =

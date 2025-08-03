@@ -28,8 +28,8 @@ import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { CreateSiteConfigDto } from 'prisma/src/generated/dto/create-siteConfig.dto';
 import { UpdateSiteConfigDto } from 'prisma/src/generated/dto/update-siteConfig.dto';
 import { SiteConfigDto } from 'prisma/src/generated/dto/siteConfig.dto';
-import { FileInterceptor, MemoryStorageFile } from '@blazity/nest-file-fastify';
 import { SiteConfigWithTenantDto } from './dto/siteConfig-with-tenant.dto';
+import { File, FileInterceptor } from '@nest-lab/fastify-multer';
 
 @Controller('site-config')
 @UseInterceptors(CacheInterceptor)
@@ -52,10 +52,9 @@ export class SiteConfigController {
   async create(
     @Body() createDto: CreateSiteConfigDto,
     @UploadedFile()
-    file: MemoryStorageFile | (() => Promise<MemoryStorageFile>),
+    logoPath: File,
   ) {
-    const memoryFile = typeof file === 'function' ? await file() : file;
-    return this.siteConfigService.create(createDto, memoryFile);
+    return this.siteConfigService.create(createDto, logoPath);
   }
 
   @Get()
@@ -81,9 +80,8 @@ export class SiteConfigController {
     @Param('siteConfigId', ParseUUIDPipe) siteConfigId: string,
     @Body() updateDto: UpdateSiteConfigDto,
     @UploadedFile()
-    file: MemoryStorageFile | (() => Promise<MemoryStorageFile>),
+    logo: File,
   ) {
-    const memoryFile = typeof file === 'function' ? await file() : file;
-    return this.siteConfigService.update(siteConfigId, updateDto, memoryFile);
+    return this.siteConfigService.update(siteConfigId, updateDto, logo);
   }
 }
