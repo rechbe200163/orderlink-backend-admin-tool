@@ -107,6 +107,9 @@ importers:
       commander:
         specifier: ^14.0.0
         version: 14.0.0
+      fastify:
+        specifier: ^5.4.0
+        version: 5.4.0
       fastify-helmet:
         specifier: ^7.1.0
         version: 7.1.0

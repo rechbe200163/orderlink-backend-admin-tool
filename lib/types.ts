@@ -1,4 +1,5 @@
 import { Customer, Employees } from '@prisma/client';
+import { FastifyRequest } from 'fastify';
 
 export type AuthResultCustomer = {
   token: string;
@@ -32,3 +33,7 @@ export type PagingData<T> = [
     totalCount: number;
   },
 ];
+
+export interface FastifyUserRequest extends FastifyRequest {
+  user: SanitizedEmployee;
+}

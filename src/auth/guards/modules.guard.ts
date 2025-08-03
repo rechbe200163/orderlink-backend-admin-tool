@@ -2,15 +2,15 @@ import {
   CanActivate,
   ExecutionContext,
   ForbiddenException,
-  Inject,
   Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { ModuleEnum } from 'src/tenants/dto/modules-entity.dto';
 import { TenantsService } from 'src/tenants/tenants.service';
-import { JwtPayload } from '../auth.service';
 import { FastifyRequest } from 'fastify';
 import { MODULE_KEY } from 'lib/decorators/module.decorators';
+import { FastifyUserRequest } from 'lib/types';
+import { JwtPayload } from '../auth.service';
 
 @Injectable()
 export class ModulesGuard implements CanActivate {
@@ -20,7 +20,7 @@ export class ModulesGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const req = context.switchToHttp().getRequest<FastifyRequest>();
+    const req = context.switchToHttp().getRequest<FastifyUserRequest>();
     const employee = req.user as JwtPayload;
 
     console.log(

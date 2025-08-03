@@ -13,6 +13,7 @@ import { Actions } from '@prisma/client';
 import { Resources } from '../../rbac/resources.enum';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
 import { JwtPayload } from '../auth.service';
+import { FastifyUserRequest } from 'lib/types';
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -24,7 +25,7 @@ export class PermissionsGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const req = context.switchToHttp().getRequest<FastifyRequest>();
+    const req = context.switchToHttp().getRequest<FastifyUserRequest>();
     const employee = req.user as JwtPayload;
 
     const method = req.method;
