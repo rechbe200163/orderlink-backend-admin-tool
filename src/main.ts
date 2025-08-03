@@ -1,4 +1,3 @@
-import { fastifyMultipart } from '@fastify/multipart';
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
@@ -13,12 +12,6 @@ async function bootstrap() {
     AppModule,
     new FastifyAdapter(),
   );
-  await app.register(fastifyMultipart, {
-    limits: {
-      fileSize: 10 * 1024 * 1024, // z. B. 10MB
-    },
-  });
-
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
   app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
 

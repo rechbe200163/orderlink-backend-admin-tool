@@ -66,6 +66,11 @@ import { FastifyMulterModule } from '@nest-lab/fastify-multer';
       isGlobal: true, // Makes ConfigService globally available
       envFilePath: '.env', // Default
     }),
+    FastifyMulterModule.register({
+      limits: {
+        fileSize: 10 * 1024 * 1024,
+      },
+    }),
     EmailModule,
     CustomersModule,
     AuthModule,
