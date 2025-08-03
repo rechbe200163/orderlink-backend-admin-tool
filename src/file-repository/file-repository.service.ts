@@ -30,13 +30,21 @@ export class FileRepositoryService {
 
   uploadFile(file: MemoryStorageFile): Promise<string> {
     return new Promise((resolve, reject) => {
-      const originalName =
-        (file as any).originalname ||
-        (file as any).filename ||
-        (file as any).originalFilename ||
-        file.fieldname;
+      const source = file as Partial<MemoryStorageFile> & {
+        originalname?: string;
+        filename?: string;
+        originalFilename?: string;
+        fieldname?: string;
+      };
 
-      const ext = file.mimetype?.split('/')[1] || '';
+      const originalName =
+        source.originalname ||
+        source.filename ||
+        source.originalFilename ||
+        source.fieldname ||
+        'file';
+
+      const ext = source.mimetype?.split('/')[1] || '';
       const cleanName = slugify(originalName, {
         lower: true,
         remove: /[0-9]/g,
@@ -47,9 +55,9 @@ export class FileRepositoryService {
       this.minioService.putObject(
         this._bucketName,
         filename,
-        file.buffer,
-        file.size,
-        (error, objInfo) => {
+        source.buffer,
+        source.size,
+        (error) => {
           if (error) {
             reject(error);
           } else {

@@ -18,14 +18,11 @@ export class ProductsService {
     private readonly eventEmitter: TypedEventEmitter,
   ) {}
   // products.service.ts
-  async create(createProductDto: CreateProductDto, file: MemoryStorageFile) {
+  async create(createProductDto: CreateProductDto, file?: MemoryStorageFile) {
     let imageFilename: string | undefined;
 
     if (file) {
-      const uploadResult = await this.fileService.uploadFile(file);
-      console.log('File uploaded successfully:', uploadResult);
-      imageFilename = uploadResult;
-      console.log('Image filename:', imageFilename);
+      imageFilename = await this.fileService.uploadFile(file);
     }
 
     const product = await this.productRepository.create(
@@ -105,7 +102,7 @@ export class ProductsService {
   async update(
     id: string,
     updateProductDto: UpdateProductDto,
-    file: MemoryStorageFile,
+    file?: MemoryStorageFile,
   ) {
     let imageFilename: string | undefined;
 
@@ -113,9 +110,7 @@ export class ProductsService {
       await this.productRepository.findOriginalProductById(id);
 
     if (file) {
-      const uploadResult = await this.fileService.uploadFile(file);
-      console.log('File uploaded successfully:', uploadResult);
-      imageFilename = uploadResult;
+      imageFilename = await this.fileService.uploadFile(file);
     }
 
     const product = await this.productRepository.update(
