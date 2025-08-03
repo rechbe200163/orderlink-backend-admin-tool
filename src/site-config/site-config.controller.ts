@@ -28,7 +28,7 @@ import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { CreateSiteConfigDto } from 'prisma/src/generated/dto/create-siteConfig.dto';
 import { UpdateSiteConfigDto } from 'prisma/src/generated/dto/update-siteConfig.dto';
 import { SiteConfigDto } from 'prisma/src/generated/dto/siteConfig.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, MemoryStorageFile } from '@blazity/nest-file-fastify';
 import { SiteConfigWithTenantDto } from './dto/siteConfig-with-tenant.dto';
 
 @Controller('site-config')
@@ -51,7 +51,7 @@ export class SiteConfigController {
   @UseInterceptors(FileInterceptor('logoPath'))
   create(
     @Body() createDto: CreateSiteConfigDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: MemoryStorageFile,
   ) {
     return this.siteConfigService.create(createDto, file);
   }
@@ -78,7 +78,7 @@ export class SiteConfigController {
   update(
     @Param('siteConfigId', ParseUUIDPipe) siteConfigId: string,
     @Body() updateDto: UpdateSiteConfigDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile() file: MemoryStorageFile,
   ) {
     return this.siteConfigService.update(siteConfigId, updateDto, file);
   }

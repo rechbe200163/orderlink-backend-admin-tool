@@ -7,6 +7,7 @@ import { FileRepositoryService } from 'src/file-repository/file-repository.servi
 import { Tenant } from 'src/tenants/entities/tenant.entity';
 import { TenantDto } from 'src/tenants/dto/tenant-entity.dto';
 import { TenantsService } from 'src/tenants/tenants.service';
+import { MemoryStorageFile } from '@blazity/nest-file-fastify';
 
 @Injectable()
 export class SiteConfigService {
@@ -18,7 +19,7 @@ export class SiteConfigService {
 
   async create(
     createDto: CreateSiteConfigDto,
-    file?: Express.Multer.File,
+    file?: MemoryStorageFile,
   ): Promise<SiteConfigDto> {
     if (file) {
       const filename = await this.fileService.uploadFile(file);
@@ -58,7 +59,7 @@ export class SiteConfigService {
   async update(
     id: string,
     updateDto: UpdateSiteConfigDto,
-    file?: Express.Multer.File,
+    file?: MemoryStorageFile,
   ): Promise<SiteConfigDto> {
     if (file) {
       const filename = await this.fileService.uploadFile(file);
