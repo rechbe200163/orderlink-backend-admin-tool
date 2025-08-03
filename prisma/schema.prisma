@@ -294,6 +294,8 @@ model SiteConfig {
   modifiedAt       DateTime? @default(dbgenerated("null")) @updatedAt
   deleted          Boolean   @default(false)
   tenantId        String    @db.VarChar(255)
+  deliveryNavigationToolBackendURL String @db.VarChar(255) @default("https://fakerjs.dev/api/")
+  deliveryNavigationToolConnected Boolean @default(false)
   address          Address   @relation(fields: [addressId], references: [addressId])
 
   @@map("siteConfigs")

@@ -39,6 +39,10 @@ export class SiteConfigDto {
   @Expose()
   tenantId: string;
   @Expose()
+  deliveryNavigationToolBackendURL: string;
+  @Expose()
+  deliveryNavigationToolConnected: boolean;
+  @Expose()
   deleted: boolean;
   @Expose()
   address: AddressDto;

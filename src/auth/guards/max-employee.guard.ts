@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   CanActivate,
   ExecutionContext,
   ForbiddenException,
@@ -36,7 +37,7 @@ export class MaxEmployeeGuard implements CanActivate {
     const currentEmployees = await this.prismaService.client.employees.count();
 
     if (currentEmployees >= maxEmployees) {
-      throw new ForbiddenException('Maximum employee limit reached');
+      throw new BadRequestException('Maximum employee limit reached');
     }
 
     return true;
