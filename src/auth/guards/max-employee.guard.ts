@@ -7,7 +7,7 @@ import {
 } from '@nestjs/common';
 import { TenantsService } from 'src/tenants/tenants.service';
 import { JwtPayload } from '../auth.service';
-import { Request } from 'express';
+import { FastifyRequest } from 'fastify';
 import { CustomPrismaService } from 'nestjs-prisma/dist/custom';
 import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 
@@ -20,7 +20,7 @@ export class MaxEmployeeGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const req = context.switchToHttp().getRequest<Request>();
+    const req = context.switchToHttp().getRequest<FastifyRequest>();
     const employee = req.user as JwtPayload;
     const method = req.method;
 

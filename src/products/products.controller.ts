@@ -28,7 +28,7 @@ import { Resources } from '../rbac/resources.enum';
 import { Resource } from 'lib/decorators/resource.decorator';
 import { CreateProductDto } from 'src/products/dto/create-product.dto';
 import { UpdateProductDto } from 'src/products/dto/update-product.dto';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FileInterceptor, MemoryStorageFile } from '@blazity/nest-file-fastify';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { ProductDto } from './dto/product.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
@@ -62,13 +62,13 @@ export class ProductsController {
     type: CreateProductDto,
   })
   @UseInterceptors(FileInterceptor('productImage'))
-  create(
+  async create(
     @Body() createProductDto: CreateProductDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile()
+    file: MemoryStorageFile | (() => Promise<MemoryStorageFile>),
   ) {
-    console.log('Received product data:', createProductDto);
-    console.log('Received file:', file);
-    return this.productsService.create(createProductDto, file);
+    const memoryFile = typeof file === 'function' ? await file() : file;
+    return this.productsService.create(createProductDto, memoryFile);
   }
 
   @Get()
@@ -115,8 +115,6 @@ export class ProductsController {
     @Query('page', ParseIntPipe) page: number = 1,
     @Query('limit', ParseIntPipe) limit: number = 10,
   ) {
-    console.log('Query parameters:', { limit, page, categoryId, search });
-
     return this.productsService.findAll(limit, page, search, categoryId);
   }
 
@@ -155,11 +153,13 @@ export class ProductsController {
     type: UpdateProductDto,
   })
   @UseInterceptors(FileInterceptor('productImage'))
-  update(
+  async update(
     @Param('productId', ParseUUIDPipe) productId: string,
     @Body() updateProductDto: UpdateProductDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile()
+    file: MemoryStorageFile | (() => Promise<MemoryStorageFile>),
   ) {
-    return this.productsService.update(productId, updateProductDto, file);
+    const memoryFile = typeof file === 'function' ? await file() : file;
+    return this.productsService.update(productId, updateProductDto, memoryFile);
   }
 }
