@@ -10,6 +10,7 @@ import {
   ParseUUIDPipe,
   ParseIntPipe,
   Query,
+  Req,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import {
@@ -31,6 +32,10 @@ import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { ProductDto } from './dto/product.dto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
 import { File, FileInterceptor } from '@nest-lab/fastify-multer';
+import { FastifyFileInterceptor } from 'lib/interceptors/fastify-file-interceptor';
+import { diskStorage } from 'multer';
+import { editFileName, imageFileFilter } from 'lib/utils/file-upload-util';
+import { fileMapper } from 'lib/utils/file-mappter';
 
 @Controller('products')
 @UseInterceptors(CacheInterceptor)
@@ -57,12 +62,22 @@ export class ProductsController {
     description: 'Product created successfully',
     type: CreateProductDto,
   })
-  @UseInterceptors(FileInterceptor('productImage'))
+  @UseInterceptors(
+    FastifyFileInterceptor('productImage', {
+      storage: diskStorage({
+        destination: './upload/single',
+        filename: editFileName,
+      }),
+      fileFilter: imageFileFilter,
+    }),
+  )
   async create(
+    @Req() req: Request,
     @Body() createProductDto: CreateProductDto,
-    @UploadedFile() productImage: File,
+    @UploadedFile() productImage: Express.Multer.File,
   ) {
     console.log(createProductDto);
+    console.log(fileMapper({ file: productImage, req }));
     return console.log(productImage);
     // return this.productsService.create(createProductDto, productImage);
   }
