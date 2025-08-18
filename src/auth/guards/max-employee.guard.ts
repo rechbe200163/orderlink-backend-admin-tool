@@ -29,12 +29,15 @@ export class MaxEmployeeGuard implements CanActivate {
       return true;
     }
 
-    const { maxEmployees } =
-      await this.prismaService.client.siteConfig.findFirst({});
+    const siteConfig = await this.prismaService.client.siteConfig.findFirst({});
+
+    if (!siteConfig) {
+      throw new ForbiddenException('Site configuration not found');
+    }
 
     const currentEmployees = await this.prismaService.client.employees.count();
 
-    if (currentEmployees >= maxEmployees) {
+    if (currentEmployees >= siteConfig.maxEmployees) {
       throw new BadRequestException('Maximum employee limit reached');
     }
 

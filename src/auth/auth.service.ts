@@ -10,7 +10,7 @@ import { SanitizedEmployee } from 'lib/types';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { OtpService } from 'src/otp/otp.service';
-import { SiteConfig } from '@prisma/client';
+import { SiteConfig, TenantStatus } from '@prisma/client';
 
 type AuthInput = {
   email: string;
@@ -28,15 +28,13 @@ type AuthResult = {
   user: SanitizedEmployee;
   tenantInfo: TenantInfo;
 };
-
-type TenantInfo = Pick<
-  SiteConfig,
-  | 'maxEmployees'
-  | 'trialEndsAt'
-  | 'trialStartedAt'
-  | 'status'
-  | 'enabledModules'
->;
+type TenantInfo = {
+  maxEmployees: number;
+  trialEndsAt: Date | null;
+  trialStartedAt: Date | null;
+  status: TenantStatus;
+  enabledModules: string[];
+};
 
 export type JwtPayload = SanitizedEmployee;
 
@@ -106,7 +104,15 @@ export class AuthService {
         expiresAt: Math.floor(Date.now()) + 30 * 60 * 1000, // 30 minutes later
       },
       user: sanitized as SanitizedEmployee,
-      tenantInfo: siteConfig,
+      tenantInfo: {
+        maxEmployees: siteConfig.maxEmployees,
+        trialEndsAt: siteConfig.trialEndsAt,
+        trialStartedAt: siteConfig.trialStartedAt,
+        status: siteConfig.status,
+        enabledModules: siteConfig.enabledModules.map(
+          (module) => module.moduleName,
+        ),
+      },
     };
   }
 

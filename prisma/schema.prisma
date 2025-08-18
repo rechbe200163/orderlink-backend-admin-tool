@@ -279,33 +279,34 @@ model Employees {
 /**
  * SiteConfig
  */
+
 model SiteConfig {
-  siteConfigId String @id @default(uuid(7))
-  companyName  String @db.VarChar(255)
+  siteConfigId String   @id @default(uuid())
+  tenantId     String   @unique
+  tenant       Tenant   @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
 
-  slug           String       @db.VarChar(255)
-  status         TenantStatus @default(TRIAL)
-  trialStartedAt DateTime     @default(now()) @db.Timestamptz
-  trialEndsAt    DateTime     @default(dbgenerated("(now() + interval '3 days')")) @db.Timestamptz
-
-  enabledModules    EnabledModule[]
-  billingCustomerId String?
-  maxEmployees      Int             @default(3)
-
-  logoPath                         String    @db.VarChar(255)
-  email                            String    @unique @db.VarChar(255)
-  phoneNumber                      String    @db.VarChar(255)
-  iban                             String    @db.VarChar(255)
-  companyNumber                    String    @db.VarChar(255)
-  addressId                        String
-  modifiedAt                       DateTime? @default(dbgenerated("null")) @updatedAt
-  deleted                          Boolean   @default(false)
-  deliveryNavigationToolConnected  Boolean   @default(false)
-  address                          Address   @relation(fields: [addressId], references: [addressId])
-
-  @@map("siteConfigs")
+  companyName  String
+  logoPath     String?
+  email        String   @unique
+  phoneNumber  String
+  iban         String?
+  companyNumber String?
+  addressId    String
+  address      Address  @relation(fields: [addressId], references: [addressId])
+  modifiedAt   DateTime @updatedAt
 }
 
+model Tenant {
+  tenantId          String       @id @default(uuid())
+  status            TenantStatus @default(TRIAL)
+  trialStartedAt    DateTime     @default(now())
+  trialEndsAt       DateTime     @default(dbgenerated("(now() + interval '3 days')"))
+  billingCustomerId String?
+  maxEmployees      Int          @default(3)
+
+  enabledModules EnabledModule[]
+  siteConfig     SiteConfig?
+}
 model Action {
   name          Actions          @id
   description   String?          @db.VarChar(255)
