@@ -31,7 +31,6 @@ export class SiteConfigRepository {
 
   async findFirst(): Promise<SiteConfigDto> {
     const siteConfig = await this.prismaService.client.siteConfig.findFirst({
-      where: { deleted: false },
       include: {
         address: true, // Include address if needed
       },

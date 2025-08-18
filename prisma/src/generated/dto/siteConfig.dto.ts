@@ -22,15 +22,6 @@ export class SiteConfigDto {
   iban: string;
   @Expose()
   companyNumber: string;
-  @ApiProperty({
-    type: String,
-    format: 'date-time',
-  })
-  @Expose({
-    name: 'createdAt',
-    toPlainOnly: true,
-  })
-  createdAt: Date | null;
   @Expose({
     name: 'modifiedAt',
     toPlainOnly: true,
@@ -38,12 +29,6 @@ export class SiteConfigDto {
   modifiedAt: Date | null;
   @Expose()
   tenantId: string;
-  @Expose()
-  deliveryNavigationToolBackendURL: string;
-  @Expose()
-  deliveryNavigationToolConnected: boolean;
-  @Expose()
-  deleted: boolean;
   @Expose()
   address: AddressDto;
 }
