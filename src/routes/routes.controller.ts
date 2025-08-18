@@ -11,6 +11,7 @@ import {
   UseInterceptors,
   UseGuards,
   BadRequestException,
+  Module,
 } from '@nestjs/common';
 import { RoutesService } from './routes.service';
 import { CacheInterceptor } from '@nestjs/cache-manager';
@@ -34,7 +35,7 @@ import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
 import { ModulesGuard } from 'src/auth/guards/modules.guard';
 import { ModuleTag } from 'lib/decorators/module.decorators';
-import { ModuleEnum } from '@prisma/client';
+import { ModuleEnum } from 'src/tenants/dto/modules-entity.dto';
 
 @Controller('routes')
 @UseInterceptors(CacheInterceptor)

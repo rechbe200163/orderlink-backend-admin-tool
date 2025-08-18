@@ -21,7 +21,7 @@ export class MaxEmployeeGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<FastifyUserRequest>();
-    const employee = req.user;
+    const employee = req.user as JwtPayload;
     const method = req.method;
 
     // Only run on POST requests

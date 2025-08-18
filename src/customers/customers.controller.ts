@@ -108,12 +108,12 @@ export class CustomersController {
   async getCustomers(
     @Query('limit', ParseIntPipe) limit: number = 10,
     @Query('page', ParseIntPipe) page: number = 1,
-    @Query('query') query?: string,
+    @Query('query') query?: string | undefined,
     @Query(
       'businessSector',
       new ParseEnumPipe(BusinessSector, { optional: true }),
     )
-    businessSector?: BusinessSector,
+    businessSector?: BusinessSector | undefined,
   ) {
     const maxLimit = MAX_PAGE_SIZE; // Define a maximum limit for pagination
     if (limit > maxLimit) {

@@ -1,3 +1,4 @@
+import { Ressource } from './../../prisma/src/generated/client/index.d';
 import { Controller, Get, UseInterceptors, UseGuards } from '@nestjs/common';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { StatisticsService } from './statistics.service';
@@ -15,7 +16,7 @@ import { SalesStatsDto } from './dto/sales-stats.dto';
 import { AverageOrderValueStatsDto } from './dto/average-order-value-stats.dto';
 import { CustomerStatsDto } from './dto/customer-stats.dto';
 import { ModuleTag } from 'lib/decorators/module.decorators';
-import { ModuleEnum } from '@prisma/client';
+import { ModuleEnum } from 'src/tenants/dto/modules-entity.dto';
 import { ModulesGuard } from 'src/auth/guards/modules.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { Resource } from 'lib/decorators/resource.decorator';

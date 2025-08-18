@@ -3,12 +3,11 @@ import {
   ExecutionContext,
   ForbiddenException,
   Injectable,
-  Inject,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { ModuleEnum } from '@prisma/client';
-import { CustomPrismaService } from 'nestjs-prisma';
-import { ExtendedPrismaClient } from 'prisma/prisma.extension';
+import { ModuleEnum } from 'src/tenants/dto/modules-entity.dto';
+import { TenantsService } from 'src/tenants/tenants.service';
+import { FastifyRequest } from 'fastify';
 import { MODULE_KEY } from 'lib/decorators/module.decorators';
 import { FastifyUserRequest } from 'lib/types';
 import { JwtPayload } from '../auth.service';
@@ -17,15 +16,16 @@ import { JwtPayload } from '../auth.service';
 export class ModulesGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
-    @Inject('PrismaService')
-    private readonly prismaService: CustomPrismaService<ExtendedPrismaClient>,
+    private readonly tenantService: TenantsService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<FastifyUserRequest>();
-    const employee = req.user;
+    const employee = req.user as JwtPayload;
 
-    console.log(`Checking module access for user: ${employee?.email}`);
+    console.log(
+      `Checking module access for user: ${employee?.email}, tenantId: ${employee?.tenantId}`,
+    );
     const handler = context.getHandler();
     const classRef = context.getClass();
 
@@ -38,12 +38,11 @@ export class ModulesGuard implements CanActivate {
     }
 
     // Check if the user has access to the specified module
-    const siteConfig = await this.prismaService.client.siteConfig.findFirst({
-      select: { enabledModules: true },
-    });
+    const tenant = await this.tenantService.getTenantById(employee.tenantId);
 
-    const allowedModules =
-      siteConfig?.enabledModules.map((module) => module.moduleName) ?? [];
+    const allowedModules = tenant.enabledModules.map(
+      (module) => module.moduleName,
+    );
 
     console.log(
       `User: ${employee.email} has access to modules: ${allowedModules.join(', ')}`,

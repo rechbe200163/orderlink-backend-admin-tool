@@ -28,6 +28,7 @@ import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { CreateSiteConfigDto } from 'prisma/src/generated/dto/create-siteConfig.dto';
 import { UpdateSiteConfigDto } from 'prisma/src/generated/dto/update-siteConfig.dto';
 import { SiteConfigDto } from 'prisma/src/generated/dto/siteConfig.dto';
+import { SiteConfigWithTenantDto } from './dto/siteConfig-with-tenant.dto';
 import { FastifyFileInterceptor } from 'lib/interceptors/fastify-file-interceptor';
 import { diskStorage } from 'multer';
 import { editFileName, imageFileFilter } from 'lib/utils/file-upload-util';
@@ -67,7 +68,7 @@ export class SiteConfigController {
   }
 
   @Get()
-  @ApiOkResponse({ type: SiteConfigDto })
+  @ApiOkResponse({ type: SiteConfigWithTenantDto })
   findAll() {
     return this.siteConfigService.findFirst();
   }

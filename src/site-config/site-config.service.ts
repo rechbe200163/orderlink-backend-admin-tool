@@ -4,12 +4,15 @@ import { CreateSiteConfigDto } from 'prisma/src/generated/dto/create-siteConfig.
 import { UpdateSiteConfigDto } from 'prisma/src/generated/dto/update-siteConfig.dto';
 import { SiteConfigDto } from 'prisma/src/generated/dto/siteConfig.dto';
 import { FileRepositoryService } from 'src/file-repository/file-repository.service';
+import { TenantDto } from 'src/tenants/dto/tenant-entity.dto';
+import { TenantsService } from 'src/tenants/tenants.service';
 
 @Injectable()
 export class SiteConfigService {
   constructor(
     private readonly siteConfigRepository: SiteConfigRepository,
     private readonly fileService: FileRepositoryService,
+    private readonly tenantService: TenantsService,
   ) {}
 
   async create(
@@ -23,15 +26,21 @@ export class SiteConfigService {
     return this.siteConfigRepository.create(createDto);
   }
 
-  async findFirst(): Promise<SiteConfigDto> {
+  async findFirst(): Promise<{ siteConfig: SiteConfigDto; tenant: TenantDto }> {
     const siteConfig = await this.siteConfigRepository.findFirst();
     if (!siteConfig) {
       throw new NotFoundException('Site configuration not found');
     }
-    if (siteConfig.logoPath) {
+    const tenantInfo = await this.tenantService.getTenantById(
+      siteConfig.tenantId,
+    );
+    if (!tenantInfo) {
+      throw new NotFoundException('Tenant information not found');
+    }
+    if (siteConfig && siteConfig.logoPath) {
       siteConfig.logoPath = await this.fileService.getFile(siteConfig.logoPath);
     }
-    return siteConfig;
+    return { siteConfig: siteConfig, tenant: tenantInfo };
   }
 
   async findById(id: string): Promise<SiteConfigDto> {
@@ -57,5 +66,13 @@ export class SiteConfigService {
     return this.siteConfigRepository.update(id, updateDto);
   }
 
-  // Tenant information is stored within SiteConfig; no separate tenant lookup needed
+  async getTenantInforamtion(): Promise<string> {
+    const { tenantId } = await this.siteConfigRepository.findFirst();
+
+    if (!tenantId) {
+      throw new NotFoundException('Tenant information not found');
+    }
+
+    return tenantId;
+  }
 }

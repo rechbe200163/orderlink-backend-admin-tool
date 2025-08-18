@@ -74,7 +74,7 @@ export class CustomersRepository {
   async getCustomers(
     limit?: number,
     page?: number,
-    query?: string,
+    query?: string | undefined,
     businessSector?: BusinessSector,
   ): Promise<CustomerPagingResultDto> {
     console.log('businessSector', businessSector);

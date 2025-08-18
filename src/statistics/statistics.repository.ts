@@ -87,9 +87,7 @@ export class StatisticsRepository {
   }
 
   async getRevenueStats(): Promise<RevenueStatsDto> {
-    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(
-      new Date(),
-    );
+    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(new Date());
     const { start: lastStart, end: lastEnd } = this.getMonthDateRange(
       new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
     );
@@ -116,9 +114,7 @@ export class StatisticsRepository {
   }
 
   async getSalesStats(): Promise<SalesStatsDto> {
-    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(
-      new Date(),
-    );
+    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(new Date());
     const { start: lastStart, end: lastEnd } = this.getMonthDateRange(
       new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
     );
@@ -139,9 +135,7 @@ export class StatisticsRepository {
   }
 
   async getAverageOrderValueStats(): Promise<AverageOrderValueStatsDto> {
-    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(
-      new Date(),
-    );
+    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(new Date());
     const { start: lastStart, end: lastEnd } = this.getMonthDateRange(
       new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
     );
@@ -175,9 +169,7 @@ export class StatisticsRepository {
   }
 
   async getCustomerStats(): Promise<CustomerStatsDto> {
-    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(
-      new Date(),
-    );
+    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(new Date());
     const { start: lastStart, end: lastEnd } = this.getMonthDateRange(
       new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
     );

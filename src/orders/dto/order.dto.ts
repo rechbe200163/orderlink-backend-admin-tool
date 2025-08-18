@@ -1,13 +1,7 @@
 import { Exclude, Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
 import { OrderState } from '@prisma/client';
-import {
-  IsBoolean,
-  IsDateString,
-  IsEnum,
-  IsInt,
-  IsUUID,
-} from 'class-validator';
+import { IsBoolean, IsDateString, IsEnum, IsInt, IsUUID } from 'class-validator';
 
 export class OrderDto {
   @Expose()
