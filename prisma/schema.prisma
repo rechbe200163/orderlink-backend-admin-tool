@@ -105,7 +105,7 @@ model Customer {
 model CustomerHistory {
   historyId         String          @id @default(uuid(7))
   customerReference Int
-  email         String
+  email             String
   phoneNumber       String          @db.VarChar(255)
   password          String          @db.VarChar(255)
   firstName         String?         @db.VarChar(255)
@@ -285,18 +285,27 @@ model SiteConfig {
   //? should probably also have a slogan or a short description field
   //? should probably also have a relation to a socialMedia model with links to social media
 
-  logoPath         String    @db.VarChar(255)
-  email            String    @unique @db.VarChar(255)
-  phoneNumber      String    @db.VarChar(255)
-  iban             String    @db.VarChar(255)
-  companyNumber    String    @db.VarChar(255)
-  addressId        String
-  modifiedAt       DateTime? @default(dbgenerated("null")) @updatedAt
-  deleted          Boolean   @default(false)
-  tenantId        String    @db.VarChar(255)
-  deliveryNavigationToolBackendURL String @db.VarChar(255) @default("https://fakerjs.dev/api/")
-  deliveryNavigationToolConnected Boolean @default(false)
-  address          Address   @relation(fields: [addressId], references: [addressId])
+  slug           String       @db.VarChar(255)
+  status         TenantStatus @default(TRIAL)
+  trialStartedAt DateTime     @default(now()) @db.Timestamptz
+  trialEndsAt    DateTime     @default(dbgenerated("(now() + interval '3 days')")) @db.Timestamptz
+
+  enabledModules    EnabledModule[]
+  billingCustomerId String?
+  maxEmployees      Int             @default(3)
+
+  logoPath                         String    @db.VarChar(255)
+  email                            String    @unique @db.VarChar(255)
+  phoneNumber                      String    @db.VarChar(255)
+  iban                             String    @db.VarChar(255)
+  companyNumber                    String    @db.VarChar(255)
+  addressId                        String
+  modifiedAt                       DateTime? @default(dbgenerated("null")) @updatedAt
+  deleted                          Boolean   @default(false)
+  tenantId                         String    @db.VarChar(255)
+  deliveryNavigationToolBackendURL String    @default("https://fakerjs.dev/api/") @db.VarChar(255)
+  deliveryNavigationToolConnected  Boolean   @default(false)
+  address                          Address   @relation(fields: [addressId], references: [addressId])
 
   @@map("siteConfigs")
 }
@@ -432,11 +441,11 @@ model Module {
 }
 
 model EnabledModule {
-  id         String     @id @default(uuid())
-  siteConfig     SiteConfig     @relation(fields: [siteConfigId], references: [siteConfigId], onDelete: Cascade)
+  id           String     @id @default(uuid())
+  siteConfig   SiteConfig @relation(fields: [siteConfigId], references: [siteConfigId], onDelete: Cascade)
   siteConfigId String
-  module     Module     @relation(fields: [moduleName], references: [name], onDelete: Cascade)
-  moduleName ModuleEnum
+  module       Module     @relation(fields: [moduleName], references: [name], onDelete: Cascade)
+  moduleName   ModuleEnum
 
   enabledAt DateTime @default(now()) @db.Timestamptz
 
