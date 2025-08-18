@@ -28,7 +28,6 @@ import { StatisticsModule } from './statistics/statistics.module';
 import { SiteConfigModule } from './site-config/site-config.module';
 import { ProductHistoryModule } from './product-history/product-history.module';
 import { OtpModule } from './otp/otp.module';
-import { TenantsModule } from './tenants/tenants.module';
 @Module({
   imports: [
     CacheModule.registerAsync({
@@ -82,7 +81,6 @@ import { TenantsModule } from './tenants/tenants.module';
     StatisticsModule,
     ProductHistoryModule,
     OtpModule,
-    TenantsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

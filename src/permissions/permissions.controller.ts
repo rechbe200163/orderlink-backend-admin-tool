@@ -38,7 +38,7 @@ import { MAX_PAGE_SIZE } from 'lib/constants';
 import { PermissionPagingResultDto } from './dto/permissions-paging';
 import { CreatePermissionDto } from 'prisma/src/generated/dto/create-permission.dto';
 import { ModuleTag } from 'lib/decorators/module.decorators';
-import { ModuleEnum } from 'src/tenants/dto/modules-entity.dto';
+import { ModuleEnum } from '@prisma/client';
 import { ModulesGuard } from 'src/auth/guards/modules.guard';
 
 @Controller('permissions')

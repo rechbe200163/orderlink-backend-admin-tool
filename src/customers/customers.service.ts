@@ -24,7 +24,7 @@ export class CustomersService {
   async getCustomers(
     limit: number = 10,
     page: number = 1,
-    query?: string | undefined,
+    query?: string,
     businessSector?: BusinessSector,
   ) {
     return this.customerRepository.getCustomers(

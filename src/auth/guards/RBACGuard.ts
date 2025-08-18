@@ -26,7 +26,7 @@ export class PermissionsGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<FastifyUserRequest>();
-    const employee = req.user as JwtPayload;
+    const employee = req.user;
 
     const method = req.method;
     const handler = context.getHandler();

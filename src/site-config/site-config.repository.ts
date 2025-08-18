@@ -1,4 +1,3 @@
-import { SiteConfig } from './../../prisma/src/generated/dto/siteConfig.entity';
 import {
   BadRequestException,
   Inject,
@@ -10,33 +9,19 @@ import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { CreateSiteConfigDto } from 'prisma/src/generated/dto/create-siteConfig.dto';
 import { SiteConfigDto } from 'prisma/src/generated/dto/siteConfig.dto';
 import { UpdateSiteConfigDto } from 'prisma/src/generated/dto/update-siteConfig.dto';
-import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { transformResponse } from 'lib/utils/transform';
 import { isNoChange } from 'lib/utils/isNoChange';
-import { Tenant } from 'src/tenants/entities/tenant.entity';
-import { TenantsService } from 'src/tenants/tenants.service';
-import { da } from '@faker-js/faker/.';
 
 @Injectable()
 export class SiteConfigRepository {
   constructor(
     @Inject('PrismaService')
     private readonly prismaService: CustomPrismaService<ExtendedPrismaClient>,
-    private readonly tenantService: TenantsService,
   ) {}
 
   async create(data: CreateSiteConfigDto): Promise<SiteConfigDto> {
-    const tenant = await this.tenantService.create({
-      companyName: data.companyName,
-      slug: encodeURIComponent(
-        data.companyName.toLowerCase().replace(/\s+/g, '-'),
-      ),
-    });
     const siteConfig = await this.prismaService.client.siteConfig.create({
-      data: {
-        ...data,
-        tenantId: tenant.tenantId,
-      },
+      data,
     });
     return transformResponse(SiteConfigDto, siteConfig);
   }
