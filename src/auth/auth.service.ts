@@ -10,7 +10,7 @@ import { SanitizedEmployee } from 'lib/types';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { OtpService } from 'src/otp/otp.service';
-import { SiteConfig, TenantStatus } from '@prisma/client';
+import { TenantStatus } from '@prisma/client';
 
 type AuthInput = {
   email: string;
@@ -73,9 +73,9 @@ export class AuthService {
   }
 
   async signIn(user: SanitizedEmployee): Promise<AuthResult> {
-    const siteConfig = await this.prismaService.client.siteConfig.findFirst({
+    const tenantData = await this.prismaService.client.tenantData.findFirst({
       select: {
-        enabledModules: true,
+        enabledModules: { select: { moduleName: true } },
         status: true,
         trialStartedAt: true,
         trialEndsAt: true,
@@ -83,8 +83,8 @@ export class AuthService {
       },
     });
 
-    if (!siteConfig) {
-      throw new InternalServerErrorException('Site configuration not found');
+    if (!tenantData) {
+      throw new InternalServerErrorException('Tenant data not found');
     }
 
     const tokenPayload = {
@@ -105,11 +105,11 @@ export class AuthService {
       },
       user: sanitized as SanitizedEmployee,
       tenantInfo: {
-        maxEmployees: siteConfig.maxEmployees,
-        trialEndsAt: siteConfig.trialEndsAt,
-        trialStartedAt: siteConfig.trialStartedAt,
-        status: siteConfig.status,
-        enabledModules: siteConfig.enabledModules.map(
+        maxEmployees: tenantData.maxEmployees,
+        trialEndsAt: tenantData.trialEndsAt,
+        trialStartedAt: tenantData.trialStartedAt,
+        status: tenantData.status,
+        enabledModules: tenantData.enabledModules.map(
           (module) => module.moduleName,
         ),
       },

@@ -21,7 +21,7 @@ export class MaxEmployeeGuard implements CanActivate {
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const req = context.switchToHttp().getRequest<FastifyUserRequest>();
-    const employee = req.user as JwtPayload;
+    const employee = req.user;
     const method = req.method;
 
     // Only run on POST requests
@@ -29,15 +29,15 @@ export class MaxEmployeeGuard implements CanActivate {
       return true;
     }
 
-    const siteConfig = await this.prismaService.client.siteConfig.findFirst({});
+    const tenantData = await this.prismaService.client.tenantData.findFirst({});
 
-    if (!siteConfig) {
-      throw new ForbiddenException('Site configuration not found');
+    if (!tenantData) {
+      throw new ForbiddenException('Tenant data not found');
     }
 
     const currentEmployees = await this.prismaService.client.employees.count();
 
-    if (currentEmployees >= siteConfig.maxEmployees) {
+    if (currentEmployees >= tenantData.maxEmployees) {
       throw new BadRequestException('Maximum employee limit reached');
     }
 

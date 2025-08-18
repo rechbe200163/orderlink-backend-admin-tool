@@ -283,7 +283,7 @@ model Employees {
 model SiteConfig {
   siteConfigId String   @id @default(uuid())
   tenantId     String   @unique
-  tenant       Tenant   @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  tenant       TenantData @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
 
   companyName  String
   logoPath     String?
@@ -296,7 +296,7 @@ model SiteConfig {
   modifiedAt   DateTime @updatedAt
 }
 
-model Tenant {
+model TenantData {
   tenantId          String       @id @default(uuid())
   status            TenantStatus @default(TRIAL)
   trialStartedAt    DateTime     @default(now())
@@ -438,13 +438,13 @@ model Module {
 }
 
 model EnabledModule {
-  id           String     @id @default(uuid())
-  siteConfig   SiteConfig @relation(fields: [siteConfigId], references: [siteConfigId], onDelete: Cascade)
-  siteConfigId String
-  module       Module     @relation(fields: [moduleName], references: [name], onDelete: Cascade)
+  id           String      @id @default(uuid())
+  tenantData   TenantData  @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  tenantId     String
+  module       Module      @relation(fields: [moduleName], references: [name], onDelete: Cascade)
   moduleName   ModuleEnum
 
   enabledAt DateTime @default(now()) @db.Timestamptz
 
-  @@unique([siteConfigId, moduleName]) // Prevent duplicate activations
+  @@unique([tenantId, moduleName]) // Prevent duplicate activations
 }
