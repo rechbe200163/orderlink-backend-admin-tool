@@ -16,7 +16,7 @@ import { SalesStatsDto } from './dto/sales-stats.dto';
 import { AverageOrderValueStatsDto } from './dto/average-order-value-stats.dto';
 import { CustomerStatsDto } from './dto/customer-stats.dto';
 import { ModuleTag } from 'lib/decorators/module.decorators';
-import { ModuleEnum } from 'src/tenants/dto/modules-entity.dto';
+import { ModuleEnum } from 'src/site-config/dto/modules-entity.dto';
 import { ModulesGuard } from 'src/auth/guards/modules.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { Resource } from 'lib/decorators/resource.decorator';

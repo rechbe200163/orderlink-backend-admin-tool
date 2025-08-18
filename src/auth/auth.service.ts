@@ -6,13 +6,10 @@ import {
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compare } from 'bcryptjs';
-import { CustomersService } from 'src/customers/customers.service';
-import { SanitizedCustomer, SanitizedEmployee } from 'lib/types';
-import { EmployeesRepository } from 'src/employees/employees.repository';
+import { SanitizedEmployee } from 'lib/types';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { OtpService } from 'src/otp/otp.service';
-import { SanitizedEmployeeDto } from './dto/sanitized-employee.dto';
 import { SiteConfig } from '@prisma/client';
 
 type AuthInput = {
@@ -41,9 +38,7 @@ type TenantInfo = Pick<
   | 'enabledModules'
 >;
 
-export type JwtPayload = SanitizedEmployee & {
-  tenantId: string;
-};
+export type JwtPayload = SanitizedEmployee;
 
 @Injectable()
 export class AuthService {
@@ -64,21 +59,7 @@ export class AuthService {
       console.error('User not found or invalid credentials');
       throw new UnauthorizedException('Invalid credentials');
     }
-    const siteConfig = await this.prismaService.client.siteConfig.findFirst({
-      select: {
-        enabledModules: true,
-        status: true,
-        trialStartedAt: true,
-        trialEndsAt: true,
-        maxEmployees: true,
-      },
-    });
-
-    if (!siteConfig) {
-      throw new InternalServerErrorException('Site configuration not found');
-    }
-
-    return this.signIn(user, siteConfig);
+    return this.signIn(user);
   }
 
   async validateUser(authInput: AuthInput): Promise<SanitizedEmployee | null> {
@@ -93,10 +74,21 @@ export class AuthService {
     return null;
   }
 
-  async signIn(
-    user: SanitizedEmployee,
-    siteConfig: SiteConfig,
-  ): Promise<AuthResult> {
+  async signIn(user: SanitizedEmployee): Promise<AuthResult> {
+    const siteConfig = await this.prismaService.client.siteConfig.findFirst({
+      select: {
+        enabledModules: true,
+        status: true,
+        trialStartedAt: true,
+        trialEndsAt: true,
+        maxEmployees: true,
+      },
+    });
+
+    if (!siteConfig) {
+      throw new InternalServerErrorException('Site configuration not found');
+    }
+
     const tokenPayload = {
       employeeId: user.employeeId,
       email: user.email,
@@ -118,11 +110,8 @@ export class AuthService {
     };
   }
 
-  async renewSession(
-    user: SanitizedEmployee,
-    tenantId: string,
-  ): Promise<AuthResult> {
-    return this.signIn(user, tenantId);
+  async renewSession(user: SanitizedEmployee): Promise<AuthResult> {
+    return this.signIn(user);
   }
 
   async signInWithOtp(code: number): Promise<AuthResult> {
@@ -136,14 +125,7 @@ export class AuthService {
     if (!employee) {
       throw new UnauthorizedException('Invalid or expired OTP');
     }
-    const siteConfig = await this.prismaService.client.siteConfig.findFirst();
-
-    if (!siteConfig?.tenantId) {
-      throw new InternalServerErrorException(
-        'Tenant ID not found please contact support',
-      );
-    }
     await this.otpService.markOtpAsUsed(code);
-    return this.signIn(employee, siteConfig.tenantId);
+    return this.signIn(employee);
   }
 }

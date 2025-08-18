@@ -35,7 +35,7 @@ import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
 import { ModulesGuard } from 'src/auth/guards/modules.guard';
 import { ModuleTag } from 'lib/decorators/module.decorators';
-import { ModuleEnum } from 'src/tenants/dto/modules-entity.dto';
+import { ModuleEnum } from 'src/site-config/dto/modules-entity.dto';
 
 @Controller('routes')
 @UseInterceptors(CacheInterceptor)
