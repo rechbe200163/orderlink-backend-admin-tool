@@ -12,9 +12,8 @@ import { EmployeesRepository } from 'src/employees/employees.repository';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { OtpService } from 'src/otp/otp.service';
-import { TenantsService } from 'src/tenants/tenants.service';
-import { TenantDto } from 'src/tenants/dto/tenant-entity.dto';
 import { SanitizedEmployeeDto } from './dto/sanitized-employee.dto';
+import { SiteConfig } from '@prisma/client';
 
 type AuthInput = {
   email: string;
@@ -30,8 +29,17 @@ export type Token = {
 type AuthResult = {
   token: Token;
   user: SanitizedEmployee;
-  // tenant: TenantDto;
+  tenantInfo: TenantInfo;
 };
+
+type TenantInfo = Pick<
+  SiteConfig,
+  | 'maxEmployees'
+  | 'trialEndsAt'
+  | 'trialStartedAt'
+  | 'status'
+  | 'enabledModules'
+>;
 
 export type JwtPayload = SanitizedEmployee & {
   tenantId: string;
@@ -56,14 +64,21 @@ export class AuthService {
       console.error('User not found or invalid credentials');
       throw new UnauthorizedException('Invalid credentials');
     }
-    const siteConfig = await this.prismaService.client.siteConfig.findFirst();
+    const siteConfig = await this.prismaService.client.siteConfig.findFirst({
+      select: {
+        enabledModules: true,
+        status: true,
+        trialStartedAt: true,
+        trialEndsAt: true,
+        maxEmployees: true,
+      },
+    });
 
-    if (!siteConfig?.tenantId) {
-      throw new InternalServerErrorException(
-        'Tenant ID not found please contact support',
-      );
+    if (!siteConfig) {
+      throw new InternalServerErrorException('Site configuration not found');
     }
-    return this.signIn(user, siteConfig.tenantId);
+
+    return this.signIn(user, siteConfig);
   }
 
   async validateUser(authInput: AuthInput): Promise<SanitizedEmployee | null> {
@@ -78,7 +93,10 @@ export class AuthService {
     return null;
   }
 
-  async signIn(user: SanitizedEmployee, tenantId: string): Promise<AuthResult> {
+  async signIn(
+    user: SanitizedEmployee,
+    siteConfig: SiteConfig,
+  ): Promise<AuthResult> {
     const tokenPayload = {
       employeeId: user.employeeId,
       email: user.email,
@@ -86,10 +104,9 @@ export class AuthService {
       lastName: user.lastName,
       role: user.role,
       superAdmin: user.superAdmin,
-      tenantId: tenantId,
     };
     const accessToken = this.jwtService.sign(tokenPayload);
-    const { tenantId: _, ...sanitized } = tokenPayload;
+    const { ...sanitized } = tokenPayload;
     return {
       token: {
         accessToken,
@@ -97,6 +114,7 @@ export class AuthService {
         expiresAt: Math.floor(Date.now()) + 30 * 60 * 1000, // 30 minutes later
       },
       user: sanitized as SanitizedEmployee,
+      tenantInfo: siteConfig,
     };
   }
 

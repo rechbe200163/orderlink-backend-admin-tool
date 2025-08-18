@@ -6,7 +6,6 @@ import {
   Inject,
   Injectable,
 } from '@nestjs/common';
-import { TenantsService } from 'src/tenants/tenants.service';
 import { JwtPayload } from '../auth.service';
 import { FastifyRequest } from 'fastify';
 import { CustomPrismaService } from 'nestjs-prisma/dist/custom';
@@ -18,7 +17,6 @@ export class MaxEmployeeGuard implements CanActivate {
   constructor(
     @Inject('PrismaService')
     private prismaService: CustomPrismaService<ExtendedPrismaClient>,
-    private readonly tenantService: TenantsService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -31,9 +29,8 @@ export class MaxEmployeeGuard implements CanActivate {
       return true;
     }
 
-    const { maxEmployees } = await this.tenantService.getTenantById(
-      employee.tenantId,
-    );
+    const { maxEmployees } =
+      await this.prismaService.client.siteConfig.findFirst({});
 
     const currentEmployees = await this.prismaService.client.employees.count();
 

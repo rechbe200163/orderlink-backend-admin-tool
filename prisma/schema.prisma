@@ -282,8 +282,6 @@ model Employees {
 model SiteConfig {
   siteConfigId String @id @default(uuid(7))
   companyName  String @db.VarChar(255)
-  //? should probably also have a slogan or a short description field
-  //? should probably also have a relation to a socialMedia model with links to social media
 
   slug           String       @db.VarChar(255)
   status         TenantStatus @default(TRIAL)
@@ -302,8 +300,6 @@ model SiteConfig {
   addressId                        String
   modifiedAt                       DateTime? @default(dbgenerated("null")) @updatedAt
   deleted                          Boolean   @default(false)
-  tenantId                         String    @db.VarChar(255)
-  deliveryNavigationToolBackendURL String    @default("https://fakerjs.dev/api/") @db.VarChar(255)
   deliveryNavigationToolConnected  Boolean   @default(false)
   address                          Address   @relation(fields: [addressId], references: [addressId])
 
