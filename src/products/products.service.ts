@@ -8,7 +8,6 @@ import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { ProductDto } from './dto/product.dto';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
 import { ProductHistoryDto } from './dto/product-history';
-import { File } from '@nest-lab/fastify-multer';
 
 @Injectable()
 export class ProductsService {
@@ -18,7 +17,10 @@ export class ProductsService {
     private readonly eventEmitter: TypedEventEmitter,
   ) {}
   // products.service.ts
-  async create(createProductDto: CreateProductDto, productImage?: File) {
+  async create(
+    createProductDto: CreateProductDto,
+    productImage?: Express.Multer.File,
+  ) {
     let imageFilename: string | undefined;
 
     if (productImage) {
@@ -99,7 +101,11 @@ export class ProductsService {
     };
   }
 
-  async update(id: string, updateProductDto: UpdateProductDto, file?: File) {
+  async update(
+    id: string,
+    updateProductDto: UpdateProductDto,
+    file?: Express.Multer.File,
+  ) {
     let imageFilename: string | undefined;
 
     const originalProduct =

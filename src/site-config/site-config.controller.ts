@@ -29,7 +29,9 @@ import { CreateSiteConfigDto } from 'prisma/src/generated/dto/create-siteConfig.
 import { UpdateSiteConfigDto } from 'prisma/src/generated/dto/update-siteConfig.dto';
 import { SiteConfigDto } from 'prisma/src/generated/dto/siteConfig.dto';
 import { SiteConfigWithTenantDto } from './dto/siteConfig-with-tenant.dto';
-import { File, FileInterceptor } from '@nest-lab/fastify-multer';
+import { FastifyFileInterceptor } from 'lib/interceptors/fastify-file-interceptor';
+import { diskStorage } from 'multer';
+import { editFileName, imageFileFilter } from 'lib/utils/file-upload-util';
 
 @Controller('site-config')
 @UseInterceptors(CacheInterceptor)
@@ -48,11 +50,19 @@ export class SiteConfigController {
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: CreateSiteConfigDto })
   @ApiOkResponse({ type: SiteConfigDto })
-  @UseInterceptors(FileInterceptor('logoPath'))
+  @UseInterceptors(
+    FastifyFileInterceptor('photo_url', {
+      storage: diskStorage({
+        destination: './upload/single',
+        filename: editFileName,
+      }),
+      fileFilter: imageFileFilter,
+    }),
+  )
   async create(
     @Body() createDto: CreateSiteConfigDto,
     @UploadedFile()
-    logoPath: File,
+    logoPath: Express.Multer.File,
   ) {
     return this.siteConfigService.create(createDto, logoPath);
   }
@@ -75,12 +85,20 @@ export class SiteConfigController {
   @ApiParam({ name: 'siteConfigId', type: String })
   @ApiBody({ type: UpdateSiteConfigDto })
   @ApiOkResponse({ type: SiteConfigDto })
-  @UseInterceptors(FileInterceptor('logo'))
+  @UseInterceptors(
+    FastifyFileInterceptor('photo_url', {
+      storage: diskStorage({
+        destination: './upload/single',
+        filename: editFileName,
+      }),
+      fileFilter: imageFileFilter,
+    }),
+  )
   async update(
     @Param('siteConfigId', ParseUUIDPipe) siteConfigId: string,
     @Body() updateDto: UpdateSiteConfigDto,
     @UploadedFile()
-    logo: File,
+    logo: Express.Multer.File,
   ) {
     return this.siteConfigService.update(siteConfigId, updateDto, logo);
   }

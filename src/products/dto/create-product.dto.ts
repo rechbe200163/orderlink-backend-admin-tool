@@ -52,6 +52,6 @@ export class CreateProductDto {
   @IsUUID()
   categoryId: string;
 
-  @ApiProperty({ type: 'string', format: 'binary', required: false })
-  productImage?: any;
+  @ApiProperty({ type: 'string', format: 'binary' })
+  productImage: string;
 }

@@ -1,50 +1,53 @@
-import { helmet } from 'fastify-helmet';
+// main.ts (NestJS + Fastify + Scalar UI)
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
-import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import {
   FastifyAdapter,
   NestFastifyApplication,
 } from '@nestjs/platform-fastify';
-import { join } from 'path';
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
+import { apiReference } from '@scalar/nestjs-api-reference';
 import { contentParser } from 'fastify-multer';
-
-const config = new DocumentBuilder()
-  .setTitle('API Documentation')
-  .setDescription('The API description')
-  .setVersion('1.0')
-  .addBearerAuth({
-    type: 'http',
-    scheme: 'bearer',
-    in: 'header',
-  })
-  .build();
+import { join } from 'path';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestFastifyApplication>(
     AppModule,
     new FastifyAdapter(),
   );
-  await app.listen(3001);
-  app.register(helmet, {
-    contentSecurityPolicy: {
-      directives: {
-        defaultSrc: [`'self'`],
-        styleSrc: [`'self'`, `'unsafe-inline'`],
-        imgSrc: [`'self'`, 'data:', 'validator.swagger.io'],
-        scriptSrc: [`'self'`, `https: 'unsafe-inline'`],
-      },
-    },
-  });
+
+  // Global Pipes & Interceptors
+  app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
+  app.useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)));
+
+  // OpenAPI-Dokument erzeugen (ohne Swagger-UI zu mounten)
+  const config = new DocumentBuilder()
+    .setTitle('API Documentation')
+    .setDescription('The API description')
+    .setVersion('1.0')
+    .addBearerAuth({ type: 'http', scheme: 'bearer', bearerFormat: 'JWT' })
+    .build();
+  const document = SwaggerModule.createDocument(app, config);
+
+  // Roh-Spec unter /openapi.json ausliefern (Fastify-Route)
+  const fastify = app.getHttpAdapter().getInstance();
+  fastify.get('/openapi.json', (_req: any, reply: any) => reply.send(document));
+
+  // Scalar-UI (Elysia-Style) unter /docs einhängen
+  app.use(
+    '/docs',
+    apiReference({
+      url: '/openapi.json', // alternativ: content: document
+      withFastify: true, // WICHTIG bei Fastify-Adapter
+      theme: 'nestjs', // 'default' | 'moon' | 'purple' | 'solarized' | 'alternate'
+    }),
+  );
+
+  // Upload & Static Assets (dein bestehendes Setup)
   app.register(contentParser);
   app.useStaticAssets({ root: join(__dirname, '../../fastify-file-upload') });
 
-  SwaggerModule.setup('api', app, SwaggerModule.createDocument(app, config));
-  console.log(
-    `APP IS RUNNING ON PORT ${await app.getUrl()}`,
-    join(__dirname, '../../fastify-file-upload'),
-  );
+  await app.listen(process.env.PORT ?? 3001, '0.0.0.0');
 }
-
 bootstrap();

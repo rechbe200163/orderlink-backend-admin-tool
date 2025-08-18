@@ -409,14 +409,36 @@ model RoutesOnOrders {
   @@map("routesOrders")
 }
 
-// model RouteOrderHistory {
-//   historyId String @id @default(uuid(7)) 
-//   routeId             String 
-//   orderId             String 
-//   deleted             Boolean @default(false)
+enum TenantStatus {
+  TRIAL
+  ACTIVE
+  SUSPENDED
+  CANCELLED
+}
 
-//   route Route @relation(fields: [routeId], references: [routeId])
-//   order Order @relation(fields: [orderId], references: [orderId])
+enum ModuleEnum {
+  CUSTOM_ROLES
+  STATISTICS
+  NAVIGATION
+}
 
-//   @@map("routeOrderHistory")
-// }
+model Module {
+  name          ModuleEnum      @id
+  description   String?         @db.Text
+  priceCents    Int             @default(0) // price per month (optional, for display/UI)
+  createdAt     DateTime        @default(now()) @db.Timestamptz
+  updatedAt     DateTime        @updatedAt @db.Timestamptz
+  EnabledModule EnabledModule[]
+}
+
+model EnabledModule {
+  id         String     @id @default(uuid())
+  siteConfig     SiteConfig     @relation(fields: [siteConfigId], references: [siteConfigId], onDelete: Cascade)
+  siteConfigId String
+  module     Module     @relation(fields: [moduleName], references: [name], onDelete: Cascade)
+  moduleName ModuleEnum
+
+  enabledAt DateTime @default(now()) @db.Timestamptz
+
+  @@unique([siteConfigId, moduleName]) // Prevent duplicate activations
+}

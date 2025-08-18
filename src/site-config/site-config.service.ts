@@ -6,7 +6,6 @@ import { SiteConfigDto } from 'prisma/src/generated/dto/siteConfig.dto';
 import { FileRepositoryService } from 'src/file-repository/file-repository.service';
 import { TenantDto } from 'src/tenants/dto/tenant-entity.dto';
 import { TenantsService } from 'src/tenants/tenants.service';
-import { File } from '@nest-lab/fastify-multer';
 
 @Injectable()
 export class SiteConfigService {
@@ -18,7 +17,7 @@ export class SiteConfigService {
 
   async create(
     createDto: CreateSiteConfigDto,
-    file?: File,
+    file?: Express.Multer.File,
   ): Promise<SiteConfigDto> {
     if (file) {
       const filename = await this.fileService.uploadFile(file);
@@ -58,7 +57,7 @@ export class SiteConfigService {
   async update(
     id: string,
     updateDto: UpdateSiteConfigDto,
-    file?: File,
+    file?: Express.Multer.File,
   ): Promise<SiteConfigDto> {
     if (file) {
       const filename = await this.fileService.uploadFile(file);

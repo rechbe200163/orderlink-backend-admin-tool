@@ -31,11 +31,11 @@ import { UpdateProductDto } from 'src/products/dto/update-product.dto';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { ProductDto } from './dto/product.dto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
-import { File, FileInterceptor } from '@nest-lab/fastify-multer';
 import { FastifyFileInterceptor } from 'lib/interceptors/fastify-file-interceptor';
 import { diskStorage } from 'multer';
 import { editFileName, imageFileFilter } from 'lib/utils/file-upload-util';
 import { fileMapper } from 'lib/utils/file-mappter';
+import { SingleFileDto } from './dto/single-file-dto';
 
 @Controller('products')
 @UseInterceptors(CacheInterceptor)
@@ -52,16 +52,8 @@ import { fileMapper } from 'lib/utils/file-mappter';
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
-  @Post()
   @ApiConsumes('multipart/form-data')
-  @ApiBody({
-    description: 'Create product',
-    type: CreateProductDto,
-  })
-  @ApiOkResponse({
-    description: 'Product created successfully',
-    type: CreateProductDto,
-  })
+  @Post()
   @UseInterceptors(
     FastifyFileInterceptor('productImage', {
       storage: diskStorage({
@@ -73,12 +65,12 @@ export class ProductsController {
   )
   async create(
     @Req() req: Request,
+    @UploadedFile() file: Express.Multer.File,
     @Body() createProductDto: CreateProductDto,
-    @UploadedFile() productImage: Express.Multer.File,
   ) {
     console.log(createProductDto);
-    console.log(fileMapper({ file: productImage, req }));
-    return console.log(productImage);
+    console.log(fileMapper({ file: file, req }));
+    return console.log(file);
     // return this.productsService.create(createProductDto, productImage);
   }
 
@@ -163,12 +155,20 @@ export class ProductsController {
     description: 'Product updated successfully',
     type: UpdateProductDto,
   })
-  @UseInterceptors(FileInterceptor('productImage'))
+  @UseInterceptors(
+    FastifyFileInterceptor('productImage', {
+      storage: diskStorage({
+        destination: './upload/single',
+        filename: editFileName,
+      }),
+      fileFilter: imageFileFilter,
+    }),
+  )
   async update(
     @Param('productId', ParseUUIDPipe) productId: string,
     @Body() updateProductDto: UpdateProductDto,
-    @UploadedFile() productImage: File,
+    @UploadedFile() file: Express.Multer.File,
   ) {
-    return console.log(productImage);
+    return console.log(file);
   }
 }

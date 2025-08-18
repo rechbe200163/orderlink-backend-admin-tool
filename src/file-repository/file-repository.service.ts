@@ -3,7 +3,6 @@ import { InjectMinio } from 'src/minio/minio.decorator';
 import * as Minio from 'minio';
 import { randomUUID } from 'crypto';
 import slugify from 'slugify';
-import { File } from '@nest-lab/fastify-multer';
 @Injectable()
 export class FileRepositoryService {
   protected _bucketName = 'product-images';
@@ -28,37 +27,29 @@ export class FileRepositoryService {
     }
   }
 
-  uploadFile(productImage: File): Promise<string> {
+  async uploadFile(productImage: Express.Multer.File): Promise<string> {
     console.log(
       'Uploading file:',
-      productImage.encoding,
+      productImage.originalname,
       productImage.mimetype,
       productImage.size,
       productImage.fieldname,
     );
-    return new Promise((resolve, reject) => {
-      const originalName = productImage.fieldname || 'file';
-      const ext = productImage.mimetype?.split('/')[1] ?? '';
-      const cleanName = slugify(originalName, {
-        lower: true,
-        remove: /[0-9]/g,
-        trim: true,
-        strict: true,
-      });
-      const filename = `${randomUUID()}-${cleanName}${ext ? '.' + ext : ''}`;
-      this.minioService.putObject(
-        this._bucketName,
-        filename,
-        productImage.buffer!,
-        productImage.size,
-        (error, objInfo) => {
-          if (error) {
-            reject(error);
-          } else {
-            resolve(filename);
-          }
-        },
-      );
+    const originalName = productImage.originalname || 'file';
+    const ext = productImage.mimetype?.split('/')[1] ?? '';
+    const cleanName = slugify(originalName, {
+      lower: true,
+      remove: /[0-9]/g,
+      trim: true,
+      strict: true,
     });
+    const filename = `${randomUUID()}-${cleanName}${ext ? '.' + ext : ''}`;
+    await this.minioService.putObject(
+      this._bucketName,
+      filename,
+      productImage.buffer,
+      productImage.size,
+    );
+    return filename;
   }
 }

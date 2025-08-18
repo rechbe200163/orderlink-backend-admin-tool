@@ -67,7 +67,7 @@ export class UpdateProductDto {
   @IsOptional()
   categoryId?: string;
 
-  @ApiProperty({ type: 'string', format: 'binary', required: false })
+  @ApiProperty({ type: 'string', format: 'binary' })
   @IsOptional()
-  productImage?: any;
+  productImage: string;
 }
