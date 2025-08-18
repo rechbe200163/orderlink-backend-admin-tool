@@ -1,0 +1,5 @@
+export enum ModuleEnum {
+  CUSTOM_ROLES = 'CUSTOM_ROLES',
+  STATISTICS = 'STATISTICS',
+  NAVIGATION = 'NAVIGATION',
+}

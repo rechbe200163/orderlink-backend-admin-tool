@@ -52,10 +52,10 @@ export class AuthController {
   @UseGuards(JwtAuthGuard, ThrottlerGuard)
   @ApiBearerAuth()
   renewToken(@Request() request) {
-    if (!request.user && !request.user.tenantId) {
+    if (!request.user) {
       throw new NotImplementedException('User not found in request');
     }
-    return this.authService.signIn(request.user, request.user.tenantId);
+    return this.authService.signIn(request.user);
   }
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, ThrottlerGuard)
@@ -88,9 +88,9 @@ export class AuthController {
   })
   @UseGuards(JwtAuthGuard, ThrottlerGuard)
   renewSession(@Request() request) {
-    if (!request.user && !request.user.tenantId) {
+    if (!request.user) {
       throw new NotImplementedException('User not found in request');
     }
-    return this.authService.renewSession(request.user, request.user.tenantId);
+    return this.authService.renewSession(request.user);
   }
 }
