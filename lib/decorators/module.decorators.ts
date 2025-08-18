@@ -1,5 +1,5 @@
 import { SetMetadata } from '@nestjs/common';
-import { ModuleEnum } from 'src/tenants/dto/modules-entity.dto';
+import { ModuleEnum } from '@prisma/client';
 
 export const MODULE_KEY = 'module'; // <-- Konstanter Schlüssel
 
