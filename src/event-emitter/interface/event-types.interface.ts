@@ -45,6 +45,14 @@ export interface EventPayloads {
     imagePath: string | null;
     categoryId: string;
   };
+  'order.created': {
+    orderId: string;
+    customerReference: number;
+    items: Array<{
+      productId: string;
+      productAmount: number;
+    }>;
+  };
   'otp.resend': {
     employeeId: string;
     otpCode: number;

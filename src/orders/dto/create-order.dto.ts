@@ -11,14 +11,18 @@ import {
 import { CreateOrderProductDto } from './create-order-product.dto';
 
 export class CreateOrderDto {
-  @ApiProperty({ type: Number, example: 123 })
+  @ApiProperty({ type: Number, example: 1000 })
   @Type(() => Number)
   @IsInt()
   customerReference: number;
 
-  @ApiProperty({ type: String, format: 'date-time', required: false })
+  @ApiProperty({
+    type: String,
+    format: 'date-time',
+    required: false,
+    default: null,
+  })
   @IsOptional()
-  @IsDateString()
   deliveryDate?: Date;
 
   @ApiProperty({ type: Boolean, required: false })

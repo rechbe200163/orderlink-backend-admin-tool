@@ -123,4 +123,13 @@ export class ProductsRepository {
     }
     return product;
   }
+
+  async findProductByIds(productIds: string[]): Promise<ProductDto[]> {
+    const products = await this.prismaService.client.product.findMany({
+      where: {
+        productId: { in: productIds },
+      },
+    });
+    return products.map((product) => transformResponse(ProductDto, product));
+  }
 }
