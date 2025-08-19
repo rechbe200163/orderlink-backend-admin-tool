@@ -1,21 +1,15 @@
-// main.ts (NestJS + Fastify + Scalar UI)
+// main.ts (NestJS + Express + Scalar UI)
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
-import {
-  FastifyAdapter,
-  NestFastifyApplication,
-} from '@nestjs/platform-fastify';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
-import { contentParser } from 'fastify-multer';
 import { join } from 'path';
+import type { Request, Response } from 'express';
 
 async function bootstrap() {
-  const app = await NestFactory.create<NestFastifyApplication>(
-    AppModule,
-    new FastifyAdapter(),
-  );
+  const app = await NestFactory.create(AppModule);
 
   // Global Pipes & Interceptors
   app.useGlobalPipes(new ValidationPipe({ transform: true, whitelist: true }));
@@ -30,24 +24,24 @@ async function bootstrap() {
     .build();
   const document = SwaggerModule.createDocument(app, config);
 
-  // Roh-Spec unter /openapi.json ausliefern (Fastify-Route)
-  const fastify = app.getHttpAdapter().getInstance();
-  fastify.get('/openapi.json', (_req: any, reply: any) => reply.send(document));
+  // Roh-Spec unter /openapi.json ausliefern (Express-Route)
+  const express = app.getHttpAdapter().getInstance();
+  express.get('/openapi.json', (_req: Request, res: Response) =>
+    res.json(document),
+  );
 
-  // Scalar-UI (Elysia-Style) unter /docs einhängen
+  // Scalar-UI unter /docs einhängen (Express – kein withFastify nötig)
   app.use(
     '/docs',
     apiReference({
-      url: '/openapi.json', // alternativ: content: document
-      withFastify: true, // WICHTIG bei Fastify-Adapter
+      url: '/openapi.json',
       theme: 'nestjs', // 'default' | 'moon' | 'purple' | 'solarized' | 'alternate'
     }),
   );
 
-  // Upload & Static Assets (dein bestehendes Setup)
-  app.register(contentParser);
-  app.useStaticAssets({ root: join(__dirname, '../../fastify-file-upload') });
-
-  await app.listen(process.env.PORT ?? 3001, '0.0.0.0');
+  await app.listen(
+    process.env.PORT ? Number(process.env.PORT) : 3001,
+    '0.0.0.0',
+  );
 }
 bootstrap();

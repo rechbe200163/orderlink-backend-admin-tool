@@ -32,7 +32,7 @@ type TenantInfo = {
   maxEmployees: number;
   trialEndsAt: Date | null;
   trialStartedAt: Date | null;
-  status: TenantStatus;
+  status: TenantStatus | null;
   enabledModules: string[];
 };
 

@@ -282,8 +282,8 @@ model Employees {
 
 model SiteConfig {
   siteConfigId String   @id @default(uuid())
-  tenantId     String   @unique
-  tenant       TenantData @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  tenantId     String?   @unique
+  tenant       TenantData? @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
 
   companyName  String
   logoPath     String?
@@ -298,7 +298,7 @@ model SiteConfig {
 
 model TenantData {
   tenantId          String       @id @default(uuid())
-  status            TenantStatus @default(TRIAL)
+  status            TenantStatus? @default(TRIAL)
   trialStartedAt    DateTime     @default(now())
   trialEndsAt       DateTime     @default(dbgenerated("(now() + interval '3 days')"))
   billingCustomerId String?

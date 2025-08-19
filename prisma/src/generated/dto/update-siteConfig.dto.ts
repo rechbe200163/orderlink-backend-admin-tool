@@ -14,7 +14,7 @@ export class UpdateSiteConfigDto {
     required: false,
   })
   @IsOptional()
-  logoPath?: string;
+  logoPath?: string | null;
 
   @ApiProperty({
     description: 'The name of the company for the site configuration',

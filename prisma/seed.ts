@@ -1,8 +1,11 @@
 import {
   Actions,
   BusinessSector,
+  ModuleEnum,
+  OrderState,
   PrismaClient,
   Resources,
+  TenantStatus,
 } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import { hash } from 'bcryptjs';
@@ -116,6 +119,25 @@ async function main() {
     ),
   );
 
+  // 8.1 Create CustomerHistory for each Customer
+  await Promise.all(
+    customers.map((c) =>
+      prisma.customerHistory.create({
+        data: {
+          customerReference: c.customerReference,
+          email: c.email,
+          phoneNumber: c.phoneNumber,
+          password: c.password,
+          firstName: c.firstName,
+          lastName: c.lastName,
+          companyNumber: c.companyNumber ?? null,
+          addressId: c.addressId,
+          businessSector: c.businessSector ?? null,
+        },
+      }),
+    ),
+  );
+
   // 9. Create Carts for Customers
   const carts = await Promise.all(
     customers.map((customer) =>
@@ -151,6 +173,23 @@ async function main() {
           stock: faker.number.int({ min: 10, max: 100 }),
           imagePath: faker.image.urlLoremFlickr({ category: 'product' }),
           categoryId: categories[i % categories.length].categoryId,
+        },
+      }),
+    ),
+  );
+
+  // 11.1 Create ProductHistory for each Product
+  await Promise.all(
+    products.map((p) =>
+      prisma.productHistory.create({
+        data: {
+          productId: p.productId,
+          name: p.name,
+          price: p.price,
+          description: p.description,
+          stock: p.stock,
+          imagePath: p.imagePath ?? null,
+          categoryId: p.categoryId,
         },
       }),
     ),
@@ -232,18 +271,68 @@ async function main() {
     ),
   );
 
-  // 18. Create Site Config
-  // await prisma.siteConfig.create({
-  //   data: {
-  //     companyName: faker.company.name(),
-  //     logoPath: faker.image.urlPicsumPhotos(),
-  //     email: faker.internet.email(),
-  //     phoneNumber: faker.phone.number({ style: 'international' }),
-  //     iban: faker.finance.iban(),
-  //     companyNumber: faker.string.uuid(),
-  //     addressId: addresses[0].addressId,
-  //   },
-  // });
+  // 18. Create TenantData
+  const tenants = await Promise.all(
+    Array.from({ length: 3 }).map(() =>
+      prisma.tenantData.create({
+        data: {
+          status: faker.helpers.arrayElement(Object.values(TenantStatus)),
+          billingCustomerId: faker.string.uuid(),
+          maxEmployees: faker.number.int({ min: 1, max: 20 }),
+        },
+      }),
+    ),
+  );
+
+  // 19. Create SiteConfig linked to TenantData
+  await Promise.all(
+    tenants.map((tenant, i) =>
+      prisma.siteConfig.create({
+        data: {
+          tenantId: tenant.tenantId,
+          companyName: faker.company.name(),
+          logoPath: faker.image.urlPicsumPhotos(),
+          email: faker.internet.email(),
+          phoneNumber: faker.phone.number({ style: 'international' }),
+          iban: faker.finance.iban(),
+          companyNumber: faker.string.uuid(),
+          addressId: addresses[i % addresses.length].addressId,
+        },
+      }),
+    ),
+  );
+
+  // 20. Create Modules
+  const modules = await Promise.all(
+    Object.values(ModuleEnum).map((mod) =>
+      prisma.module.create({
+        data: {
+          name: mod,
+          description: faker.commerce.productDescription(),
+          priceCents: faker.number.int({ min: 0, max: 5000 }),
+        },
+      }),
+    ),
+  );
+
+  // 21. Enable random Modules for Tenants
+  await Promise.all(
+    tenants.flatMap((tenant) =>
+      faker.helpers
+        .arrayElements(
+          modules,
+          faker.number.int({ min: 1, max: modules.length }),
+        )
+        .map((mod) =>
+          prisma.enabledModule.create({
+            data: {
+              tenantId: tenant.tenantId,
+              moduleName: mod.name,
+            },
+          }),
+        ),
+    ),
+  );
 
   console.log('✅ Seeding complete!');
 }

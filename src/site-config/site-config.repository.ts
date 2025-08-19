@@ -62,7 +62,15 @@ export class SiteConfigRepository {
         `SiteConfig with ID ${siteConfigId} not found`,
       );
     }
-    if (isNoChange<UpdateSiteConfigDto>(data, existing)) {
+    const existingDto: UpdateSiteConfigDto = {
+      companyName: existing.companyName,
+      logoPath: existing.logoPath ?? undefined,
+      email: existing.email,
+      phoneNumber: existing.phoneNumber,
+      iban: existing.iban ?? undefined,
+      companyNumber: existing.companyNumber ?? undefined,
+    };
+    if (isNoChange<UpdateSiteConfigDto>(data, existingDto)) {
       throw new BadRequestException(
         `No changes detected for site config ${siteConfigId}`,
       );

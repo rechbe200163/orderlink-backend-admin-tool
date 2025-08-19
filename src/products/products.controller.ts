@@ -31,11 +31,13 @@ import { UpdateProductDto } from 'src/products/dto/update-product.dto';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { ProductDto } from './dto/product.dto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
-import { FastifyFileInterceptor } from 'lib/interceptors/fastify-file-interceptor';
 import { diskStorage } from 'multer';
 import { editFileName, imageFileFilter } from 'lib/utils/file-upload-util';
 import { fileMapper } from 'lib/utils/file-mappter';
 import { SingleFileDto } from './dto/single-file-dto';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FileSizeValidationPipe } from 'lib/pipes/file-size-validation-pipe';
+import { FileTypeValidationPipe } from 'lib/pipes/file-name-validation-pipe.ts';
 
 @Controller('products')
 @UseInterceptors(CacheInterceptor)
@@ -54,24 +56,14 @@ export class ProductsController {
 
   @ApiConsumes('multipart/form-data')
   @Post()
-  @UseInterceptors(
-    FastifyFileInterceptor('productImage', {
-      storage: diskStorage({
-        destination: './upload/single',
-        filename: editFileName,
-      }),
-      fileFilter: imageFileFilter,
-    }),
-  )
+  @UseInterceptors(FileInterceptor('productImage'))
   async create(
     @Req() req: Request,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(new FileSizeValidationPipe(), new FileTypeValidationPipe())
+    productImage: Express.Multer.File,
     @Body() createProductDto: CreateProductDto,
   ) {
-    console.log(createProductDto);
-    console.log(fileMapper({ file: file, req }));
-    return console.log(file);
-    // return this.productsService.create(createProductDto, productImage);
+    return this.productsService.create(createProductDto, productImage);
   }
 
   @Get()
@@ -155,20 +147,13 @@ export class ProductsController {
     description: 'Product updated successfully',
     type: UpdateProductDto,
   })
-  @UseInterceptors(
-    FastifyFileInterceptor('productImage', {
-      storage: diskStorage({
-        destination: './upload/single',
-        filename: editFileName,
-      }),
-      fileFilter: imageFileFilter,
-    }),
-  )
+  @UseInterceptors(FileInterceptor('productImage'))
   async update(
     @Param('productId', ParseUUIDPipe) productId: string,
     @Body() updateProductDto: UpdateProductDto,
-    @UploadedFile() file: Express.Multer.File,
+    @UploadedFile(new FileSizeValidationPipe(), new FileTypeValidationPipe())
+    productImage: Express.Multer.File,
   ) {
-    return console.log(file);
+    return console.log(productImage);
   }
 }

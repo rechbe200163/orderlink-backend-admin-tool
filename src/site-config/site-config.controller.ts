@@ -28,9 +28,11 @@ import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { CreateSiteConfigDto } from 'prisma/src/generated/dto/create-siteConfig.dto';
 import { UpdateSiteConfigDto } from 'prisma/src/generated/dto/update-siteConfig.dto';
 import { SiteConfigDto } from 'prisma/src/generated/dto/siteConfig.dto';
-import { FastifyFileInterceptor } from 'lib/interceptors/fastify-file-interceptor';
 import { diskStorage } from 'multer';
 import { editFileName, imageFileFilter } from 'lib/utils/file-upload-util';
+import { FileSizeValidationPipe } from 'lib/pipes/file-size-validation-pipe';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { FileTypeValidationPipe } from 'lib/pipes/file-name-validation-pipe.ts';
 
 @Controller('site-config')
 @UseInterceptors(CacheInterceptor)
@@ -49,21 +51,13 @@ export class SiteConfigController {
   @ApiConsumes('multipart/form-data')
   @ApiBody({ type: CreateSiteConfigDto })
   @ApiOkResponse({ type: SiteConfigDto })
-  @UseInterceptors(
-    FastifyFileInterceptor('photo_url', {
-      storage: diskStorage({
-        destination: './upload/single',
-        filename: editFileName,
-      }),
-      fileFilter: imageFileFilter,
-    }),
-  )
+  @UseInterceptors(FileInterceptor('logo'))
   async create(
     @Body() createDto: CreateSiteConfigDto,
-    @UploadedFile()
-    logoPath: Express.Multer.File,
+    @UploadedFile(new FileSizeValidationPipe(), new FileTypeValidationPipe())
+    logo: Express.Multer.File,
   ) {
-    return this.siteConfigService.create(createDto, logoPath);
+    return this.siteConfigService.create(createDto, logo);
   }
 
   @Get()
@@ -84,19 +78,11 @@ export class SiteConfigController {
   @ApiParam({ name: 'siteConfigId', type: String })
   @ApiBody({ type: UpdateSiteConfigDto })
   @ApiOkResponse({ type: SiteConfigDto })
-  @UseInterceptors(
-    FastifyFileInterceptor('photo_url', {
-      storage: diskStorage({
-        destination: './upload/single',
-        filename: editFileName,
-      }),
-      fileFilter: imageFileFilter,
-    }),
-  )
+  @UseInterceptors(FileInterceptor('logo'))
   async update(
     @Param('siteConfigId', ParseUUIDPipe) siteConfigId: string,
     @Body() updateDto: UpdateSiteConfigDto,
-    @UploadedFile()
+    @UploadedFile(new FileSizeValidationPipe(), new FileTypeValidationPipe())
     logo: Express.Multer.File,
   ) {
     return this.siteConfigService.update(siteConfigId, updateDto, logo);

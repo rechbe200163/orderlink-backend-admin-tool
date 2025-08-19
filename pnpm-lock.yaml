@@ -74,9 +74,6 @@ importers:
       '@scalar/nestjs-api-reference':
         specifier: ^0.5.12
         version: 0.5.12
-      '@types/multer':
-        specifier: ^2.0.0
-        version: 2.0.0
       amqp-connection-manager:
         specifier: ^4.1.14
         version: 4.1.14(amqplib@0.10.8)
@@ -195,6 +192,9 @@ importers:
       '@types/k6':
         specifier: ^1.2.0
         version: 1.2.0
+      '@types/multer':
+        specifier: ^2.0.0
+        version: 2.0.0
       '@types/node':
         specifier: ^22.17.2
         version: 22.17.2
