@@ -22,7 +22,7 @@ services:
       - redis
     restart: unless-stopped
     env_file:
-      - .env
+      - .env.production
 
   minio:
     image: bitnami/minio:2024.11.7

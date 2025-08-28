@@ -36,7 +36,7 @@ import { OtpModule } from './otp/otp.module';
         return {
           ttl: 60000,
           stores: [
-            createKeyv('redis://localhost:6379'),
+            createKeyv(process.env.REDIS_URL),
             new Keyv({
               store: new CacheableMemory({ ttl: 60000, lruSize: 5000 }),
             }),
