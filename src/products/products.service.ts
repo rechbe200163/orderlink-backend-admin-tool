@@ -61,43 +61,25 @@ export class ProductsService {
     search?: string,
     categoryId?: string,
   ): Promise<PagingResultDto<ProductDto>> {
-    const { data: products, meta } = await this.productRepository.findAll(
+    const { data, meta } = await this.productRepository.findAll(
       limit,
       page,
       search,
       categoryId,
     );
 
-    // Falls paginate ein { data, meta }-Objekt zurückgibt:
-    const productsWithUrls = await Promise.all(
-      products.map(async (product) => {
-        const imageUrl = product.imagePath
-          ? await this.fileService.getFile(product.imagePath)
-          : null;
-
-        return {
-          ...product,
-          imageUrl,
-        };
-      }),
-    );
-
     return {
-      data: productsWithUrls,
+      data,
       meta,
     };
   }
 
   async findOne(id: string): Promise<ProductDto> {
     const product = await this.productRepository.findById(id);
-
-    const imagePath = product.imagePath
-      ? await this.fileService.getFile(product.imagePath)
-      : null;
-
+    const imageUrl = this.addCdnImageUrl(product.imagePath);
     return {
       ...product,
-      imagePath,
+      imagePath: imageUrl!,
     };
   }
 
@@ -136,5 +118,12 @@ export class ProductsService {
 
   remove(id: string) {
     return `This action removes a #${id} product`;
+  }
+
+  private addCdnImageUrl(productImage: string | null): string | undefined {
+    if (!productImage) return;
+
+    const cdnUrl = `https://localhost/product-images/${productImage}`;
+    return cdnUrl;
   }
 }
