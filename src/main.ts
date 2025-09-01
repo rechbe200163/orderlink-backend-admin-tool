@@ -2,10 +2,8 @@
 import { NestFactory, Reflector } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
-import { NestExpressApplication } from '@nestjs/platform-express';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
-import { join } from 'path';
 import type { Request, Response } from 'express';
 
 async function bootstrap() {
@@ -35,7 +33,7 @@ async function bootstrap() {
     '/docs',
     apiReference({
       url: '/openapi.json',
-      theme: 'nestjs', // 'default' | 'moon' | 'purple' | 'solarized' | 'alternate'
+      theme: 'default', // 'default' | 'moon' | 'purple' | 'solarized' | 'alternate'
     }),
   );
 

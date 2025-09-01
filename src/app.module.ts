@@ -34,7 +34,7 @@ import { OtpModule } from './otp/otp.module';
       isGlobal: true,
       useFactory: async () => {
         return {
-          ttl: 60000,
+          ttl: 60000, // 1-minute
           stores: [
             createKeyv(process.env.REDIS_URL),
             new Keyv({
