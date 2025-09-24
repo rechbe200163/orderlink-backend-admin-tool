@@ -61,15 +61,26 @@ export class ProductsService {
     search?: string,
     categoryId?: string,
   ): Promise<PagingResultDto<ProductDto>> {
-    const { data, meta } = await this.productRepository.findAll(
+    const { data: products, meta } = await this.productRepository.findAll(
       limit,
       page,
       search,
       categoryId,
     );
 
+    const productsWithCdnImageURL = products.map((product) => {
+      if (!product.imagePath?.startsWith('https')) {
+        return {
+          ...product,
+          imagePath: this.addCdnImageUrl(product.imagePath)!,
+        };
+      }
+      return {
+        ...product,
+      };
+    });
     return {
-      data,
+      data: productsWithCdnImageURL,
       meta,
     };
   }

@@ -13,19 +13,19 @@ export class FileRepositoryService {
     return await this.minioService.listBuckets();
   }
 
-  async getFile(filename: string) {
-    try {
-      return await this.minioService.presignedUrl(
-        'GET',
-        this._bucketName,
-        filename,
-        24 * 60 * 60, // 1 day in seconds
-      );
-    } catch (error) {
-      console.error('Could not generate minio URL', error);
-      return '';
-    }
-  }
+  // async getFile(filename: string) {
+  //   try {
+  //     return await this.minioService.presignedUrl(
+  //       'GET',
+  //       this._bucketName,
+  //       filename,
+  //       24 * 60 * 60, // 1 day in seconds
+  //     );
+  //   } catch (error) {
+  //     console.error('Could not generate minio URL', error);
+  //     return '';
+  //   }
+  // }
 
   async uploadFile(productImage: Express.Multer.File): Promise<string> {
     console.log(

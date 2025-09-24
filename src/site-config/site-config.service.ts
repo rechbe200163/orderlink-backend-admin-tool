@@ -29,7 +29,7 @@ export class SiteConfigService {
       throw new NotFoundException('Site configuration not found');
     }
     if (siteConfig && siteConfig.logoPath) {
-      siteConfig.logoPath = await this.fileService.getFile(siteConfig.logoPath);
+      siteConfig.logoPath = this.addCdnImageUrl(siteConfig.logoPath)!;
     }
     return siteConfig;
   }
@@ -40,7 +40,7 @@ export class SiteConfigService {
       throw new NotFoundException('Site configuration not found');
     }
     if (siteConfig && siteConfig.logoPath) {
-      siteConfig.logoPath = await this.fileService.getFile(siteConfig.logoPath);
+      siteConfig.logoPath = this.addCdnImageUrl(siteConfig.logoPath)!;
     }
     return siteConfig;
   }
@@ -55,5 +55,12 @@ export class SiteConfigService {
       updateDto.logoPath = filename;
     }
     return this.siteConfigRepository.update(id, updateDto);
+  }
+
+  private addCdnImageUrl(productImage: string | null): string | undefined {
+    if (!productImage) return;
+
+    const cdnUrl = `https://localhost/product-images/${productImage}`;
+    return cdnUrl;
   }
 }
