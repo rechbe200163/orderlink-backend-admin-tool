@@ -21,28 +21,40 @@ export class InvoicesService {
     private readonly siteConfigRepository: SiteConfigRepository,
   ) {}
 
-  create(createInvoiceDto: CreateInvoiceDto): Promise<InvoiceDto> {
-    return this.invoicesRepository.create(createInvoiceDto);
+  create(
+    tenantId: string,
+    createInvoiceDto: CreateInvoiceDto,
+  ): Promise<InvoiceDto> {
+    return this.invoicesRepository.create(tenantId, createInvoiceDto);
   }
 
-  findAll(limit = 10, page = 1): Promise<PagingResultDto<InvoiceDto>> {
+  findAll(
+    tenantId: string,
+    limit = 10,
+    page = 1,
+  ): Promise<PagingResultDto<InvoiceDto>> {
     return this.invoicesRepository.findAll(limit, page);
   }
 
-  findById(id: string): Promise<InvoiceDto> {
-    return this.invoicesRepository.findById(id);
+  findById(tenantId: string, id: string): Promise<InvoiceDto> {
+    return this.invoicesRepository.findById(tenantId, id);
   }
 
-  update(id: string, updateInvoiceDto: UpdateInvoiceDto): Promise<InvoiceDto> {
-    return this.invoicesRepository.update(id, updateInvoiceDto);
+  update(
+    tenantId: string,
+    id: string,
+    updateInvoiceDto: UpdateInvoiceDto,
+  ): Promise<InvoiceDto> {
+    return this.invoicesRepository.update(tenantId, id, updateInvoiceDto);
   }
 
   @OnEvent('order.created')
   async orderCreated(data: EventPayloads['order.created']) {
-    const { orderId, items } = data;
+    const { tenantId, orderId, items } = data;
 
     // 1) Daten laden
     const products = await this.productRepository.findProductByIds(
+      tenantId,
       items.map((i) => i.productId),
     );
     const companyInfo = await this.siteConfigRepository.findFirst();
@@ -254,9 +266,9 @@ export class InvoicesService {
       stream,
     };
 
-    const filename = await this.fileService.uploadFile(file);
+    const filename = await this.fileService.uploadFile(tenantId, file);
 
-    await this.invoicesRepository.create({
+    await this.invoicesRepository.create(tenantId, {
       orderId,
       invoiceAmount,
       pdfUrl: filename,

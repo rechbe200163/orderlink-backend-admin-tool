@@ -9,27 +9,35 @@ import { AddressDto } from 'prisma/src/generated/dto/address.dto';
 export class AddressesService {
   constructor(private readonly addressesRepository: AddressesRepository) {}
 
-  create(createAddressDto: CreateAddressDto): Promise<AddressDto> {
-    return this.addressesRepository.create(createAddressDto);
+  create(
+    tenantId: string,
+    createAddressDto: CreateAddressDto,
+  ): Promise<AddressDto> {
+    return this.addressesRepository.create(tenantId, createAddressDto);
   }
 
   findAllPaging(
+    tenantId: string,
     limit = 10,
     page = 1,
     query?: string,
   ): Promise<PagingResultDto<AddressDto>> {
-    return this.addressesRepository.findAllPaging(limit, page, query);
+    return this.addressesRepository.findAllPaging(tenantId, limit, page, query);
   }
 
-  findAll(): Promise<AddressDto[]> {
-    return this.addressesRepository.findAll();
+  findAll(tenantId: string): Promise<AddressDto[]> {
+    return this.addressesRepository.findAll(tenantId);
   }
 
-  findById(id: string): Promise<AddressDto> {
-    return this.addressesRepository.findById(id);
+  findById(tenantId: string, id: string): Promise<AddressDto> {
+    return this.addressesRepository.findById(tenantId, id);
   }
 
-  update(id: string, updateAddressDto: UpdateAddressDto): Promise<AddressDto> {
-    return this.addressesRepository.update(id, updateAddressDto);
+  update(
+    tenantId: string,
+    id: string,
+    updateAddressDto: UpdateAddressDto,
+  ): Promise<AddressDto> {
+    return this.addressesRepository.update(tenantId, id, updateAddressDto);
   }
 }

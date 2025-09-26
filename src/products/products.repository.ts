@@ -20,10 +20,15 @@ export class ProductsRepository {
   ) {}
 
   // products.repository.ts
-  async create(createProductDto: CreateProductDto, imageName?: string) {
+  async create(
+    tenantId: string,
+    createProductDto: CreateProductDto,
+    imageName?: string,
+  ) {
     console.log('Creating product with data:', imageName);
     return this.prismaService.client.product.create({
       data: {
+        tenantId,
         name: createProductDto.name,
         price: createProductDto.price,
         description: createProductDto.description,
@@ -35,9 +40,12 @@ export class ProductsRepository {
     // Kategorien zuordnen
   }
 
-  async getHistory(productId: string): Promise<ProductHistoryDto[]> {
+  async getHistory(
+    tenantId: string,
+    productId: string,
+  ): Promise<ProductHistoryDto[]> {
     const product = await this.prismaService.client.productHistory.findMany({
-      where: { productId },
+      where: { tenantId, productId },
       orderBy: { version: 'desc' },
     });
     if (!product) {
@@ -49,6 +57,7 @@ export class ProductsRepository {
   }
 
   async findAll(
+    tenantId: string,
     limit: number = 10,
     page: number = 1,
     search?: string,
@@ -58,6 +67,7 @@ export class ProductsRepository {
     const [products, meta] = await this.prismaService.client.product
       .paginate({
         where: {
+          tenantId: { equals: tenantId },
           ...(search && {
             name: {
               contains: search,
@@ -82,9 +92,14 @@ export class ProductsRepository {
     };
   }
 
-  async findById(productId: string): Promise<ProductDto> {
+  async findById(tenantId: string, productId: string): Promise<ProductDto> {
     const product = await this.prismaService.client.product.findUnique({
-      where: { productId },
+      where: {
+        tenantId_productId: {
+          productId,
+          tenantId,
+        },
+      },
     });
     if (!product) {
       throw new NotFoundException(`Product with ID ${productId} not found`);
@@ -93,12 +108,18 @@ export class ProductsRepository {
   }
 
   async update(
+    tenantId: string,
     productId: string,
     updateProductDto: UpdateProductDto,
     imageName?: string,
   ): Promise<ProductDto> {
     const product = await this.prismaService.client.product.update({
-      where: { productId },
+      where: {
+        tenantId_productId: {
+          productId,
+          tenantId,
+        },
+      },
       data: {
         name: updateProductDto.name,
         price: updateProductDto.price,
@@ -114,9 +135,14 @@ export class ProductsRepository {
     return transformResponse(ProductDto, product);
   }
 
-  async findOriginalProductById(productId: string) {
+  async findOriginalProductById(tenantId: string, productId: string) {
     const product = await this.prismaService.client.product.findUnique({
-      where: { productId },
+      where: {
+        tenantId_productId: {
+          productId,
+          tenantId,
+        },
+      },
     });
     if (!product) {
       throw new NotFoundException(`Product with ID ${productId} not found`);
@@ -124,10 +150,14 @@ export class ProductsRepository {
     return product;
   }
 
-  async findProductByIds(productIds: string[]): Promise<ProductDto[]> {
+  async findProductByIds(
+    tenantId: string,
+    productIds: string[],
+  ): Promise<ProductDto[]> {
     const products = await this.prismaService.client.product.findMany({
       where: {
         productId: { in: productIds },
+        tenantId: { equals: tenantId },
       },
     });
     return products.map((product) => transformResponse(ProductDto, product));

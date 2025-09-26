@@ -22,7 +22,10 @@ export class OrdersRepository {
     private readonly prismaService: CustomPrismaService<ExtendedPrismaClient>,
   ) {}
 
-  async create(createOrderDto: CreateOrderDto): Promise<OrderDto> {
+  async create(
+    tenantId: string,
+    createOrderDto: CreateOrderDto,
+  ): Promise<OrderDto> {
     const order = await this.prismaService.client.order.create({
       data: {
         customerReference: createOrderDto.customerReference,
@@ -34,12 +37,14 @@ export class OrdersRepository {
             productAmount: p.productAmount,
           })),
         },
+        tenantId,
       },
     });
     return transformResponse(OrderDto, order);
   }
 
   async findAll(
+    tenantId: string,
     limit = 10,
     page = 1,
     orderState?: OrderState,
@@ -64,8 +69,8 @@ export class OrdersRepository {
     const [orders, meta] = await this.prismaService.client.order
       .paginate({
         where: {
+          tenantId,
           deleted: false,
-
           ...(customerReference && { customerReference }),
           ...(orderState && { orderState }),
           ...(startDate || endDate
@@ -130,7 +135,7 @@ export class OrdersRepository {
     };
   }
 
-  findAllOrders(): Promise<any> {
+  findAllOrders(tenantId: string): Promise<any> {
     return this.prismaService.client.order.findMany({
       // with address of customer
       include: {
@@ -140,14 +145,14 @@ export class OrdersRepository {
           },
         },
       },
-      where: { deleted: false },
+      where: { deleted: false, tenantId },
       orderBy: { orderDate: 'desc' },
     });
   }
 
-  async findById(orderId: string): Promise<OrderDto> {
+  async findById(tenantId: string, orderId: string): Promise<OrderDto> {
     const order = await this.prismaService.client.order.findUnique({
-      where: { orderId },
+      where: { tenantId_orderId: { orderId, tenantId } },
     });
     if (!order) {
       throw new NotFoundException(`Order with ID ${orderId} not found`);
@@ -156,11 +161,12 @@ export class OrdersRepository {
   }
 
   async update(
+    tenantId: string,
     orderId: string,
     updateOrderDto: UpdateOrderDto,
   ): Promise<OrderDto> {
     const existing = await this.prismaService.client.order.findUnique({
-      where: { orderId },
+      where: { tenantId_orderId: { orderId, tenantId } },
     });
     if (!existing) {
       throw new NotFoundException(`Order with ID ${orderId} not found`);
@@ -170,7 +176,7 @@ export class OrdersRepository {
     }
     const { products, ...rest } = updateOrderDto;
     const order = await this.prismaService.client.order.update({
-      where: { orderId },
+      where: { tenantId_orderId: { orderId, tenantId } },
       data: {
         ...rest,
         ...(products && {

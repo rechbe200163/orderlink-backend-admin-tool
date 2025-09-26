@@ -18,16 +18,18 @@ export class ProductsService {
   ) {}
   // products.service.ts
   async create(
+    tenantId: string,
     createProductDto: CreateProductDto,
     productImage?: Express.Multer.File,
   ) {
     let imageFilename: string | undefined;
 
     if (productImage) {
-      imageFilename = await this.fileService.uploadFile(productImage);
+      imageFilename = await this.fileService.uploadFile(tenantId, productImage);
     }
 
     const product = await this.productRepository.create(
+      tenantId,
       createProductDto,
       imageFilename,
     );
@@ -45,8 +47,14 @@ export class ProductsService {
     return product;
   }
 
-  async getHistory(productId: string): Promise<ProductHistoryDto[]> {
-    const productHistory = await this.productRepository.getHistory(productId);
+  async getHistory(
+    tenantId: string,
+    productId: string,
+  ): Promise<ProductHistoryDto[]> {
+    const productHistory = await this.productRepository.getHistory(
+      tenantId,
+      productId,
+    );
     if (!productHistory) {
       throw new NotFoundException(
         `Product history for ID ${productId} not found`,
@@ -56,12 +64,14 @@ export class ProductsService {
   }
 
   async findAll(
+    tenantId: string,
     limit = 10,
     page = 1,
     search?: string,
     categoryId?: string,
   ): Promise<PagingResultDto<ProductDto>> {
     const { data: products, meta } = await this.productRepository.findAll(
+      tenantId,
       limit,
       page,
       search,
@@ -85,8 +95,8 @@ export class ProductsService {
     };
   }
 
-  async findOne(id: string): Promise<ProductDto> {
-    const product = await this.productRepository.findById(id);
+  async findOne(tenantId: string, id: string): Promise<ProductDto> {
+    const product = await this.productRepository.findById(tenantId, id);
     const imageUrl = this.addCdnImageUrl(product.imagePath);
     return {
       ...product,
@@ -95,6 +105,7 @@ export class ProductsService {
   }
 
   async update(
+    tenantId: string,
     id: string,
     updateProductDto: UpdateProductDto,
     file?: Express.Multer.File,
@@ -102,19 +113,21 @@ export class ProductsService {
     let imageFilename: string | undefined;
 
     const originalProduct =
-      await this.productRepository.findOriginalProductById(id);
+      await this.productRepository.findOriginalProductById(tenantId, id);
 
     if (file) {
-      imageFilename = await this.fileService.uploadFile(file);
+      imageFilename = await this.fileService.uploadFile(tenantId, file);
     }
 
     const product = await this.productRepository.update(
+      tenantId,
       id,
       updateProductDto,
       imageFilename,
     );
 
     this.eventEmitter.emit('product.updated', {
+      tenantId,
       productId: originalProduct.productId,
       name: originalProduct.name,
       price: originalProduct.price,

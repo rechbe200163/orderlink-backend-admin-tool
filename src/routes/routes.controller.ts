@@ -12,6 +12,7 @@ import {
   UseGuards,
   BadRequestException,
   Module,
+  Req,
 } from '@nestjs/common';
 import { RoutesService } from './routes.service';
 import { CacheInterceptor } from '@nestjs/cache-manager';
@@ -36,6 +37,7 @@ import { MAX_PAGE_SIZE } from 'lib/constants';
 import { ModulesGuard } from 'src/auth/guards/modules.guard';
 import { ModuleTag } from 'lib/decorators/module.decorators';
 import { ModuleEnum } from 'src/site-config/dto/modules-entity.dto';
+import { requireTenantId } from 'lib/common/tenant.util';
 
 @Controller('routes')
 @UseInterceptors(CacheInterceptor)
@@ -54,8 +56,9 @@ export class RoutesController {
   @Post()
   @ApiBody({ type: CreateRouteDto })
   @ApiOkResponse({ type: RouteDto })
-  create(@Body() createRouteDto: CreateRouteDto) {
-    return this.routesService.create(createRouteDto);
+  create(@Req() req, @Body() createRouteDto: CreateRouteDto) {
+    const { tenantId } = requireTenantId(req);
+    return this.routesService.create(tenantId, createRouteDto);
   }
 
   @Get()
@@ -74,21 +77,26 @@ export class RoutesController {
     description: 'Returns a paginated list of routes',
   })
   async findAll(
+    @Req() req,
     @Query('limit', ParseIntPipe) limit = 10,
     @Query('page', ParseIntPipe) page = 1,
     @Query('search') search?: string,
   ) {
+    const { tenantId } = requireTenantId(req);
+
     if (limit > MAX_PAGE_SIZE) {
       throw new BadRequestException(`Limit cannot exceed ${MAX_PAGE_SIZE}`);
     }
-    return this.routesService.findAll(limit, page, search);
+    return this.routesService.findAll(tenantId, limit, page, search);
   }
 
   @Get(':routeId')
   @ApiParam({ name: 'routeId', type: String })
   @ApiOkResponse({ type: RouteDto })
-  findOne(@Param('routeId', ParseUUIDPipe) routeId: string) {
-    return this.routesService.findById(routeId);
+  findOne(@Req() req, @Param('routeId', ParseUUIDPipe) routeId: string) {
+    const { tenantId } = requireTenantId(req);
+
+    return this.routesService.findById(tenantId, routeId);
   }
 
   @Patch(':routeId')
@@ -96,9 +104,12 @@ export class RoutesController {
   @ApiBody({ type: UpdateRouteDto })
   @ApiOkResponse({ type: RouteDto })
   update(
+    @Req() req,
     @Param('routeId', ParseUUIDPipe) routeId: string,
     @Body() updateRouteDto: UpdateRouteDto,
   ) {
-    return this.routesService.update(routeId, updateRouteDto);
+    const { tenantId } = requireTenantId(req);
+
+    return this.routesService.update(tenantId, routeId, updateRouteDto);
   }
 }

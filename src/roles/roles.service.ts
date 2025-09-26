@@ -7,23 +7,28 @@ import { CreateRoleDto } from 'prisma/src/generated/dto/create-role.dto';
 export class RolesService {
   constructor(private readonly rolesRepository: RolesRepository) {}
 
-  create(createRoleDto: CreateRoleDto) {
-    return this.rolesRepository.create(createRoleDto);
+  create(tenantId: string, createRoleDto: CreateRoleDto) {
+    return this.rolesRepository.create(tenantId, createRoleDto);
   }
 
-  findAll(limit: number = 10, page: number = 1, search: string = '') {
-    return this.rolesRepository.findAll(limit, page, search);
+  findAll(
+    tenantId: string,
+    limit: number = 10,
+    page: number = 1,
+    search: string = '',
+  ) {
+    return this.rolesRepository.findAll(tenantId, limit, page, search);
   }
 
-  findOne(name: string) {
-    return this.rolesRepository.findByName(name);
+  findOne(tenantId: string, name: string) {
+    return this.rolesRepository.findByName(tenantId, name);
   }
 
-  findAllRoleNames() {
-    return this.rolesRepository.findAllRoleNames();
+  findAllRoleNames(tenantId: string) {
+    return this.rolesRepository.findAllRoleNames(tenantId);
   }
 
-  update(name: string, updateRoleDto: UpdateRoleDto) {
-    return this.rolesRepository.update(name, updateRoleDto);
+  update(tenantId: string, name: string, updateRoleDto: UpdateRoleDto) {
+    return this.rolesRepository.update(tenantId, name, updateRoleDto);
   }
 }

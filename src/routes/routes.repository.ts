@@ -20,7 +20,7 @@ export class RoutesRepository {
     private prismaService: CustomPrismaService<ExtendedPrismaClient>,
   ) {}
 
-  async create(data: CreateRouteDto): Promise<RouteDto> {
+  async create(tenantId: string, data: CreateRouteDto): Promise<RouteDto> {
     const existing = await this.prismaService.client.route.findFirst({
       where: { name: data.name },
     });
@@ -29,11 +29,17 @@ export class RoutesRepository {
         `Route with name ${data.name} already exists`,
       );
     }
-    const route = await this.prismaService.client.route.create({ data });
+    const route = await this.prismaService.client.route.create({
+      data: {
+        ...data,
+        tenantId,
+      },
+    });
     return transformResponse(RouteDto, route);
   }
 
   async findAll(
+    tenantId: string,
     limit = 10,
     page = 1,
     search?: string,
@@ -65,9 +71,9 @@ export class RoutesRepository {
     };
   }
 
-  async findById(routeId: string): Promise<RouteDto> {
+  async findById(tenantId: string, routeId: string): Promise<RouteDto> {
     const route = await this.prismaService.client.route.findUnique({
-      where: { routeId },
+      where: { tenantId_routeId: { tenantId, routeId } },
     });
     if (!route) {
       throw new NotFoundException(`Route with ID ${routeId} not found`);
@@ -75,9 +81,13 @@ export class RoutesRepository {
     return transformResponse(RouteDto, route);
   }
 
-  async update(routeId: string, data: UpdateRouteDto): Promise<RouteDto> {
+  async update(
+    tenantId: string,
+    routeId: string,
+    data: UpdateRouteDto,
+  ): Promise<RouteDto> {
     const existing = await this.prismaService.client.route.findUnique({
-      where: { routeId },
+      where: { tenantId_routeId: { tenantId, routeId } },
     });
     if (!existing) {
       throw new NotFoundException(`Route with ID ${routeId} not found`);
@@ -86,7 +96,7 @@ export class RoutesRepository {
       throw new BadRequestException(`No changes detected for route ${routeId}`);
     }
     const route = await this.prismaService.client.route.update({
-      where: { routeId },
+      where: { tenantId_routeId: { tenantId, routeId } },
       data,
     });
     return transformResponse(RouteDto, route);

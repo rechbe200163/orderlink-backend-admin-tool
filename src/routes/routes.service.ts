@@ -9,23 +9,28 @@ import { RouteDto } from 'prisma/src/generated/dto/route.dto';
 export class RoutesService {
   constructor(private readonly routesRepository: RoutesRepository) {}
 
-  create(createRouteDto: CreateRouteDto): Promise<RouteDto> {
-    return this.routesRepository.create(createRouteDto);
+  create(tenantId: string, createRouteDto: CreateRouteDto): Promise<RouteDto> {
+    return this.routesRepository.create(tenantId, createRouteDto);
   }
 
   findAll(
+    tenantId: string,
     limit = 10,
     page = 1,
     search?: string,
   ): Promise<PagingResultDto<RouteDto & { ordersCount: number }>> {
-    return this.routesRepository.findAll(limit, page, search);
+    return this.routesRepository.findAll(tenantId, limit, page, search);
   }
 
-  findById(id: string): Promise<RouteDto> {
-    return this.routesRepository.findById(id);
+  findById(tenantId: string, id: string): Promise<RouteDto> {
+    return this.routesRepository.findById(tenantId, id);
   }
 
-  update(id: string, updateRouteDto: UpdateRouteDto): Promise<RouteDto> {
-    return this.routesRepository.update(id, updateRouteDto);
+  update(
+    tenantId: string,
+    id: string,
+    updateRouteDto: UpdateRouteDto,
+  ): Promise<RouteDto> {
+    return this.routesRepository.update(tenantId, id, updateRouteDto);
   }
 }

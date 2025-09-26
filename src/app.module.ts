@@ -28,6 +28,9 @@ import { StatisticsModule } from './statistics/statistics.module';
 import { SiteConfigModule } from './site-config/site-config.module';
 import { ProductHistoryModule } from './product-history/product-history.module';
 import { OtpModule } from './otp/otp.module';
+import { OnboardingsModule } from './onboardings/onboardings.module';
+import { TenantsModule } from './tenants/tenants.module';
+import { ScheduleModule } from '@nestjs/schedule';
 @Module({
   imports: [
     CacheModule.registerAsync({
@@ -44,6 +47,7 @@ import { OtpModule } from './otp/otp.module';
         };
       },
     }),
+    ScheduleModule.forRoot(),
     EventEmitterModule.forRoot(),
     CustomPrismaModule.forRootAsync({
       name: 'PrismaService',
@@ -81,6 +85,8 @@ import { OtpModule } from './otp/otp.module';
     StatisticsModule,
     ProductHistoryModule,
     OtpModule,
+    TenantsModule,
+    OnboardingsModule,
   ],
   controllers: [AppController],
   providers: [AppService],

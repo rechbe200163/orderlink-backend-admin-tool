@@ -9,6 +9,7 @@ import {
   UseInterceptors,
   UseGuards,
   UploadedFile,
+  Request,
 } from '@nestjs/common';
 import { SiteConfigService } from './site-config.service';
 import { CacheInterceptor } from '@nestjs/cache-manager';
@@ -25,14 +26,13 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
-import { CreateSiteConfigDto } from 'prisma/src/generated/dto/create-siteConfig.dto';
+import { CreateSiteConfigDto } from 'src/onboardings/dto/create-siteConfig.dto';
 import { UpdateSiteConfigDto } from 'prisma/src/generated/dto/update-siteConfig.dto';
 import { SiteConfigDto } from 'prisma/src/generated/dto/siteConfig.dto';
-import { diskStorage } from 'multer';
-import { editFileName, imageFileFilter } from 'lib/utils/file-upload-util';
 import { FileSizeValidationPipe } from 'lib/pipes/file-size-validation-pipe';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileTypeValidationPipe } from 'lib/pipes/file-name-validation-pipe.ts';
+import { requireTenantId } from 'lib/common/tenant.util';
 
 @Controller('site-config')
 @UseInterceptors(CacheInterceptor)
@@ -53,24 +53,34 @@ export class SiteConfigController {
   @ApiOkResponse({ type: SiteConfigDto })
   @UseInterceptors(FileInterceptor('logo'))
   async create(
+    @Request() req,
     @Body() createDto: CreateSiteConfigDto,
     @UploadedFile(new FileSizeValidationPipe(), new FileTypeValidationPipe())
     logo: Express.Multer.File,
   ) {
-    return this.siteConfigService.create(createDto, logo);
+    const { tenantId } = requireTenantId(req);
+
+    return this.siteConfigService.create(tenantId, createDto, logo);
   }
 
   @Get()
   @ApiOkResponse({ type: SiteConfigDto })
-  findAll() {
-    return this.siteConfigService.findFirst();
+  findAll(@Request() req) {
+    const { tenantId } = requireTenantId(req);
+
+    return this.siteConfigService.findFirst(tenantId);
   }
 
   @Get(':siteConfigId')
   @ApiParam({ name: 'siteConfigId', type: String })
   @ApiOkResponse({ type: SiteConfigDto })
-  findOne(@Param('siteConfigId', ParseUUIDPipe) siteConfigId: string) {
-    return this.siteConfigService.findById(siteConfigId);
+  findOne(
+    @Request() req,
+    @Param('siteConfigId', ParseUUIDPipe) siteConfigId: string,
+  ) {
+    const { tenantId } = requireTenantId(req);
+
+    return this.siteConfigService.findById(tenantId, siteConfigId);
   }
 
   @Patch(':siteConfigId')
@@ -80,11 +90,18 @@ export class SiteConfigController {
   @ApiOkResponse({ type: SiteConfigDto })
   @UseInterceptors(FileInterceptor('logo'))
   async update(
+    @Request() req,
     @Param('siteConfigId', ParseUUIDPipe) siteConfigId: string,
     @Body() updateDto: UpdateSiteConfigDto,
     @UploadedFile(new FileSizeValidationPipe(), new FileTypeValidationPipe())
     logo: Express.Multer.File,
   ) {
-    return this.siteConfigService.update(siteConfigId, updateDto, logo);
+    const { tenantId } = requireTenantId(req);
+    return this.siteConfigService.update(
+      tenantId,
+      siteConfigId,
+      updateDto,
+      logo,
+    );
   }
 }

@@ -11,6 +11,7 @@ import {
   Query,
   ParseIntPipe,
   BadRequestException,
+  Req,
 } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { Resource } from 'lib/decorators/resource.decorator';
@@ -34,6 +35,7 @@ import { UpdateRoleDto } from 'prisma/src/generated/dto/update-role.dto';
 import { CreateRoleDto } from 'prisma/src/generated/dto/create-role.dto';
 import { RoleDto } from 'prisma/src/generated/dto/role.dto';
 import { RolePagingResultDto } from './dto/role-paging';
+import { requireTenantId } from 'lib/common/tenant.util';
 
 @Controller('roles')
 @UseInterceptors(CacheInterceptor)
@@ -68,8 +70,9 @@ export class RolesController {
   @ApiBadRequestResponse({
     description: 'Role with this name already exists or invalid data provided',
   })
-  create(@Body() createRoleDto: CreateRoleDto) {
-    return this.rolesService.create(createRoleDto);
+  create(@Req() req, @Body() createRoleDto: CreateRoleDto) {
+    const { tenantId } = requireTenantId(req);
+    return this.rolesService.create(tenantId, createRoleDto);
   }
 
   @Get()
@@ -99,14 +102,16 @@ export class RolesController {
   })
   @ApiOkResponse({ type: RolePagingResultDto })
   findAll(
+    @Req() req,
     @Query('limit', ParseIntPipe) limit: number = 10,
     @Query('page', ParseIntPipe) page: number = 1,
     @Query('search') search?: string,
   ) {
+    const { tenantId } = requireTenantId(req);
     if (limit > MAX_PAGE_SIZE) {
       throw new BadRequestException(`Limit cannot exceed ${MAX_PAGE_SIZE}`);
     }
-    return this.rolesService.findAll(limit, page, search);
+    return this.rolesService.findAll(tenantId, limit, page, search);
   }
 
   @Get('roleNames')
@@ -114,8 +119,9 @@ export class RolesController {
     description: 'All role names retrieved successfully',
     type: [String],
   })
-  findAllRoleNames() {
-    return this.rolesService.findAllRoleNames();
+  findAllRoleNames(@Req() req) {
+    const { tenantId } = requireTenantId(req);
+    return this.rolesService.findAllRoleNames(tenantId);
   }
 
   @Get(':name')
@@ -130,8 +136,9 @@ export class RolesController {
     description: 'Role retrieved successfully',
     type: RoleDto,
   })
-  findOne(@Param('name') name: string) {
-    return this.rolesService.findOne(name);
+  findOne(@Req() req, @Param('name') name: string) {
+    const { tenantId } = requireTenantId(req);
+    return this.rolesService.findOne(tenantId, name);
   }
 
   @Patch(':name')
@@ -146,7 +153,12 @@ export class RolesController {
     type: UpdateRoleDto,
     description: 'Update an existing role',
   })
-  update(@Param('name') name: string, @Body() updateRoleDto: UpdateRoleDto) {
-    return this.rolesService.update(name, updateRoleDto);
+  update(
+    @Req() req,
+    @Param('name') name: string,
+    @Body() updateRoleDto: UpdateRoleDto,
+  ) {
+    const { tenantId } = requireTenantId(req);
+    return this.rolesService.update(tenantId, name, updateRoleDto);
   }
 }

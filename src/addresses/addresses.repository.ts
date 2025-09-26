@@ -20,12 +20,18 @@ export class AddressesRepository {
     private prismaService: CustomPrismaService<ExtendedPrismaClient>,
   ) {}
 
-  async create(data: CreateAddressDto): Promise<AddressDto> {
-    const address = await this.prismaService.client.address.create({ data });
+  async create(tenantId: string, data: CreateAddressDto): Promise<AddressDto> {
+    const address = await this.prismaService.client.address.create({
+      data: {
+        ...data,
+        tenantId,
+      },
+    });
     return transformResponse(AddressDto, address);
   }
 
   async findAllPaging(
+    tenantId: string,
     limit = 10,
     page = 1,
     query?: string,
@@ -33,6 +39,7 @@ export class AddressesRepository {
     const [addresses, meta] = await this.prismaService.client.address
       .paginate({
         where: {
+          tenantId,
           deleted: false,
           ...(query && {
             OR: [
@@ -50,16 +57,21 @@ export class AddressesRepository {
     };
   }
 
-  async findAll(): Promise<AddressDto[]> {
+  async findAll(tenantId: string): Promise<AddressDto[]> {
     const addresses = await this.prismaService.client.address.findMany({
-      where: { deleted: false },
+      where: { deleted: false, tenantId },
     });
     return addresses.map((a: AddressDto) => transformResponse(AddressDto, a));
   }
 
-  async findById(addressId: string): Promise<AddressDto> {
+  async findById(tenantId: string, addressId: string): Promise<AddressDto> {
     const address = await this.prismaService.client.address.findUnique({
-      where: { addressId },
+      where: {
+        tenantId_addressId: {
+          tenantId,
+          addressId,
+        },
+      },
     });
     if (!address) {
       throw new NotFoundException(`Address with ID ${addressId} not found`);
@@ -67,9 +79,18 @@ export class AddressesRepository {
     return transformResponse(AddressDto, address);
   }
 
-  async update(addressId: string, data: UpdateAddressDto): Promise<AddressDto> {
+  async update(
+    tenantId: string,
+    addressId: string,
+    data: UpdateAddressDto,
+  ): Promise<AddressDto> {
     const existing = await this.prismaService.client.address.findUnique({
-      where: { addressId },
+      where: {
+        tenantId_addressId: {
+          tenantId,
+          addressId,
+        },
+      },
     });
     if (!existing) {
       throw new NotFoundException(`Address with ID ${addressId} not found`);
@@ -80,7 +101,12 @@ export class AddressesRepository {
       );
     }
     const address = await this.prismaService.client.address.update({
-      where: { addressId },
+      where: {
+        tenantId_addressId: {
+          tenantId,
+          addressId,
+        },
+      },
       data,
     });
     return transformResponse(AddressDto, address);

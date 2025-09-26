@@ -1,6 +1,6 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { SiteConfigRepository } from './site-config.repository';
-import { CreateSiteConfigDto } from 'prisma/src/generated/dto/create-siteConfig.dto';
+import { CreateSiteConfigDto } from 'src/onboardings/dto/create-siteConfig.dto';
 import { UpdateSiteConfigDto } from 'prisma/src/generated/dto/update-siteConfig.dto';
 import { SiteConfigDto } from 'prisma/src/generated/dto/siteConfig.dto';
 import { FileRepositoryService } from 'src/file-repository/file-repository.service';
@@ -13,17 +13,18 @@ export class SiteConfigService {
   ) {}
 
   async create(
+    tenantId: string,
     createDto: CreateSiteConfigDto,
     file?: Express.Multer.File,
   ): Promise<SiteConfigDto> {
     if (file) {
-      const filename = await this.fileService.uploadFile(file);
+      const filename = await this.fileService.uploadFile(tenantId, file);
       createDto.logoPath = filename;
     }
-    return this.siteConfigRepository.create(createDto);
+    return this.siteConfigRepository.create(tenantId, createDto);
   }
 
-  async findFirst(): Promise<SiteConfigDto> {
+  async findFirst(tenantId: string): Promise<SiteConfigDto> {
     const siteConfig = await this.siteConfigRepository.findFirst();
     if (!siteConfig) {
       throw new NotFoundException('Site configuration not found');
@@ -34,8 +35,8 @@ export class SiteConfigService {
     return siteConfig;
   }
 
-  async findById(id: string): Promise<SiteConfigDto> {
-    const siteConfig = await this.siteConfigRepository.findById(id);
+  async findById(tenantId: string, id: string): Promise<SiteConfigDto> {
+    const siteConfig = await this.siteConfigRepository.findById(tenantId, id);
     if (!siteConfig) {
       throw new NotFoundException('Site configuration not found');
     }
@@ -46,15 +47,16 @@ export class SiteConfigService {
   }
 
   async update(
+    tenantId: string,
     id: string,
     updateDto: UpdateSiteConfigDto,
     file?: Express.Multer.File,
   ): Promise<SiteConfigDto> {
     if (file) {
-      const filename = await this.fileService.uploadFile(file);
+      const filename = await this.fileService.uploadFile(tenantId, file);
       updateDto.logoPath = filename;
     }
-    return this.siteConfigRepository.update(id, updateDto);
+    return this.siteConfigRepository.update(tenantId, id, updateDto);
   }
 
   private addCdnImageUrl(productImage: string | null): string | undefined {

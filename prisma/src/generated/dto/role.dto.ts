@@ -1,5 +1,6 @@
 import { Expose } from 'class-transformer';
 import { PermissionDto } from './permission.dto';
+import { IsOptional } from 'class-validator';
 
 export class RoleDto {
   @Expose()
@@ -9,5 +10,5 @@ export class RoleDto {
   @Expose()
   deleted: boolean;
   @Expose()
-  permissions: PermissionDto[];
+  permissions?: PermissionDto[];
 }

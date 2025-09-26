@@ -27,7 +27,9 @@ export class MaxEmployeeGuard implements CanActivate {
       return true;
     }
 
-    const tenantData = await this.prismaService.client.tenantData.findFirst({});
+    const tenantData = await this.prismaService.client.tenant.findUnique({
+      where: { tenantId: (employee as JwtPayload).tenantId },
+    });
 
     if (!tenantData) {
       throw new ForbiddenException('Tenant data not found');

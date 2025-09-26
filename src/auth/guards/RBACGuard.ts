@@ -37,10 +37,10 @@ export class PermissionsGuard implements CanActivate {
       this.reflector.get<Resources>('resource', controller);
 
     console.log(
-      `Checking permissions for user: ${employee?.email}, method: ${method}, resource: ${resource}, role: ${employee?.role}, superAdmin: ${employee?.superAdmin}`,
+      `Checking permissions for user: ${employee?.email}, method: ${method}, resource: ${resource}, role: ${employee?.roleName}, superAdmin: ${employee?.superAdmin}`,
     );
 
-    if (!employee || !employee.role || !resource) {
+    if (!employee || !employee.roleName || !resource) {
       throw new ForbiddenException('Missing user role or resource.');
     }
 
@@ -56,8 +56,9 @@ export class PermissionsGuard implements CanActivate {
     // Wichtig: Suche permission anhand role, action und resource
     const permission = await this.prismaService.client.permission.findUnique({
       where: {
-        role_action_resource: {
-          role: employee.role,
+        permission_role_action_resource_unique: {
+          tenantId: employee.tenantId,
+          roleName: employee.roleName,
           action: action,
           resource: resource,
         },
@@ -67,16 +68,17 @@ export class PermissionsGuard implements CanActivate {
     if (!permission || !permission.allowed) {
       // Emit an event for access violation
       this.eventEmitter.emit('access-violation', {
+        tenantId: employee.tenantId,
         employeeId: employee.employeeId,
         firstName: employee.firstName || '',
         lastName: employee.lastName,
         email: employee.email,
-        role: employee.role,
+        role: employee.roleName,
         resource: resource,
         action: action,
       });
       throw new ForbiddenException(
-        `Role "${employee.role}" is not allowed to ${action} ${resource}`,
+        `Role "${employee.roleName}" is not allowed to ${action} ${resource}`,
       );
     }
 

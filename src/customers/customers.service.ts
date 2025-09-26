@@ -13,21 +13,26 @@ export class CustomersService {
     private readonly eventEmitter: TypedEventEmitter,
   ) {}
 
-  async findCustomerByReference(customerReference: number) {
-    return this.customerRepository.findCustomerByReference(customerReference);
+  async findCustomerByReference(tenantId: string, customerReference: number) {
+    return this.customerRepository.findCustomerByReference(
+      tenantId,
+      customerReference,
+    );
   }
 
-  async findAllCustomers(query?: string) {
-    return this.customerRepository.findAllCustomers(query);
+  async findAllCustomers(tenantId: string, query?: string) {
+    return this.customerRepository.findAllCustomers(tenantId, query);
   }
 
   async getCustomers(
+    tenantId: string,
     limit: number = 10,
     page: number = 1,
     query?: string | undefined,
     businessSector?: BusinessSector,
   ) {
     return this.customerRepository.getCustomers(
+      tenantId,
       limit,
       page,
       query,
@@ -35,9 +40,11 @@ export class CustomersService {
     );
   }
 
-  async createCustomer(customerData: CreateCustomerDto) {
-    const { customer, password } =
-      await this.customerRepository.createCustomer(customerData);
+  async createCustomer(tenantId: string, customerData: CreateCustomerDto) {
+    const { customer, password } = await this.customerRepository.createCustomer(
+      tenantId,
+      customerData,
+    );
     if (customer) {
       // Emit an event after creating a customer
       this.eventEmitter.emit('customer.created', {
@@ -52,10 +59,12 @@ export class CustomersService {
   }
 
   async updateCustomer(
+    tenantId: string,
     customerReference: number,
     customerData: UpdateCustomerDto,
   ) {
     return this.customerRepository.updateCustomer(
+      tenantId,
       customerReference,
       customerData,
     );

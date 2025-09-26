@@ -11,6 +11,7 @@ import {
   Query,
   UseGuards,
   UseInterceptors,
+  Request,
 } from '@nestjs/common';
 import { CustomersService } from './customers.service';
 import { Resource } from 'lib/decorators/resource.decorator';
@@ -36,6 +37,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { UpdateCustomerDto } from 'src/customers/dto/update-customer.dto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
+import { requireTenantId } from 'lib/common/tenant.util';
 
 @Controller('customers')
 @UseInterceptors(CacheInterceptor)
@@ -65,9 +67,15 @@ export class CustomersController {
     description: 'Customer not found',
   })
   async findCustomerByReference(
+    @Request() req,
     @Param('reference', ParseIntPipe) reference: number,
   ) {
-    return await this.customersService.findCustomerByReference(reference);
+    const { tenantId } = requireTenantId(req);
+
+    return await this.customersService.findCustomerByReference(
+      tenantId,
+      reference,
+    );
   }
 
   @Get()
@@ -106,6 +114,7 @@ export class CustomersController {
   })
   @ApiOkResponse({ type: CustomerPagingResultDto })
   async getCustomers(
+    @Request() req,
     @Query('limit', ParseIntPipe) limit: number = 10,
     @Query('page', ParseIntPipe) page: number = 1,
     @Query('query') query?: string | undefined,
@@ -115,14 +124,14 @@ export class CustomersController {
     )
     businessSector?: BusinessSector | undefined,
   ) {
+    const { tenantId } = requireTenantId(req);
+
     const maxLimit = MAX_PAGE_SIZE; // Define a maximum limit for pagination
     if (limit > maxLimit) {
       throw new BadRequestException(`Limit cannot exceed ${maxLimit}`);
     }
-    console.log(
-      `Fetching customers with limit: ${limit}, page: ${page}, businessSector: ${businessSector}`,
-    );
     return await this.customersService.getCustomers(
+      tenantId,
       limit,
       page,
       query,
@@ -142,9 +151,16 @@ export class CustomersController {
   @ApiConflictResponse({
     description: 'Customer with this email already exists',
   })
-  async createCustomer(@Body() createCustomerDto: CreateCustomerDto) {
-    const data = await this.customersService.createCustomer(createCustomerDto);
-    console.log('Customer created:', data);
+  async createCustomer(
+    @Request() req,
+    @Body() createCustomerDto: CreateCustomerDto,
+  ) {
+    const { tenantId } = requireTenantId(req);
+
+    const data = await this.customersService.createCustomer(
+      tenantId,
+      createCustomerDto,
+    );
     return data;
   }
 
@@ -161,13 +177,14 @@ export class CustomersController {
     type: UpdateCustomerDto,
   })
   async updateCustomer(
+    @Request() req,
     @Param('reference', ParseIntPipe) reference: number,
     @Body() updateCustomerDto: UpdateCustomerDto,
   ) {
-    console.log(
-      `Updating customer with reference: ${reference}, data: ${JSON.stringify(updateCustomerDto)}`,
-    );
+    const { tenantId } = requireTenantId(req);
+
     return await this.customersService.updateCustomer(
+      tenantId,
       reference,
       updateCustomerDto,
     );

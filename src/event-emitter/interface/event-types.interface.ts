@@ -7,12 +7,17 @@ export interface EventPayloads {
     password: string;
   };
   'employee.created': {
+    tenant: {
+      tenantSlug: string;
+      tenantId: string;
+    };
     employeeId: string;
     firstName: string;
     lastName: string;
     email: string;
   };
   'access-violation': {
+    tenantId: string;
     employeeId: string;
     firstName: string;
     lastName: string;
@@ -22,12 +27,14 @@ export interface EventPayloads {
     action: string;
   };
   'permission.requested': {
+    tenantId: string;
     employeeId: string;
     role: string;
     resource: string;
     actions: string[];
   };
   'product.updated': {
+    tenantId: string;
     productId: string;
     name: string;
     price: number;
@@ -46,6 +53,7 @@ export interface EventPayloads {
     categoryId: string;
   };
   'order.created': {
+    tenantId: string;
     orderId: string;
     customerReference: number;
     items: Array<{
@@ -54,6 +62,7 @@ export interface EventPayloads {
     }>;
   };
   'otp.resend': {
+    tenantId: string;
     employeeId: string;
     otpCode: number;
   };

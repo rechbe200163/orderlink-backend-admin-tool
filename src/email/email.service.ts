@@ -37,14 +37,17 @@ export class EmailService {
 
   @OnEvent('employee.created')
   async employeeCreatedEmail(data: EventPayloads['employee.created']) {
-    const { email, firstName, lastName, employeeId } = data;
+    const { tenant, email, firstName, lastName, employeeId } = data;
 
     console.log(
       `Sending employee created email to ${email} with firstName: ${firstName}`,
       `with lastName: ${lastName}`,
     );
 
-    const otp = await this.OtpService.createOTP(employeeId);
+    const { code } = await this.OtpService.createOTP(
+      tenant.tenantId,
+      employeeId,
+    );
 
     await this.mailerService.sendMail({
       to: email,
@@ -53,7 +56,8 @@ export class EmailService {
         firstName,
         lastName,
         email,
-        otp,
+        otp: code,
+        magicLink: `https://admin.orderlink.at/auth/${tenant.tenantSlug}/otp`,
       },
     });
   }
@@ -61,10 +65,17 @@ export class EmailService {
   @OnEvent('access-violation')
   async accessViolationEmail(data: EventPayloads['access-violation']) {
     // find all employees with admin role
-    const adminEmails = await this.employeeRepository.findAdminEmails();
-
-    const { employeeId, firstName, lastName, email, role, resource, action } =
-      data;
+    const {
+      tenantId,
+      employeeId,
+      firstName,
+      lastName,
+      email,
+      role,
+      resource,
+      action,
+    } = data;
+    const adminEmails = await this.employeeRepository.findAdminEmails(tenantId);
 
     console.log(
       `Sending access violation email for employeeId: ${employeeId}, firstName: ${firstName}`,
@@ -90,8 +101,8 @@ export class EmailService {
 
   @OnEvent('permission.requested')
   async permissionRequestEmail(data: EventPayloads['permission.requested']) {
-    const adminEmails = await this.employeeRepository.findAdminEmails();
-    const { employeeId, role, resource, actions } = data;
+    const { tenantId, employeeId, role, resource, actions } = data;
+    const adminEmails = await this.employeeRepository.findAdminEmails(tenantId);
 
     for (const adminEmail of adminEmails) {
       await this.mailerService.sendMail({
@@ -104,9 +115,12 @@ export class EmailService {
 
   @OnEvent('otp.resend')
   async resendOtpEmail(data: EventPayloads['otp.resend']) {
-    const { employeeId, otpCode } = data;
+    const { tenantId, employeeId, otpCode } = data;
 
-    const employee = await this.employeeRepository.findById(employeeId);
+    const employee = await this.employeeRepository.findById(
+      tenantId,
+      employeeId,
+    );
     if (!employee) {
       console.error(`Employee with ID ${employeeId} not found`);
       return;

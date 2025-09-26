@@ -27,22 +27,27 @@ export class EmployeesRepository {
     private readonly rolesRepository: RolesRepository,
   ) {}
 
-  async create(createEmployeeDto: CreateEmployeesDto): Promise<{
+  async create(
+    tenantId: string,
+    createEmployeeDto: CreateEmployeesDto,
+  ): Promise<{
     employee: EmployeesDto;
   }> {
     const existingEmployee =
       await this.prismaService.client.employees.findEmployeeByEmail(
+        tenantId,
         createEmployeeDto.email,
       );
     if (existingEmployee) {
       throw new BadRequestException(`Employee with this email already exists`);
     }
     const existingRole = await this.rolesRepository.findByName(
-      createEmployeeDto.role,
+      tenantId,
+      createEmployeeDto.roleName,
     );
     if (!existingRole) {
       throw new NotFoundException(
-        `Role ${createEmployeeDto.role} does not exist`,
+        `Role ${createEmployeeDto.roleName} does not exist`,
       );
     }
 
@@ -50,6 +55,7 @@ export class EmployeesRepository {
       data: {
         ...createEmployeeDto,
         password: '',
+        tenantId,
       },
     });
     return {
@@ -107,37 +113,48 @@ export class EmployeesRepository {
     };
   }
 
-  async findById(employeeId: string, includeOtp = false) {
+  async findById(tenantId: string, employeeId: string, includeOtp = false) {
     const employee = (await this.prismaService.client.employees.findUnique({
-      where: { employeeId },
+      where: {
+        tenantId_employeeId: { tenantId, employeeId },
+      },
       ...(includeOtp && { include: { Otp: true } }),
     })) as EmployeesDto & { Otp?: Otp };
     const base = transformResponse(EmployeesDto, employee);
     return includeOtp ? { ...base, Otp: employee?.Otp } : base;
   }
 
-  async findByRole(role: string) {
+  async findByRole(tenantId: string, role: string) {
     // check if role exists
-    const existingRole = await this.rolesRepository.findByName(role);
+    const existingRole = await this.rolesRepository.findByName(tenantId, role);
     if (!existingRole) {
       throw new NotFoundException(`Role ${role} does not exist`);
     }
-    const employees =
-      await this.prismaService.client.employees.findByRole(role);
+    const employees = await this.prismaService.client.employees.findByRole(
+      tenantId,
+      role,
+    );
     return transformResponse(EmployeesDto, employees);
   }
 
-  async findByEmail(email: string) {
+  async findByEmail(tenantId: string, email: string) {
     const employee =
-      await this.prismaService.client.employees.findEmployeeByEmail(email);
+      await this.prismaService.client.employees.findEmployeeByEmail(
+        tenantId,
+        email,
+      );
     if (!employee) {
       throw new NotFoundException(`Employee with email ${email} not found`);
     }
     return transformResponse(EmployeesDto, employee);
   }
 
-  async update(employeeId: string, updateEmployee: UpdateEmployeesDto) {
-    const existingEmployee = await this.findById(employeeId);
+  async update(
+    tenantId: string,
+    employeeId: string,
+    updateEmployee: UpdateEmployeesDto,
+  ) {
+    const existingEmployee = await this.findById(tenantId, employeeId);
     if (!existingEmployee) {
       throw new NotFoundException(`Employee with ID ${employeeId} not found`);
     }
@@ -156,15 +173,17 @@ export class EmployeesRepository {
       );
     }
     const updatedEmployee = await this.prismaService.client.employees.update({
-      where: { employeeId },
+      where: {
+        tenantId_employeeId: { tenantId, employeeId },
+      },
       data: updateEmployee,
     });
     return transformResponse(EmployeesDto, updatedEmployee);
   }
 
-  async findAdminEmails(): Promise<string[]> {
+  async findAdminEmails(tenantId: string): Promise<string[]> {
     const admins = await this.prismaService.client.employees.findMany({
-      where: { role: 'ADMIN', superAdmin: true, deleted: false },
+      where: { roleName: 'ADMIN', superAdmin: true, deleted: false, tenantId },
       select: { email: true },
     });
     return admins.map((admin) => admin.email);

@@ -20,14 +20,21 @@ export class InvoicesRepository {
     private prismaService: CustomPrismaService<ExtendedPrismaClient>,
   ) {}
 
-  async create(data: CreateInvoiceDto): Promise<InvoiceDto> {
+  async create(tenantId: string, data: CreateInvoiceDto): Promise<InvoiceDto> {
     const existing = await this.prismaService.client.invoice.findUnique({
-      where: { orderId: data.orderId },
+      where: {
+        invoice_tenant_order_unique: {
+          tenantId,
+          orderId: data.orderId,
+        },
+      },
     });
     if (existing) {
       throw new BadRequestException(`Invoice for this order already exists`);
     }
-    const invoice = await this.prismaService.client.invoice.create({ data });
+    const invoice = await this.prismaService.client.invoice.create({
+      data: { ...data, tenantId },
+    });
     return transformResponse(InvoiceDto, invoice);
   }
 
@@ -42,9 +49,14 @@ export class InvoicesRepository {
     };
   }
 
-  async findById(invoiceId: string): Promise<InvoiceDto> {
+  async findById(tenantId: string, invoiceId: string): Promise<InvoiceDto> {
     const invoice = await this.prismaService.client.invoice.findUnique({
-      where: { invoiceId },
+      where: {
+        invoice_tenant_invoiceId_unique: {
+          invoiceId,
+          tenantId,
+        },
+      },
     });
     if (!invoice) {
       throw new NotFoundException(`Invoice with ID ${invoiceId} not found`);
@@ -52,9 +64,18 @@ export class InvoicesRepository {
     return transformResponse(InvoiceDto, invoice);
   }
 
-  async update(invoiceId: string, data: UpdateInvoiceDto): Promise<InvoiceDto> {
+  async update(
+    tenantId: string,
+    invoiceId: string,
+    data: UpdateInvoiceDto,
+  ): Promise<InvoiceDto> {
     const existing = await this.prismaService.client.invoice.findUnique({
-      where: { invoiceId },
+      where: {
+        invoice_tenant_invoiceId_unique: {
+          invoiceId,
+          tenantId,
+        },
+      },
     });
     if (!existing) {
       throw new NotFoundException(`Invoice with ID ${invoiceId} not found`);
@@ -65,7 +86,12 @@ export class InvoicesRepository {
       );
     }
     const invoice = await this.prismaService.client.invoice.update({
-      where: { invoiceId },
+      where: {
+        invoice_tenant_invoiceId_unique: {
+          invoiceId,
+          tenantId,
+        },
+      },
       data,
     });
     return transformResponse(InvoiceDto, invoice);

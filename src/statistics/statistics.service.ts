@@ -5,31 +5,31 @@ import { StatisticsRepository } from './statistics.repository';
 export class StatisticsService {
   constructor(private readonly statisticsRepository: StatisticsRepository) {}
 
-  getOrderStateCounts() {
-    return this.statisticsRepository.getOrderStateCounts();
+  getOrderStateCounts(tenantId: string) {
+    return this.statisticsRepository.getOrderStateCounts(tenantId);
   }
 
-  getCustomerBusinessSectors() {
-    return this.statisticsRepository.getCustomerBusinessSectors();
+  getCustomerBusinessSectors(tenantId: string) {
+    return this.statisticsRepository.getCustomerBusinessSectors(tenantId);
   }
 
-  getQuickStats() {
-    return this.statisticsRepository.getQuickStats();
+  getQuickStats(tenantId: string) {
+    return this.statisticsRepository.getQuickStats(tenantId);
   }
 
-  getRevenueStats() {
-    return this.statisticsRepository.getRevenueStats();
+  getRevenueStats(tenantId: string) {
+    return this.statisticsRepository.getRevenueStats(tenantId);
   }
 
-  getSalesStats() {
-    return this.statisticsRepository.getSalesStats();
+  getSalesStats(tenantId: string) {
+    return this.statisticsRepository.getSalesStats(tenantId);
   }
 
-  getAverageOrderValueStats() {
-    return this.statisticsRepository.getAverageOrderValueStats();
+  getAverageOrderValueStats(tenantId: string) {
+    return this.statisticsRepository.getAverageOrderValueStats(tenantId);
   }
 
-  getCustomerStats() {
-    return this.statisticsRepository.getCustomerStats();
+  getCustomerStats(tenantId: string) {
+    return this.statisticsRepository.getCustomerStats(tenantId);
   }
 }

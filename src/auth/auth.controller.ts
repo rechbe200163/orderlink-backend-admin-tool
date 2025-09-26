@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Get,
@@ -51,32 +52,32 @@ export class AuthController {
   })
   @UseGuards(JwtAuthGuard, ThrottlerGuard)
   @ApiBearerAuth()
-  renewToken(@Request() request) {
-    if (!request.user) {
+  renewToken(@Request() req) {
+    if (!req.user) {
       throw new NotImplementedException('User not found in request');
     }
-    return this.authService.signIn(request.user);
+    return this.authService.signIn(req.user);
   }
   @ApiBearerAuth()
   @UseGuards(JwtAuthGuard, ThrottlerGuard)
-  getProfile(@Request() request) {
-    return request.user;
+  getProfile(@Request() req) {
+    return req.user;
   }
 
-  @Post('otp/:otp')
+  @Post('otp/:tenantSlug/:otp')
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: AuthResultDto })
   @ApiUnauthorizedResponse({
     description: 'Invalid credentials',
   })
-  @ApiParam({
-    name: 'otp',
-    required: true,
-    type: String,
-    description: 'One-time password for validation',
-  })
-  async validateOtp(@Param('otp', ParseIntPipe) otp: number) {
-    return this.authService.signInWithOtp(otp);
+  async validateOtp(
+    @Param('tenantSlug') tenantSlug: string,
+    @Param('otp', ParseIntPipe) otp: number,
+  ) {
+    if (!tenantSlug || !otp) {
+      throw new BadRequestException('Tenant slug or OTP not provided');
+    }
+    return this.authService.signInWithOtp(tenantSlug, otp);
   }
 
   ///renewSession

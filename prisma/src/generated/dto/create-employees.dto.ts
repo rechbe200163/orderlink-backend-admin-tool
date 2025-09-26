@@ -39,7 +39,7 @@ export class CreateEmployeesDto {
       'Role must be in uppercase and can only contain letters and underscores',
   })
   @IsString()
-  role: string;
+  roleName: string;
 
   @ApiProperty({ required: false, default: false })
   @Expose()

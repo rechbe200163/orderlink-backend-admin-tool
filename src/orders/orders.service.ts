@@ -6,6 +6,7 @@ import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { OrderDto } from './dto/order.dto';
 import { OrderState } from '@prisma/client';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
+import { symlink } from 'fs';
 
 @Injectable()
 export class OrdersService {
@@ -14,9 +15,13 @@ export class OrdersService {
     private readonly eventEmitter: TypedEventEmitter,
   ) {}
 
-  async create(createOrderDto: CreateOrderDto): Promise<OrderDto> {
-    const order = await this.ordersRepository.create(createOrderDto);
+  async create(
+    tenantId: string,
+    createOrderDto: CreateOrderDto,
+  ): Promise<OrderDto> {
+    const order = await this.ordersRepository.create(tenantId, createOrderDto);
     this.eventEmitter.emit('order.created', {
+      tenantId,
       orderId: order.orderId,
       customerReference: createOrderDto.customerReference,
       items: createOrderDto.products,
@@ -25,6 +30,7 @@ export class OrdersService {
   }
 
   findAll(
+    tenantId: string,
     limit = 10,
     page = 1,
     orderState?: OrderState,
@@ -43,6 +49,7 @@ export class OrdersService {
     >
   > {
     return this.ordersRepository.findAll(
+      tenantId,
       limit,
       page,
       orderState,
@@ -52,15 +59,19 @@ export class OrdersService {
     );
   }
 
-  findOne(id: string): Promise<OrderDto> {
-    return this.ordersRepository.findById(id);
+  findOne(tenantId: string, id: string): Promise<OrderDto> {
+    return this.ordersRepository.findById(tenantId, id);
   }
 
-  findAllOrders(): Promise<any> {
-    return this.ordersRepository.findAllOrders();
+  findAllOrders(tenantId: string): Promise<any> {
+    return this.ordersRepository.findAllOrders(tenantId);
   }
 
-  update(id: string, updateOrderDto: UpdateOrderDto): Promise<OrderDto> {
-    return this.ordersRepository.update(id, updateOrderDto);
+  update(
+    tenantId: string,
+    id: string,
+    updateOrderDto: UpdateOrderDto,
+  ): Promise<OrderDto> {
+    return this.ordersRepository.update(tenantId, id, updateOrderDto);
   }
 }

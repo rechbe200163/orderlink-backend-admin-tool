@@ -14,7 +14,7 @@ export class OtpService {
     private readonly eventEmitter: TypedEventEmitter, // Assuming you have a TypedEventEmitter for event handling
   ) {}
 
-  async createOTP(employeeId: string) {
+  async createOTP(tenantId: string, employeeId: string): Promise<Otp> {
     const nanoidNumbers = customAlphabet('0123456789', 6);
     const OTP = Number(nanoidNumbers());
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // OTP valid for 10 minutes
@@ -23,27 +23,39 @@ export class OtpService {
         code: OTP,
         expiresAt,
         employeeId,
+        tenantId,
       },
     });
   }
 
-  async markOtpAsUsed(otp: number) {
-    const otpRecord = await this.prismaService.client.otp.findUnique({
-      where: { code: otp },
-    });
-    if (otpRecord) {
-      await this.prismaService.client.otp.update({
-        where: { code: otp },
-        data: { used: true },
+  async markOtpAsUsed(tenantSlug: string, otp: number): Promise<void> {
+    try {
+      const { tenantId } =
+        await this.prismaService.client.tenant.findUniqueOrThrow({
+          where: { slug: tenantSlug },
+          select: { tenantId: true },
+        });
+
+      const otpRecord = await this.prismaService.client.otp.findUnique({
+        where: { otp_tenant_code_unique: { code: otp, tenantId } },
       });
+      if (otpRecord) {
+        await this.prismaService.client.otp.update({
+          where: { otp_tenant_code_unique: { code: otp, tenantId } },
+          data: { used: true },
+        });
+      }
+    } catch (error) {
+      throw new UnauthorizedException('Invalid or expired OTP.');
     }
   }
 
-  async validateOTP(code: number): Promise<Otp | null> {
+  async validateOTP(tenantId: string, code: number): Promise<Otp | null> {
     console.log('Validating OTP:', code);
     const otp = await this.prismaService.client.otp.findUnique({
-      where: { code, used: false },
+      where: { otp_tenant_code_unique: { tenantId, code } },
     });
+    console.log('Found OTP record:', otp);
     if (!otp) {
       console.error('OTP not found');
       return null;
@@ -55,10 +67,14 @@ export class OtpService {
     return otp;
   }
 
-  async resendOtp(employeeId: string) {
-    const otp = await this.createOTP(employeeId);
+  async resendOtp(
+    tenantId: string,
+    employeeId: string,
+  ): Promise<{ message: string; otpCode: string }> {
+    const otp = await this.createOTP(employeeId, tenantId);
     // Here you would typically send the OTP via email or SMS
     this.eventEmitter.emit('otp.resend', {
+      tenantId,
       employeeId,
       otpCode: otp.code,
     });

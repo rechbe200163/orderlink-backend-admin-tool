@@ -17,10 +17,11 @@ export class StatisticsRepository {
     private readonly prisma: CustomPrismaService<ExtendedPrismaClient>,
   ) {}
 
-  async getOrderStateCounts(): Promise<OrderStateCountDto[]> {
+  async getOrderStateCounts(tenantId: string): Promise<OrderStateCountDto[]> {
     const grouped = await this.prisma.client.order.groupBy({
       by: ['orderState'],
       _count: true,
+      where: { tenantId },
     });
 
     return grouped.map((g) => ({
@@ -29,10 +30,13 @@ export class StatisticsRepository {
     }));
   }
 
-  async getCustomerBusinessSectors(): Promise<CustomerBusinessSectorDto> {
+  async getCustomerBusinessSectors(
+    tenantId: string,
+  ): Promise<CustomerBusinessSectorDto> {
     const grouped = await this.prisma.client.customer.groupBy({
       by: ['businessSector'],
       _count: true,
+      where: { tenantId },
     });
 
     const sectors = grouped.reduce(
@@ -45,12 +49,14 @@ export class StatisticsRepository {
       {} as Record<BusinessSector, number>,
     );
 
-    const totalCustomers = await this.prisma.client.customer.count();
+    const totalCustomers = await this.prisma.client.customer.count({
+      where: { tenantId },
+    });
 
     return { totalCustomers, sectors };
   }
 
-  async getQuickStats(): Promise<QuickStatsDto> {
+  async getQuickStats(tenantId: string): Promise<QuickStatsDto> {
     const [
       totalCustomers,
       totalOrders,
@@ -86,8 +92,10 @@ export class StatisticsRepository {
     return { start, end };
   }
 
-  async getRevenueStats(): Promise<RevenueStatsDto> {
-    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(new Date());
+  async getRevenueStats(tenantId: string): Promise<RevenueStatsDto> {
+    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(
+      new Date(),
+    );
     const { start: lastStart, end: lastEnd } = this.getMonthDateRange(
       new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
     );
@@ -95,11 +103,11 @@ export class StatisticsRepository {
     const [current, last] = await this.prisma.client.$transaction([
       this.prisma.client.invoice.aggregate({
         _sum: { invoiceAmount: true },
-        where: { paymentDate: { gte: currentStart, lt: currentEnd } },
+        where: { paymentDate: { gte: currentStart, lt: currentEnd }, tenantId },
       }),
       this.prisma.client.invoice.aggregate({
         _sum: { invoiceAmount: true },
-        where: { paymentDate: { gte: lastStart, lt: lastEnd } },
+        where: { paymentDate: { gte: lastStart, lt: lastEnd }, tenantId },
       }),
     ]);
 
@@ -113,18 +121,20 @@ export class StatisticsRepository {
     return { currentMonthRevenue: currentRevenue, percentageChange };
   }
 
-  async getSalesStats(): Promise<SalesStatsDto> {
-    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(new Date());
+  async getSalesStats(tenantId: string): Promise<SalesStatsDto> {
+    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(
+      new Date(),
+    );
     const { start: lastStart, end: lastEnd } = this.getMonthDateRange(
       new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
     );
 
     const [current, last] = await this.prisma.client.$transaction([
       this.prisma.client.order.count({
-        where: { orderDate: { gte: currentStart, lt: currentEnd } },
+        where: { orderDate: { gte: currentStart, lt: currentEnd }, tenantId },
       }),
       this.prisma.client.order.count({
-        where: { orderDate: { gte: lastStart, lt: lastEnd } },
+        where: { orderDate: { gte: lastStart, lt: lastEnd }, tenantId },
       }),
     ]);
 
@@ -134,8 +144,12 @@ export class StatisticsRepository {
     return { currentMonthSales: current, percentageChange };
   }
 
-  async getAverageOrderValueStats(): Promise<AverageOrderValueStatsDto> {
-    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(new Date());
+  async getAverageOrderValueStats(
+    tenantId: string,
+  ): Promise<AverageOrderValueStatsDto> {
+    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(
+      new Date(),
+    );
     const { start: lastStart, end: lastEnd } = this.getMonthDateRange(
       new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
     );
@@ -143,11 +157,11 @@ export class StatisticsRepository {
     const [current, last] = await this.prisma.client.$transaction([
       this.prisma.client.invoice.aggregate({
         _avg: { invoiceAmount: true },
-        where: { paymentDate: { gte: currentStart, lt: currentEnd } },
+        where: { paymentDate: { gte: currentStart, lt: currentEnd }, tenantId },
       }),
       this.prisma.client.invoice.aggregate({
         _avg: { invoiceAmount: true },
-        where: { paymentDate: { gte: lastStart, lt: lastEnd } },
+        where: { paymentDate: { gte: lastStart, lt: lastEnd }, tenantId },
       }),
     ]);
 
@@ -168,18 +182,20 @@ export class StatisticsRepository {
     };
   }
 
-  async getCustomerStats(): Promise<CustomerStatsDto> {
-    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(new Date());
+  async getCustomerStats(tenantId: string): Promise<CustomerStatsDto> {
+    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(
+      new Date(),
+    );
     const { start: lastStart, end: lastEnd } = this.getMonthDateRange(
       new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
     );
 
     const [current, last] = await this.prisma.client.$transaction([
       this.prisma.client.customer.count({
-        where: { signedUp: { gte: currentStart, lt: currentEnd } },
+        where: { signedUp: { gte: currentStart, lt: currentEnd }, tenantId },
       }),
       this.prisma.client.customer.count({
-        where: { signedUp: { gte: lastStart, lt: lastEnd } },
+        where: { signedUp: { gte: lastStart, lt: lastEnd }, tenantId },
       }),
     ]);
 

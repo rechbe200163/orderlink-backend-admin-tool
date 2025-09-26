@@ -13,6 +13,7 @@ import {
   ParseIntPipe,
   BadRequestException,
   Request,
+  Req,
 } from '@nestjs/common';
 import { PermissionsService } from './permissions.service';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
@@ -40,6 +41,7 @@ import { CreatePermissionDto } from 'prisma/src/generated/dto/create-permission.
 import { ModuleTag } from 'lib/decorators/module.decorators';
 import { ModuleEnum } from 'src/site-config/dto/modules-entity.dto';
 import { ModulesGuard } from 'src/auth/guards/modules.guard';
+import { requireTenantId } from 'lib/common/tenant.util';
 
 @Controller('permissions')
 @UseInterceptors(CacheInterceptor)
@@ -76,8 +78,9 @@ export class PermissionsController {
     type: PermissionDto,
     isArray: true,
   })
-  create(@Body() createPermissionsDto: CreatePermissionsDto) {
-    return this.permissionsService.create(createPermissionsDto);
+  create(@Req() req, @Body() createPermissionsDto: CreatePermissionsDto) {
+    const { tenantId } = requireTenantId(req);
+    return this.permissionsService.create(tenantId, createPermissionsDto);
   }
 
   @Post('request')
@@ -85,16 +88,16 @@ export class PermissionsController {
   @ApiBody({ type: CreatePermissionsDto })
   @ApiOkResponse({ description: 'Permission request submitted' })
   requestPermission(@Request() req, @Body() dto: CreatePermissionsDto) {
-    const { employeeId } = req.user;
+    const { employeeId, tenantId } = requireTenantId(req.user);
     this.eventEmitter.emit('permission.requested', {
       employeeId,
-      role: dto.role,
+      tenantId,
+      role: dto.roleName,
       resource: dto.resource,
       actions: dto.actions,
     });
     return { success: true };
   }
-
   @Get('all')
   @ApiOkResponse({
     description: 'All permissions found successfully',
@@ -107,8 +110,9 @@ export class PermissionsController {
     required: false,
     example: 'admin',
   })
-  findAllPermissions(@Query('role') role?: string) {
-    return this.permissionsService.findAllPermissions(role);
+  findAllPermissions(@Req() req, @Query('role') role?: string) {
+    const { tenantId } = requireTenantId(req);
+    return this.permissionsService.findAllPermissions(tenantId, role);
   }
 
   @Get()
@@ -138,14 +142,19 @@ export class PermissionsController {
   })
   @ApiOkResponse({ type: PermissionPagingResultDto })
   findAll(
+    @Req() req,
     @Query('limit', ParseIntPipe) limit: number = 10,
     @Query('page', ParseIntPipe) page: number = 1,
     @Query('role') role?: string,
   ) {
+    if (page < 1) {
+      throw new BadRequestException('Page must be greater than 0');
+    }
     if (limit > MAX_PAGE_SIZE) {
       throw new BadRequestException(`Limit cannot exceed ${MAX_PAGE_SIZE}`);
     }
-    return this.permissionsService.findAllPaging(limit, page, role);
+    const { tenantId } = requireTenantId(req);
+    return this.permissionsService.findAllPaging(tenantId, limit, page, role);
   }
 
   @Get(':permissionId')
@@ -156,8 +165,12 @@ export class PermissionsController {
   @ApiBadRequestResponse({
     description: 'Invalid permission ID format',
   })
-  findOne(@Param('permissionId', ParseUUIDPipe) permissionId: string) {
-    return this.permissionsService.findOne(permissionId);
+  findOne(
+    @Req() req,
+    @Param('permissionId', ParseUUIDPipe) permissionId: string,
+  ) {
+    const { tenantId } = requireTenantId(req);
+    return this.permissionsService.findOne(tenantId, permissionId);
   }
 
   @Patch(':permissionId')
@@ -173,9 +186,15 @@ export class PermissionsController {
     type: CreatePermissionDto,
   })
   update(
+    @Req() req,
     @Param('permissionId', ParseUUIDPipe) permissionId: string,
     @Body() updatePermissionDto: UpdatePermissionDto,
   ) {
-    return this.permissionsService.update(permissionId, updatePermissionDto);
+    const { tenantId } = requireTenantId(req);
+    return this.permissionsService.update(
+      tenantId,
+      permissionId,
+      updatePermissionDto,
+    );
   }
 }

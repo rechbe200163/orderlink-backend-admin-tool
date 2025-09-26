@@ -15,7 +15,7 @@ export class UpdatePermissionDto {
   })
   @IsString()
   @IsOptional()
-  role: string;
+  roleName: string;
 
   @IsString()
   @ApiProperty({

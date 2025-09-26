@@ -27,7 +27,10 @@ export class FileRepositoryService {
   //   }
   // }
 
-  async uploadFile(productImage: Express.Multer.File): Promise<string> {
+  async uploadFile(
+    tenantId: string,
+    productImage: Express.Multer.File,
+  ): Promise<string> {
     console.log(
       'Uploading file:',
       productImage.originalname,
@@ -43,7 +46,7 @@ export class FileRepositoryService {
       trim: true,
       strict: true,
     });
-    const filename = `${randomUUID()}-${cleanName}${ext ? '.' + ext : ''}`;
+    const filename = `${tenantId}-${cleanName}${ext ? '.' + ext : ''}`;
     await this.minioService.putObject(
       this._bucketName,
       filename,

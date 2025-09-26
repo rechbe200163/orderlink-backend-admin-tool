@@ -7,21 +7,31 @@ import { UpdateEmployeesDto } from 'prisma/src/generated/dto/update-employees.dt
 import { transformResponse } from 'lib/utils/transform';
 import { EmployeesDto } from 'prisma/src/generated/dto/employees.dto';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
+import { TenantsRepository } from 'src/tenants/tenants.repository copy';
 
 @Injectable()
 export class EmployeesService {
   constructor(
     private readonly employeesRepository: EmployeesRepository, // Assuming you have an EmployeesRepository
     private readonly eventEmitter: TypedEventEmitter, // Assuming you have a TypedEventEmitter for event handling
+    private readonly tenantsRepository: TenantsRepository, // Assuming you have a TenantsRepository to fetch tenant details
   ) {}
   async create(
+    tenantId: string,
     createEmployeeDto: CreateEmployeesDto,
   ): Promise<CreateEmployeesDto> {
-    const { employee } =
-      await this.employeesRepository.create(createEmployeeDto);
+    const { employee } = await this.employeesRepository.create(
+      tenantId,
+      createEmployeeDto,
+    );
+    const tenantSlug = await this.tenantsRepository.findById(tenantId);
     if (employee) {
       // Emit an event after creating a employee
       this.eventEmitter.emit('employee.created', {
+        tenant: {
+          tenantId,
+          tenantSlug,
+        },
         employeeId: employee.employeeId,
         firstName: employee.firstName || '',
         lastName: employee.lastName,
@@ -44,23 +54,27 @@ export class EmployeesService {
     return this.employeesRepository.findAll(page, limit, search, permissions);
   }
 
-  findById(id: string, includeOtp = false) {
-    return this.employeesRepository.findById(id, includeOtp);
+  findById(tenantId: string, id: string, includeOtp = false) {
+    return this.employeesRepository.findById(tenantId, id, includeOtp);
   }
 
-  findByEmail(email: string) {
-    return this.employeesRepository.findByEmail(email);
+  findByEmail(tenantId: string, email: string) {
+    return this.employeesRepository.findByEmail(tenantId, email);
   }
 
-  findByRole(role: string) {
-    return this.employeesRepository.findByRole(role);
+  findByRole(tenantId: string, role: string) {
+    return this.employeesRepository.findByRole(tenantId, role);
   }
 
-  update(id: string, updateEmployeeDto: UpdateEmployeesDto) {
-    return this.employeesRepository.update(id, updateEmployeeDto);
+  update(tenantId: string, id: string, updateEmployeeDto: UpdateEmployeesDto) {
+    return this.employeesRepository.update(tenantId, id, updateEmployeeDto);
   }
 
-  updateProfile(id: string, updateEmployeeDto: UpdateEmployeesDto) {
-    return this.employeesRepository.update(id, updateEmployeeDto);
+  updateProfile(
+    tenantId: string,
+    id: string,
+    updateEmployeeDto: UpdateEmployeesDto,
+  ) {
+    return this.employeesRepository.update(tenantId, id, updateEmployeeDto);
   }
 }

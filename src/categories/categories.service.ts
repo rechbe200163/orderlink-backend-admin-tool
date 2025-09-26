@@ -11,30 +11,35 @@ export class CategoriesService {
     private readonly categoriesRepository: CategoriesRepository, // Assuming you have a repository to handle DB operations
   ) {}
 
-  create(createCategoryDto: CreateCategoryDto): Promise<CreateCategoryDto> {
-    return this.categoriesRepository.create(createCategoryDto);
+  create(
+    tenantId: string,
+    createCategoryDto: CreateCategoryDto,
+  ): Promise<CreateCategoryDto> {
+    return this.categoriesRepository.create(tenantId, createCategoryDto);
   }
 
   findAll(
+    tenantId: string,
     limit: number = 10,
     page: number = 1,
     search?: string,
   ): Promise<PagingResultDto<CategoryDto>> {
-    return this.categoriesRepository.findAll(limit, page, search);
+    return this.categoriesRepository.findAll(tenantId, limit, page, search);
   }
 
-  findById(id: string): Promise<CategoryDto> {
-    return this.categoriesRepository.findById(id);
+  findById(tenantId: string, id: string): Promise<CategoryDto> {
+    return this.categoriesRepository.findById(tenantId, id);
   }
 
-  findByName(name: string): Promise<CategoryDto> {
-    return this.categoriesRepository.findByName(name);
+  findByName(tenantId: string, name: string): Promise<CategoryDto> {
+    return this.categoriesRepository.findByName(tenantId, name);
   }
 
   update(
+    tenantId: string,
     id: string,
     updateCategoryDto: UpdateCategoryDto,
   ): Promise<UpdateCategoryDto> {
-    return this.categoriesRepository.update(id, updateCategoryDto);
+    return this.categoriesRepository.update(tenantId, id, updateCategoryDto);
   }
 }

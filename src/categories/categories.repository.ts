@@ -1,3 +1,4 @@
+import { Action } from './../../prisma/src/generated/dto/action.entity';
 import {
   BadRequestException,
   Inject,
@@ -22,6 +23,7 @@ export class CategoriesRepository {
   ) {}
 
   async findAll(
+    tenantId: string,
     limit: number = 10,
     page: number = 1,
     search?: string,
@@ -29,6 +31,7 @@ export class CategoriesRepository {
     const [categories, meta] = await this.prismaService.client.category
       .paginate({
         where: {
+          tenantId,
           name: search ? { contains: search } : undefined,
         },
       })
@@ -45,9 +48,11 @@ export class CategoriesRepository {
     };
   }
 
-  async findById(categoryId: string): Promise<CategoryDto> {
+  async findById(tenantId: string, categoryId: string): Promise<CategoryDto> {
     const category = await this.prismaService.client.category.findUnique({
-      where: { categoryId },
+      where: {
+        tenantId_categoryId: { tenantId, categoryId },
+      },
     });
     if (!category) {
       throw new NotFoundException(`Category  not found`);
@@ -55,9 +60,9 @@ export class CategoriesRepository {
     return transformResponse(CategoryDto, category);
   }
 
-  async findByName(name: string): Promise<CategoryDto> {
+  async findByName(tenantId: string, name: string): Promise<CategoryDto> {
     const category = await this.prismaService.client.category.findFirst({
-      where: { name },
+      where: { tenantId, name },
     });
 
     if (!category) {
@@ -66,10 +71,18 @@ export class CategoriesRepository {
     return transformResponse(CategoryDto, category);
   }
 
-  async create(data: CreateCategoryDto): Promise<CategoryDto> {
+  async create(
+    tenantId: string,
+    data: CreateCategoryDto,
+  ): Promise<CategoryDto> {
     const existingCategory =
       await this.prismaService.client.category.findUnique({
-        where: { name: data.name },
+        where: {
+          category_tenant_name_unique: {
+            tenantId,
+            name: data.name,
+          },
+        },
       });
 
     if (existingCategory) {
@@ -79,18 +92,24 @@ export class CategoriesRepository {
     }
 
     const category = await this.prismaService.client.category.create({
-      data,
+      data: {
+        ...data,
+        tenantId,
+      },
     });
     return transformResponse(CategoryDto, category);
   }
 
   async update(
+    tenantId: string,
     categoryId: string,
     data: UpdateCategoryDto,
   ): Promise<UpdateCategoryDto> {
     const existingCategory =
       await this.prismaService.client.category.findUnique({
-        where: { categoryId },
+        where: {
+          tenantId_categoryId: { tenantId, categoryId },
+        },
       });
 
     if (!existingCategory) {
@@ -99,7 +118,7 @@ export class CategoriesRepository {
 
     if (data.name && data.name !== existingCategory.name) {
       const nameConflict = await this.prismaService.client.category.findUnique({
-        where: { name: data.name },
+        where: { category_tenant_name_unique: { tenantId, name: data.name } },
       });
 
       if (nameConflict && nameConflict.categoryId !== categoryId) {
@@ -115,7 +134,7 @@ export class CategoriesRepository {
       );
     }
     const category = await this.prismaService.client.category.update({
-      where: { categoryId },
+      where: { tenantId_categoryId: { tenantId, categoryId } },
       data,
     });
     return transformResponse(CategoryDto, category);

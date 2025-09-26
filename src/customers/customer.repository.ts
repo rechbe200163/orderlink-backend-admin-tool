@@ -8,13 +8,17 @@ import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { CustomerDto } from 'src/customers/dto/customer.dto';
 import { CustomerPagingResultDto } from './dto/customer-paging.dto';
-import { BusinessSector, Prisma, PrismaPromise } from '@prisma/client';
+import { BusinessSector, Prisma } from '@prisma/client';
 import { CreateCustomerDto } from 'src/customers/dto/create-customer.dto';
 import { customAlphabet } from 'nanoid';
 import { hash } from 'bcryptjs';
 import { UpdateCustomerDto } from 'src/customers/dto/update-customer.dto';
 import { isNoChange } from 'lib/utils/isNoChange';
 import { transformResponse } from 'lib/utils/transform';
+import {
+  generateCustomerPassword,
+  generateCustomerReferenceNumber,
+} from 'lib/common/generateCustomerReference.utils';
 
 @Injectable()
 export class CustomersRepository {
@@ -33,7 +37,10 @@ export class CustomersRepository {
     return transformResponse(CustomerDto, customer);
   }
 
-  async findAllCustomers(query?: string): Promise<CreateCustomerDto[]> {
+  async findAllCustomers(
+    tenantId: string,
+    query?: string,
+  ): Promise<CreateCustomerDto[]> {
     const where: Prisma.CustomerWhereInput = {
       deleted: false,
     };
@@ -57,12 +64,13 @@ export class CustomersRepository {
   }
 
   async findCustomerByReference(
+    tenantId: string,
     customerReference: number,
   ): Promise<CustomerDto> {
-    const customer =
-      await this.prismaService.client.customer.findByReference(
-        customerReference,
-      );
+    const customer = await this.prismaService.client.customer.findByReference(
+      tenantId,
+      customerReference,
+    );
     if (!customer) {
       throw new NotFoundException(
         `Customer with reference ${customerReference} not found`,
@@ -72,6 +80,7 @@ export class CustomersRepository {
   }
 
   async getCustomers(
+    tenantId: string,
     limit?: number,
     page?: number,
     query?: string | undefined,
@@ -105,15 +114,21 @@ export class CustomersRepository {
     };
   }
 
-  async createCustomer(customerData: CreateCustomerDto): Promise<{
+  async createCustomer(
+    tenantId: string,
+    customerData: CreateCustomerDto,
+  ): Promise<{
     customer: CustomerDto;
     password: string;
   }> {
     // hash password
-    const password = this.generateCustomerPassword();
+    if (!customerData.addressId) {
+      throw new BadRequestException('Address ID is required');
+    }
+    const password = generateCustomerPassword();
     const hashedPassword = await hash(password, 10);
     const customerEntity: Prisma.CustomerCreateInput = {
-      customerReference: this.generateCustomerReferenceNumber(),
+      customerReference: generateCustomerReferenceNumber(),
       email: customerData.email,
       phoneNumber: customerData.phoneNumber,
       password: hashedPassword,
@@ -123,9 +138,15 @@ export class CustomersRepository {
       avatarPath: customerData.avatarPath || null,
       businessSector: customerData.businessSector || null,
       address: {
-        connect: customerData.addressId
-          ? { addressId: customerData.addressId }
-          : undefined,
+        connect: {
+          tenantId_addressId: {
+            tenantId,
+            addressId: customerData.addressId,
+          },
+        },
+      },
+      tenant: {
+        connect: { tenantId },
       },
     };
 
@@ -139,11 +160,13 @@ export class CustomersRepository {
   }
 
   async updateCustomer(
+    tenantId: string,
     customerReference: number,
     customerData: UpdateCustomerDto,
   ): Promise<CustomerDto> {
     const originalCustomer =
       await this.prismaService.client.customer.findByReference(
+        tenantId,
         customerReference,
       );
 
@@ -170,22 +193,5 @@ export class CustomersRepository {
 
     return transformResponse(CustomerDto, updatedCustomer);
     // Update only the fields that are provided
-  }
-
-  private generateCustomerReferenceNumber(): number {
-    const nanoid = customAlphabet('1234567890', 9);
-    return Number(nanoid());
-  }
-
-  private generateCustomerPassword(): string {
-    const nanoid = customAlphabet(
-      'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
-      18,
-    );
-    // Format: xxxxxx-xxxxxxx-xxxxxx
-    const part1 = nanoid(6);
-    const part2 = nanoid(6);
-    const part3 = nanoid(6);
-    return `${part1}-${part2}-${part3}`;
   }
 }

@@ -1,5 +1,4 @@
 import { Injectable } from '@nestjs/common';
-import { CreatePermissionDto } from 'prisma/src/generated/dto/create-permission.dto';
 import { CreatePermissionsDto } from './dto/create-permissions.dto';
 import { UpdatePermissionDto } from 'prisma/src/generated/dto/update-permission.dto';
 import { PermissionsRepository } from './permissions.repository';
@@ -8,23 +7,32 @@ import { PermissionsRepository } from './permissions.repository';
 export class PermissionsService {
   constructor(private permissionsRepository: PermissionsRepository) {}
 
-  create(createPermissionsDto: CreatePermissionsDto) {
-    return this.permissionsRepository.create(createPermissionsDto);
+  create(tenantId: string, createPermissionsDto: CreatePermissionsDto) {
+    return this.permissionsRepository.create(tenantId, createPermissionsDto);
   }
 
-  findAllPaging(limit: number = 10, page: number = 1, role?: string) {
-    return this.permissionsRepository.findAll(limit, page, role);
+  findAllPaging(
+    tenantId: string,
+    limit: number = 10,
+    page: number = 1,
+    role?: string,
+  ) {
+    return this.permissionsRepository.findAll(tenantId, limit, page, role);
   }
 
-  findAllPermissions(role?: string) {
-    return this.permissionsRepository.findAllPermissions(role);
+  findAllPermissions(tenantId: string, role?: string) {
+    return this.permissionsRepository.findAllPermissions(tenantId, role);
   }
 
-  findOne(id: string) {
-    return this.permissionsRepository.findById(id);
+  findOne(tenantId: string, id: string) {
+    return this.permissionsRepository.findById(tenantId, id);
   }
 
-  update(id: string, updatePermissionDto: UpdatePermissionDto) {
-    return this.permissionsRepository.update(id, updatePermissionDto);
+  update(
+    tenantId: string,
+    id: string,
+    updatePermissionDto: UpdatePermissionDto,
+  ) {
+    return this.permissionsRepository.update(tenantId, id, updatePermissionDto);
   }
 }

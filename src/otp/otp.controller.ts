@@ -8,6 +8,7 @@ import {
   Delete,
   ParseUUIDPipe,
   UseGuards,
+  Request,
 } from '@nestjs/common';
 import { OtpService } from './otp.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
@@ -19,6 +20,7 @@ import {
 } from '@nestjs/swagger';
 import { Resource } from 'lib/decorators/resource.decorator';
 import { Resources } from '@prisma/client';
+import { requireTenantId } from 'lib/common/tenant.util';
 
 @Controller('otp')
 @Resource(Resources.OTP)
@@ -36,7 +38,11 @@ export class OtpController {
   constructor(private readonly otpService: OtpService) {}
 
   @Post('resend/:employeeId')
-  create(@Param('employeeId', ParseUUIDPipe) employeeId: string) {
-    return this.otpService.resendOtp(employeeId);
+  create(
+    @Request() req,
+    @Param('employeeId', ParseUUIDPipe) employeeId: string,
+  ) {
+    const { tenantId } = requireTenantId(req);
+    return this.otpService.resendOtp(tenantId, employeeId);
   }
 }

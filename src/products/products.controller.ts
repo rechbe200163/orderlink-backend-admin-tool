@@ -34,6 +34,7 @@ import { MAX_PAGE_SIZE } from 'lib/constants';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileSizeValidationPipe } from 'lib/pipes/file-size-validation-pipe';
 import { FileTypeValidationPipe } from 'lib/pipes/file-name-validation-pipe.ts';
+import { requireTenantId } from 'lib/common/tenant.util';
 
 @Controller('products')
 @UseInterceptors(CacheInterceptor)
@@ -54,12 +55,17 @@ export class ProductsController {
   @Post()
   @UseInterceptors(FileInterceptor('productImage'))
   async create(
-    @Req() req: Request,
+    @Req() req,
     @UploadedFile(new FileSizeValidationPipe(), new FileTypeValidationPipe())
     productImage: Express.Multer.File,
     @Body() createProductDto: CreateProductDto,
   ) {
-    return this.productsService.create(createProductDto, productImage);
+    const { tenantId } = requireTenantId(req);
+    return this.productsService.create(
+      tenantId,
+      createProductDto,
+      productImage,
+    );
   }
 
   @Get()
@@ -101,12 +107,21 @@ export class ProductsController {
     type: PagingResultDto<ProductDto>,
   })
   findAll(
+    @Req() req: Request,
+
     @Query('search') search?: string,
     @Query('categoryId') categoryId?: string,
     @Query('page', ParseIntPipe) page: number = 1,
     @Query('limit', ParseIntPipe) limit: number = 10,
   ) {
-    return this.productsService.findAll(limit, page, search, categoryId);
+    const { tenantId } = requireTenantId(req);
+    return this.productsService.findAll(
+      tenantId,
+      limit,
+      page,
+      search,
+      categoryId,
+    );
   }
 
   @Get(':productId')
@@ -117,8 +132,9 @@ export class ProductsController {
   @ApiBadRequestResponse({
     description: 'Invalid product ID format',
   })
-  findOne(@Param('productId', ParseUUIDPipe) productId: string) {
-    return this.productsService.findOne(productId);
+  findOne(@Req() req, @Param('productId', ParseUUIDPipe) productId: string) {
+    const { tenantId } = requireTenantId(req);
+    return this.productsService.findOne(tenantId, productId);
   }
 
   @Get('history/:productId')
@@ -129,8 +145,9 @@ export class ProductsController {
   @ApiBadRequestResponse({
     description: 'Invalid product ID format',
   })
-  getHistory(@Param('productId', ParseUUIDPipe) productId: string) {
-    return this.productsService.getHistory(productId);
+  getHistory(@Req() req, @Param('productId', ParseUUIDPipe) productId: string) {
+    const { tenantId } = requireTenantId(req);
+    return this.productsService.getHistory(tenantId, productId);
   }
 
   @Patch(':productId')
@@ -145,11 +162,18 @@ export class ProductsController {
   })
   @UseInterceptors(FileInterceptor('productImage'))
   async update(
+    @Req() req,
     @Param('productId', ParseUUIDPipe) productId: string,
     @Body() updateProductDto: UpdateProductDto,
     @UploadedFile(new FileSizeValidationPipe(), new FileTypeValidationPipe())
     productImage: Express.Multer.File,
   ) {
-    return console.log(productImage);
+    const { tenantId } = requireTenantId(req);
+    return this.productsService.update(
+      tenantId,
+      productId,
+      updateProductDto,
+      productImage,
+    );
   }
 }

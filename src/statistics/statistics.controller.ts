@@ -1,5 +1,12 @@
 import { Ressource } from './../../prisma/src/generated/client/index.d';
-import { Controller, Get, UseInterceptors, UseGuards } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  UseInterceptors,
+  UseGuards,
+  Request,
+  Req,
+} from '@nestjs/common';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { StatisticsService } from './statistics.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
@@ -21,6 +28,7 @@ import { ModulesGuard } from 'src/auth/guards/modules.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { Resource } from 'lib/decorators/resource.decorator';
 import { Resources } from '@prisma/client';
+import { requireTenantId } from 'lib/common/tenant.util';
 
 @Controller('statistics')
 @UseInterceptors(CacheInterceptor)
@@ -34,43 +42,50 @@ export class StatisticsController {
 
   @Get('orders/state')
   @ApiOkResponse({ type: OrderStateCountDto, isArray: true })
-  getOrderStates() {
-    return this.statisticsService.getOrderStateCounts();
+  getOrderStates(@Req() req) {
+    const { tenantId } = requireTenantId(req);
+    return this.statisticsService.getOrderStateCounts(tenantId);
   }
 
   @Get('customers/business-sector')
   @ApiOkResponse({ type: CustomerBusinessSectorDto })
-  getCustomerBusinessSectors() {
-    return this.statisticsService.getCustomerBusinessSectors();
+  getCustomerBusinessSectors(@Req() req) {
+    const { tenantId } = requireTenantId(req);
+    return this.statisticsService.getCustomerBusinessSectors(tenantId);
   }
 
   @Get('quick')
   @ApiOkResponse({ type: QuickStatsDto })
-  getQuickStats() {
-    return this.statisticsService.getQuickStats();
+  getQuickStats(@Req() req) {
+    const { tenantId } = requireTenantId(req);
+    return this.statisticsService.getQuickStats(tenantId);
   }
 
   @Get('revenue')
   @ApiOkResponse({ type: RevenueStatsDto })
-  getRevenueStats() {
-    return this.statisticsService.getRevenueStats();
+  getRevenueStats(@Req() req) {
+    const { tenantId } = requireTenantId(req);
+    return this.statisticsService.getRevenueStats(tenantId);
   }
 
   @Get('sales')
   @ApiOkResponse({ type: SalesStatsDto })
-  getSalesStats() {
-    return this.statisticsService.getSalesStats();
+  getSalesStats(@Req() req) {
+    const { tenantId } = requireTenantId(req);
+    return this.statisticsService.getSalesStats(tenantId);
   }
 
   @Get('average-order-value')
   @ApiOkResponse({ type: AverageOrderValueStatsDto })
-  getAverageOrderValueStats() {
-    return this.statisticsService.getAverageOrderValueStats();
+  getAverageOrderValueStats(@Req() req) {
+    const { tenantId } = requireTenantId(req);
+    return this.statisticsService.getAverageOrderValueStats(tenantId);
   }
 
   @Get('customers/monthly-signups')
   @ApiOkResponse({ type: CustomerStatsDto })
-  getCustomerStats() {
-    return this.statisticsService.getCustomerStats();
+  getCustomerStats(@Req() req) {
+    const { tenantId } = requireTenantId(req);
+    return this.statisticsService.getCustomerStats(tenantId);
   }
 }

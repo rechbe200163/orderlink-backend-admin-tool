@@ -20,8 +20,9 @@ export class RolesRepository {
     private prismaService: CustomPrismaService<ExtendedPrismaClient>,
   ) {}
 
-  async create(roleData: CreateRoleDto) {
+  async create(tenantId: string, roleData: CreateRoleDto) {
     const existingRole = await this.prismaService.client.role.findByName(
+      tenantId,
       roleData.name,
     );
     if (existingRole) {
@@ -30,30 +31,40 @@ export class RolesRepository {
       );
     }
     const createdRole = await this.prismaService.client.role.create({
-      data: roleData,
+      data: { ...roleData, tenantId },
     });
     return transformResponse(RoleDto, createdRole);
   }
 
-  async findByName(name: string) {
-    const role = await this.prismaService.client.role.findByName(name);
+  async findByName(tenantId: string, name: string) {
+    const role = await this.prismaService.client.role.findByName(
+      tenantId,
+      name,
+    );
     if (!role) {
       throw new NotFoundException(`Role not found`);
     }
     return transformResponse(RoleDto, role);
   }
 
-  async findAllRoleNames() {
+  async findAllRoleNames(tenantId: string) {
     const roles = await this.prismaService.client.role.findMany({
+      where: { tenantId },
       select: { name: true },
     });
     return roles.map((role) => role.name);
   }
 
-  async findAll(limit: number = 10, page: number = 1, search: string = '') {
+  async findAll(
+    tenantId: string,
+    limit: number = 10,
+    page: number = 1,
+    search: string = '',
+  ) {
     const [roles, meta] = await this.prismaService.client.role
       .paginate({
         where: {
+          tenantId,
           deleted: false,
           name: {
             contains: search,
@@ -73,15 +84,15 @@ export class RolesRepository {
     };
   }
 
-  async update(name: string, roleData: UpdateRoleDto) {
+  async update(tenantId: string, name: string, roleData: UpdateRoleDto) {
     const existingRole = await this.prismaService.client.role.findUnique({
-      where: { name },
+      where: { tenantId_name: { tenantId, name } },
     });
     if (!existingRole) {
       throw new NotFoundException(`Role not found`);
     }
     const updatedRole = await this.prismaService.client.role.update({
-      where: { name },
+      where: { tenantId_name: { tenantId, name } },
       data: roleData,
     });
     return transformResponse(RoleDto, updatedRole);

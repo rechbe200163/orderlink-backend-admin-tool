@@ -1,31 +1,15 @@
-// This is your Prisma schema file with @nestjsDto annotations for DTO generation
-
-// Prisma Client Generator
-
+// ---------- Generators & Datasource ----------
 generator client {
   provider      = "prisma-client-js"
-  // output        = "./src/generated/client"
   binaryTargets = ["native", "debian-openssl-3.0.x", "linux-arm64-openssl-3.0.x"]
 }
-
-// NestJS DTO Generator
-
-// generator nestjsDto {
-//   provider         = "prisma-generator-nestjs-dto"
-//   output           = "./src/generated/dto"
-//   createDtoPrefix  = "Create"
-//   updateDtoPrefix  = "Update"
-//   classValidator   = true
-//   classTransformer = true
-//   renameIdFields   = true
-//   strict           = true
-// }
 
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL_DEV")
 }
 
+// ---------- Enums ----------
 enum Actions {
   READ
   DELETE
@@ -88,17 +72,18 @@ enum ModuleEnum {
   NAVIGATION
 }
 
+// ---------- Tenant (global PK, wird von allen referenziert) ----------
 model Tenant {
-  tenantId          String        @id @default(uuid())
-  name              String        @db.VarChar(255)
-  slug              String        @unique @db.VarChar(100)
-  status            TenantStatus  @default(TRIAL)
-  trialStartedAt    DateTime      @default(now())
-  trialEndsAt       DateTime      @default(dbgenerated("(now() + interval '3 days')"))
+  tenantId          String       @id @default(uuid())
+  name              String       @db.VarChar(255)
+  slug              String       @unique @db.VarChar(100)
+  status            TenantStatus @default(TRIAL)
+  trialStartedAt    DateTime     @default(now())
+  trialEndsAt       DateTime     @default(dbgenerated("(now() + interval '14 days')"))
   billingCustomerId String?
-  maxEmployees      Int           @default(3)
-  createdAt         DateTime      @default(now()) @db.Timestamptz
-  updatedAt         DateTime      @updatedAt @db.Timestamptz
+  maxEmployees      Int          @default(3)
+  createdAt         DateTime     @default(now()) @db.Timestamptz
+  updatedAt         DateTime     @updatedAt @db.Timestamptz
 
   customers       Customer[]
   customerHistory CustomerHistory[]
@@ -114,87 +99,100 @@ model Tenant {
   employees       Employees[]
   roles           Role[]
   permissions     Permission[]
-  cartProducts     CartOnProducts[]
-  orderProducts    OrderOnProducts[]
-  routesOrders     RoutesOnOrders[]
-  otps             Otp[]
+  cartProducts    CartOnProducts[]
+  orderProducts   OrderOnProducts[]
+  routesOrders    RoutesOnOrders[]
+  otps            Otp[]
   enabledModules  EnabledModule[]
 
   @@index([name], name: "tenant_name_index")
+  @@index([slug], name: "tenant_slug_index")
   @@map("tenantData")
 }
 
+// ---------- Site Config (tenant-weit 1x, PK und FKs composite) ----------
 model SiteConfig {
-  siteConfigId String  @id @default(uuid())
-  tenantId     String  @unique
-  tenant       Tenant  @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  tenantId     String @unique
+  siteConfigId String @default(uuid())
+
+  tenant Tenant @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
 
   companyName   String
   logoPath      String?
-  email         String
+  email         String  @db.VarChar(255)
   phoneNumber   String
   iban          String?
   companyNumber String?
-  addressId     String
-  address       Address @relation(fields: [addressId], references: [addressId])
-  modifiedAt    DateTime @updatedAt
 
+  addressId String
+  address   Address @relation("SiteConfigAddress", fields: [tenantId, addressId], references: [tenantId, addressId])
+
+  modifiedAt DateTime @updatedAt
+
+  @@id([tenantId, siteConfigId])
   @@unique([tenantId, email], name: "site_config_tenant_email_unique")
 }
 
+// ---------- Address ----------
 model Address {
-  addressId    String    @id @default(uuid(7))
-  tenantId     String
-  city         String    @db.VarChar(100)
-  country      String    @db.VarChar(40)
-  postCode     String    @db.VarChar(10)
-  state        String    @db.VarChar(40)
-  streetName   String    @db.VarChar(255)
-  streetNumber String    @db.VarChar(30)
-  modifiedAt   DateTime? @default(dbgenerated("null")) @updatedAt
-  deleted      Boolean   @default(false)
+  tenantId     String  
+  addressId    String   @default(uuid())
+  city         String   @db.VarChar(100)
+  country      String   @db.VarChar(40)
+  postCode     String   @db.VarChar(10)
+  state        String   @db.VarChar(40)
+  streetName   String   @db.VarChar(255)
+  streetNumber String   @db.VarChar(30)
+  modifiedAt   DateTime @updatedAt
+  deleted      Boolean  @default(false)
 
-  tenant    Tenant        @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
-  customers Customer[]
-  siteConfig SiteConfig[]
+  tenant     Tenant       @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  customers  Customer[]  @relation("CustomerAddress")
+  siteConfig SiteConfig[] @relation("SiteConfigAddress")
 
+  @@id([tenantId, addressId])
+  @@unique([tenantId, addressId], name: "address_tenant_addressId_unique")
   @@index([tenantId, postCode], name: "address_tenant_post_code_index")
   @@map("addresses")
 }
 
+// ---------- Customer & History ----------
 model Customer {
-  customerId        String          @id @default(uuid(7))
-  tenantId          String
-  customerReference Int
-  email             String          @db.VarChar(255)
-  phoneNumber       String          @db.VarChar(255)
-  password          String          @db.VarChar(255)
-  firstName         String?         @db.VarChar(255)
-  lastName          String          @db.VarChar(255)
-  companyNumber     String?         @db.VarChar(255)
-  modifiedAt        DateTime?       @default(dbgenerated("null")) @updatedAt
-  deleted           Boolean         @default(false)
-  signedUp          DateTime        @default(now())
-  avatarPath        String?         @db.VarChar(255)
-  addressId         String
-  businessSector    BusinessSector?
+  tenantId          String  
+  customerId        String   @default(uuid())
+  customerReference Int @unique
+  email             String   @db.VarChar(255)
+  phoneNumber       String   @db.VarChar(255)
+  password          String   @db.VarChar(255)
+  firstName         String?  @db.VarChar(255)
+  lastName          String   @db.VarChar(255)
+  companyNumber     String?  @db.VarChar(255)
+  modifiedAt        DateTime @updatedAt
+  deleted           Boolean  @default(false)
+  signedUp          DateTime @default(now())
+  avatarPath        String?  @db.VarChar(255)
 
-  tenant  Tenant    @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
-  address Address   @relation(fields: [addressId], references: [addressId])
+  addressId      String
+  businessSector BusinessSector?
+
+  tenant  Tenant  @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  address Address @relation("CustomerAddress", fields: [tenantId, addressId], references: [tenantId, addressId])
+
   cart    Cart?
   orders  Order[]
   history CustomerHistory[]
 
-  @@index([tenantId], name: "customer_tenant_index")
-  @@index([tenantId, lastName], name: "customer_tenant_last_name_index")
+  @@id([tenantId, customerReference])
   @@unique([tenantId, customerReference], name: "customer_tenant_reference_unique")
   @@unique([tenantId, email], name: "customer_tenant_email_unique")
+  @@index([tenantId, lastName], name: "customer_tenant_last_name_index")
+  @@index([tenantId, addressId], name: "customer_tenant_address_index")
   @@map("customers")
 }
 
 model CustomerHistory {
-  historyId         String          @id @default(uuid(7))
-  tenantId          String
+  tenantId          String         
+  historyId         String          @default(uuid())
   customerReference Int
   email             String
   phoneNumber       String          @db.VarChar(255)
@@ -202,7 +200,7 @@ model CustomerHistory {
   firstName         String?         @db.VarChar(255)
   lastName          String          @db.VarChar(255)
   companyNumber     String?         @db.VarChar(255)
-  modifiedAt        DateTime?       @default(dbgenerated("null")) @updatedAt
+  modifiedAt        DateTime        @updatedAt
   deleted           Boolean         @default(false)
   signedUp          DateTime        @default(now())
   avatarPath        String?         @db.VarChar(255)
@@ -212,19 +210,24 @@ model CustomerHistory {
   tenant   Tenant   @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
   customer Customer @relation(fields: [tenantId, customerReference], references: [tenantId, customerReference], onDelete: Cascade)
 
+  @@id([tenantId, historyId])
+  @@unique([tenantId, customerReference, historyId], name: "customer_history_tenant_customer_history_unique")
   @@index([tenantId, customerReference], name: "customer_history_customer_ref_index")
   @@map("customerHistory")
 }
 
+// ---------- Cart & CartOnProducts ----------
 model Cart {
-  cartId            String           @id @default(uuid(7))
   tenantId          String
+  cartId            String @default(uuid())
   customerReference Int?
 
   tenant   Tenant    @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
   customer Customer? @relation(fields: [tenantId, customerReference], references: [tenantId, customerReference], onDelete: Cascade)
+
   products CartOnProducts[]
 
+  @@id([tenantId, cartId])
   @@unique([tenantId, customerReference], name: "cart_tenant_customer_unique")
   @@index([tenantId], name: "cart_tenant_index")
   @@map("carts")
@@ -234,81 +237,93 @@ model CartOnProducts {
   tenantId  String
   cartId    String
   productId String
-  quantity  Int     @default(1) @map("productAmount")
+  quantity  Int    @default(1) @map("productAmount")
 
   tenant  Tenant  @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
-  cart    Cart    @relation(fields: [cartId], references: [cartId], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [productId], onDelete: Cascade)
+  cart    Cart    @relation(fields: [tenantId, cartId], references: [tenantId, cartId], onDelete: Cascade)
+  product Product @relation(fields: [tenantId, productId], references: [tenantId, productId], onDelete: Cascade)
 
-  @@id([cartId, productId])
+  @@id([tenantId, cartId, productId])
   @@index([tenantId], name: "cart_products_tenant_index")
   @@map("cartsProducts")
 }
 
+// ---------- Category / Product / ProductHistory ----------
 model Category {
-  categoryId String  @id @default(uuid(7))
-  tenantId   String
+  tenantId   String 
+  categoryId String  @default(uuid())
   name       String  @db.VarChar(255)
   imagePath  String? @db.VarChar(255)
   deleted    Boolean @default(false)
 
-  tenant         Tenant          @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  tenant Tenant @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+
   products       Product[]
   ProductHistory ProductHistory[]
 
+  @@id([tenantId, categoryId])
   @@unique([tenantId, name], name: "category_tenant_name_unique")
+  @@unique([tenantId, categoryId], name: "category_tenant_id_unique")
   @@map("categories")
 }
 
 model Product {
-  productId   String    @id @default(uuid(7))
   tenantId    String
-  name        String    @db.VarChar(255)
+  productId   String   @default(uuid())
+  name        String   @db.VarChar(255)
   price       Int
-  description String    @db.VarChar(255)
+  description String   @db.VarChar(255)
   stock       Int
-  imagePath   String?   @db.VarChar(255)
-  createdAt   DateTime  @default(now())
-  modifiedAt  DateTime? @default(dbgenerated("null")) @updatedAt
-  deleted     Boolean   @default(false)
-  categoryId  String
+  imagePath   String?  @db.VarChar(255)
+  createdAt   DateTime @default(now())
+  modifiedAt  DateTime @updatedAt
+  deleted     Boolean  @default(false)
 
-  tenant   Tenant   @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
-  category Category @relation(fields: [categoryId], references: [categoryId])
-  carts    CartOnProducts[]
-  orders   OrderOnProducts[]
-  history  ProductHistory[]
+  // FK auf Category mit Composite Key (tenantId, categoryId)
+  categoryId String
+  category   Category @relation(fields: [tenantId, categoryId], references: [tenantId, categoryId])
 
+  // **korrekte** Tenant-Relation (die vorher fehlte/dupliziert war)
+  tenant Tenant @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+
+  carts   CartOnProducts[]
+  orders  OrderOnProducts[]
+  history ProductHistory[]
+
+  @@id([tenantId, productId])
+  @@index([tenantId, categoryId], name: "product_tenant_category_index")
   @@index([tenantId, name], name: "product_tenant_name_index")
   @@map("products")
 }
 
 model ProductHistory {
-  historyId   String    @id @default(uuid(7))
-  tenantId    String
+  tenantId    String  
+  historyId   String   @default(uuid())
   productId   String
-  name        String    @db.VarChar(255)
+  name        String   @db.VarChar(255)
   price       Int
-  description String    @db.VarChar(255)
+  description String   @db.VarChar(255)
   stock       Int
-  imagePath   String?   @db.VarChar(255)
-  createdAt   DateTime  @default(now())
-  modifiedAt  DateTime? @default(dbgenerated("null")) @updatedAt
-  deleted     Boolean   @default(false)
+  imagePath   String?  @db.VarChar(255)
+  createdAt   DateTime @default(now())
+  modifiedAt  DateTime @updatedAt
+  deleted     Boolean  @default(false)
   categoryId  String
-  version     Int       @default(autoincrement())
+  version     Int      @default(autoincrement())
 
   tenant   Tenant   @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
-  category Category @relation(fields: [categoryId], references: [categoryId])
-  product  Product  @relation(fields: [productId], references: [productId])
+  category Category @relation(fields: [tenantId, categoryId], references: [tenantId, categoryId])
+  product  Product  @relation(fields: [tenantId, productId], references: [tenantId, productId])
 
+  @@id([tenantId, historyId])
   @@index([tenantId, productId], name: "product_history_tenant_product_index")
   @@map("productHistory")
 }
 
+// ---------- Order / OrderOnProducts / Invoice ----------
 model Order {
-  orderId           String     @id @default(uuid(7))
-  tenantId          String
+  tenantId          String    
+  orderId           String     @default(uuid())
   customerReference Int
   orderDate         DateTime   @default(now())
   deliveryDate      DateTime?
@@ -318,56 +333,63 @@ model Order {
 
   tenant   Tenant   @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
   customer Customer @relation(fields: [tenantId, customerReference], references: [tenantId, customerReference])
+
   products OrderOnProducts[]
   invoice  Invoice?
   route    RoutesOnOrders[]
 
+  @@id([tenantId, orderId])
   @@index([tenantId, customerReference], name: "order_tenant_customer_index")
   @@index([tenantId, orderDate], name: "order_tenant_date_index")
   @@map("orders")
 }
 
 model OrderOnProducts {
-  tenantId      String
+  tenantId      String  
   orderId       String
   productId     String
   orderDate     DateTime @default(now())
   productAmount Int      @default(1)
 
   tenant  Tenant  @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
-  order   Order   @relation(fields: [orderId], references: [orderId], onDelete: Cascade)
-  product Product @relation(fields: [productId], references: [productId], onDelete: Cascade)
+  order   Order   @relation(fields: [tenantId, orderId], references: [tenantId, orderId], onDelete: Cascade)
+  product Product @relation(fields: [tenantId, productId], references: [tenantId, productId], onDelete: Cascade)
 
-  @@id([orderId, productId])
+  @@id([tenantId, orderId, productId])
   @@index([tenantId], name: "order_products_tenant_index")
   @@map("ordersProducts")
 }
 
 model Invoice {
-  invoiceId     String    @id @default(uuid(7))
-  tenantId      String
-  orderId       String    @unique
+  tenantId      String   
+  invoiceId     String    @default(uuid())
+  orderId       String
   invoiceAmount Int
   paymentDate   DateTime? @default(now())
   pdfUrl        String    @db.VarChar(255)
   deleted       Boolean   @default(false)
 
   tenant Tenant @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
-  order  Order  @relation(fields: [orderId], references: [orderId])
+  order  Order  @relation(fields: [tenantId, orderId], references: [tenantId, orderId])
 
+  @@id([tenantId, invoiceId])
+  @@unique([tenantId, orderId], name: "invoice_tenant_order_unique")
+  @@unique([tenantId,invoiceId], name: "invoice_tenant_invoiceId_unique")
   @@index([tenantId], name: "invoice_tenant_index")
   @@map("invoices")
 }
 
+// ---------- Route / RoutesOnOrders ----------
 model Route {
-  routeId String  @id @default(uuid(7))
-  tenantId String
-  name    String           @db.VarChar(255)
-  deleted Boolean          @default(false)
+  tenantId String 
+  routeId  String  @default(uuid())
+  name     String  @db.VarChar(255)
+  deleted  Boolean @default(false)
 
-  tenant Tenant          @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  tenant Tenant           @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
   order  RoutesOnOrders[]
 
+  @@id([tenantId, routeId])
   @@index([tenantId, name], name: "route_tenant_name_index")
   @@map("routes")
 }
@@ -378,14 +400,15 @@ model RoutesOnOrders {
   orderId  String
 
   tenant Tenant @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
-  route  Route  @relation(fields: [routeId], references: [routeId], onDelete: Cascade)
-  order  Order  @relation(fields: [orderId], references: [orderId], onDelete: Cascade)
+  route  Route  @relation(fields: [tenantId, routeId], references: [tenantId, routeId])
+  order  Order  @relation(fields: [tenantId, orderId], references: [tenantId, orderId])
 
-  @@id([routeId, orderId])
-  @@index([tenantId], name: "route_orders_tenant_index")
+  @@id([tenantId, routeId, orderId])
+  @@index([tenantId, orderId], name: "route_orders_tenant_order_index")
   @@map("routesOrders")
 }
 
+// ---------- Module / EnabledModule ----------
 model Module {
   name          ModuleEnum      @id
   description   String?         @db.Text
@@ -396,112 +419,93 @@ model Module {
 }
 
 model EnabledModule {
-  id         String     @id @default(uuid())
-  tenantId   String
+  tenantId   String    
   moduleName ModuleEnum
+  id         String     @default(uuid())
+  enabledAt  DateTime   @default(now()) @db.Timestamptz
 
   tenant Tenant @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
   module Module @relation(fields: [moduleName], references: [name], onDelete: Cascade)
 
-  enabledAt DateTime @default(now()) @db.Timestamptz
-
-  @@unique([tenantId, moduleName])
+  @@id([tenantId, moduleName])
   @@index([tenantId], name: "enabled_module_tenant_index")
+  @@index([moduleName], name: "enabled_module_name_index")
+}
+
+// ---------- RBAC ----------
+model Role {
+  tenantId    String 
+  name        String  @db.VarChar(255) // PK = (tenantId, name) -> lesbarer FK
+  roleId      String  @default(uuid()) // sekundärer eindeutiger Schlüssel
+  description String? @db.VarChar(255)
+  deleted     Boolean @default(false)
+
+  tenant      Tenant       @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  employees   Employees[]
+  permissions Permission[]
+
+  @@id([tenantId, name])
+  @@index([tenantId, name], name: "role_tenant_name_unique")
+  @@unique([tenantId, name], name: "role_tenant_roleId_unique")
+  @@index([tenantId], name: "role_tenant_index")
+  @@map("roles")
 }
 
 model Employees {
-  employeeId String  @id @default(uuid(7))
-  tenantId   String?
-  email      String  @db.VarChar(255)
+  tenantId   String 
+  employeeId String  @default(uuid())
+  email      String  @db.VarChar(255) @unique
   password   String  @db.VarChar(255)
   firstName  String  @db.VarChar(255)
   lastName   String  @db.VarChar(255)
   deleted    Boolean @default(false)
   superAdmin Boolean @default(false)
-  roleId     String
 
-  tenant Tenant? @relation(fields: [tenantId], references: [tenantId], onDelete: SetNull)
-  Role   Role    @relation(fields: [roleId], references: [roleId])
-  Otp    Otp[]
+  roleName String @db.VarChar(255)
 
-  @@unique([tenantId, email], name: "employee_tenant_email_unique")
+  tenant Tenant @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  Role   Role   @relation(fields: [tenantId, roleName], references: [tenantId, name])
+
+  Otp Otp[]
+
+  @@id([tenantId, employeeId])
+  @@unique([tenantId, employeeId], name: "employee_tenant_employeeId_unique")
   @@index([tenantId, lastName], name: "employee_tenant_last_name_index")
+  @@index([tenantId, roleName], name: "employee_role_index")
   @@map("employees")
 }
 
+model Permission {
+  tenantId     String   
+  permissionId String    @default(uuid())
+  roleName     String
+  action       Actions
+  resource     Resources
+  allowed      Boolean   @default(false)
+  createdAt    DateTime  @default(now())
+
+  tenant         Tenant         @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  role           Role           @relation(fields: [tenantId, roleName], references: [tenantId, name])
+
+  @@id([tenantId, permissionId])
+  @@unique([tenantId, roleName, action, resource], name: "permission_role_action_resource_unique")
+  @@unique([tenantId, permissionId], name: "permission_tenant_permissionId_unique")
+  @@index([tenantId, roleName, action, resource], name: "permission_role_index")
+}
+
 model Otp {
-  id         String    @id @default(uuid())
-  tenantId   String?
-  code       Int       @unique @db.Integer()
+  tenantId   String  
+  id         String   @default(uuid())
+  code       Int      @db.Integer
   employeeId String
   expiresAt  DateTime
-  used       Boolean   @default(false)
-  createdAt  DateTime  @default(now())
+  used       Boolean  @default(false)
+  createdAt  DateTime @default(now())
 
-  tenant   Tenant?   @relation(fields: [tenantId], references: [tenantId], onDelete: SetNull)
-  employee Employees @relation(fields: [employeeId], references: [employeeId])
+  tenant   Tenant    @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
+  employee Employees @relation(fields: [tenantId, employeeId], references: [tenantId, employeeId])
 
-  @@index([tenantId, code], name: "otp_tenant_code_index")
-}
-
-model Action {
-  name          Actions          @id
-  description   String?          @db.VarChar(255)
-  deleted       Boolean          @default(false)
-  resourceLinks ResourceAction[]
-}
-
-model Resource {
-  name        Resources        @id
-  description String?          @db.VarChar(255)
-  deleted     Boolean          @default(false)
-  actionLinks ResourceAction[]
-
-  @@map("resources")
-}
-
-model ResourceAction {
-  action      Actions
-  resource    Resources
-  Action      Action       @relation(fields: [action], references: [name])
-  Resource    Resource     @relation(fields: [resource], references: [name])
-  permissions Permission[]
-
-  @@id([action, resource])
-  @@unique([action, resource])
-  @@index([action, resource], name: "resource_action_resource_index")
-  @@map("resourceActions")
-}
-
-model Role {
-  roleId      String      @id @default(uuid())
-  tenantId    String?
-  name        String       @db.VarChar(255)
-  description String?      @db.VarChar(255)
-  deleted     Boolean      @default(false)
-
-  tenant      Tenant?      @relation(fields: [tenantId], references: [tenantId], onDelete: SetNull)
-  employees   Employees[]
-  permissions Permission[]
-
-  @@unique([tenantId, name], name: "role_tenant_name_unique")
-  @@index([tenantId], name: "role_tenant_index")
-  @@map("roles")
-}
-
-model Permission {
-  permissionId   String         @id @default(uuid(7))
-  tenantId       String?
-  roleId         String
-  action         Actions
-  resource       Resources
-  allowed        Boolean        @default(false)
-  createdAt      DateTime       @default(now())
-
-  tenant         Tenant?        @relation(fields: [tenantId], references: [tenantId], onDelete: SetNull)
-  role           Role           @relation(fields: [roleId], references: [roleId])
-  resourceAction ResourceAction @relation(fields: [action, resource], references: [action, resource])
-
-  @@unique([roleId, action, resource], name: "permission_role_action_resource_unique")
-  @@index([tenantId], name: "permission_tenant_index")
+  @@id([tenantId, id])
+  @@unique([tenantId, code], name: "otp_tenant_code_unique")
+  @@index([tenantId, employeeId], name: "otp_employee_index")
 }

@@ -22,6 +22,7 @@ export class PermissionsRepository {
   ) {}
 
   async findAll(
+    tenantId: string,
     limit?: number,
     page?: number,
     role?: string,
@@ -29,7 +30,8 @@ export class PermissionsRepository {
     const [permissions, meta] = await this.prismaService.client.permission
       .paginate({
         where: {
-          role: role ? role : undefined,
+          tenantId,
+          roleName: role ? role : undefined,
         },
       })
       .withPages({
@@ -46,10 +48,14 @@ export class PermissionsRepository {
     };
   }
 
-  async findAllPermissions(role?: string): Promise<PermissionDto[]> {
+  async findAllPermissions(
+    tenantId: string,
+    role?: string,
+  ): Promise<PermissionDto[]> {
     const permissions = await this.prismaService.client.permission.findMany({
       where: {
-        role: role ? role : undefined,
+        tenantId,
+        roleName: role ? role : undefined,
       },
     });
 
@@ -58,9 +64,17 @@ export class PermissionsRepository {
     );
   }
 
-  async findById(permissionId: string): Promise<PermissionDto> {
+  async findById(
+    tenantId: string,
+    permissionId: string,
+  ): Promise<PermissionDto> {
     const permission = await this.prismaService.client.permission.findUnique({
-      where: { permissionId },
+      where: {
+        permission_tenant_permissionId_unique: {
+          tenantId,
+          permissionId,
+        },
+      },
     });
     if (!permission) {
       throw new Error(`Permission with ID ${permissionId} not found`);
@@ -68,7 +82,10 @@ export class PermissionsRepository {
     return transformResponse(PermissionDto, permission);
   }
 
-  async create(dto: CreatePermissionsDto): Promise<PermissionDto[]> {
+  async create(
+    tenantId: string,
+    dto: CreatePermissionsDto,
+  ): Promise<PermissionDto[]> {
     const results: PermissionDto[] = [];
     for (const action of dto.actions) {
       if (!Object.values(Actions).includes(action)) {
@@ -83,33 +100,40 @@ export class PermissionsRepository {
         );
       }
 
-      const roleExists = await this.rolesRepository.findByName(dto.role);
+      const roleExists = await this.rolesRepository.findByName(
+        tenantId,
+        dto.roleName,
+      );
 
       if (!roleExists) {
         throw new BadRequestException(
-          `Role with name ${dto.role} does not exist`,
+          `Role with name ${dto.roleName} does not exist`,
         );
       }
 
       const existingPermission =
-        await this.prismaService.client.permission.findFirst({
+        await this.prismaService.client.permission.findUnique({
           where: {
-            action,
-            resource: dto.resource,
-            role: dto.role,
+            permission_role_action_resource_unique: {
+              tenantId,
+              roleName: dto.roleName,
+              action,
+              resource: dto.resource,
+            },
           },
         });
 
       if (existingPermission) {
         throw new BadRequestException(
-          `Permission with action ${action}, resource ${dto.resource}, and role ${dto.role} already exists`,
+          `Permission with action ${action}, resource ${dto.resource}, and role ${dto.roleName} already exists`,
         );
       }
 
       const createdPermission =
         await this.prismaService.client.permission.create({
           data: {
-            role: dto.role,
+            tenantId,
+            roleName: dto.roleName,
             resource: dto.resource,
             action,
             allowed: dto.allowed,
@@ -121,13 +145,22 @@ export class PermissionsRepository {
     return results;
   }
   async update(
+    tenantId: string,
     permissionId: string,
     permissionData: Partial<UpdatePermissionDto>,
   ): Promise<PermissionDto> {
     const updatedPermission = await this.prismaService.client.permission.update(
       {
-        where: { permissionId },
-        data: permissionData,
+        where: {
+          tenantId_permissionId: {
+            tenantId,
+            permissionId,
+          },
+        },
+        data: {
+          ...permissionData,
+          tenantId,
+        },
       },
     );
     return transformResponse(PermissionDto, updatedPermission);

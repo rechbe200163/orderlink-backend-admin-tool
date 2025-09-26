@@ -29,11 +29,10 @@ type AuthResult = {
   tenantInfo: TenantInfo;
 };
 type TenantInfo = {
-  maxEmployees: number;
   trialEndsAt: Date | null;
   trialStartedAt: Date | null;
   status: TenantStatus | null;
-  enabledModules: string[];
+  enabledModules?: string[];
 };
 
 export type JwtPayload = SanitizedEmployee;
@@ -61,9 +60,10 @@ export class AuthService {
   }
 
   async validateUser(authInput: AuthInput): Promise<SanitizedEmployee | null> {
-    const user = await this.prismaService.client.employees.findEmployeeByEmail(
-      authInput.email,
-    );
+    const user =
+      await this.prismaService.client.employees.findEmployeeByEmailAuth(
+        authInput.email,
+      );
     console.log('Validating user:', user);
     if (user && (await compare(authInput.password, user.password))) {
       const { password, ...result } = user;
@@ -73,13 +73,12 @@ export class AuthService {
   }
 
   async signIn(user: SanitizedEmployee): Promise<AuthResult> {
-    const tenantData = await this.prismaService.client.tenantData.findFirst({
+    const tenantData = await this.prismaService.client.tenant.findFirst({
       select: {
         enabledModules: { select: { moduleName: true } },
         status: true,
         trialStartedAt: true,
         trialEndsAt: true,
-        maxEmployees: true,
       },
     });
 
@@ -89,10 +88,11 @@ export class AuthService {
 
     const tokenPayload = {
       employeeId: user.employeeId,
+      tenantId: user.tenantId,
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
-      role: user.role,
+      roleName: user.roleName,
       superAdmin: user.superAdmin,
     };
     const accessToken = this.jwtService.sign(tokenPayload);
@@ -105,13 +105,10 @@ export class AuthService {
       },
       user: sanitized as SanitizedEmployee,
       tenantInfo: {
-        maxEmployees: tenantData.maxEmployees,
         trialEndsAt: tenantData.trialEndsAt,
         trialStartedAt: tenantData.trialStartedAt,
         status: tenantData.status,
-        enabledModules: tenantData.enabledModules.map(
-          (module) => module.moduleName,
-        ),
+        enabledModules: tenantData.enabledModules.map((m) => m.moduleName),
       },
     };
   }
@@ -120,18 +117,28 @@ export class AuthService {
     return this.signIn(user);
   }
 
-  async signInWithOtp(code: number): Promise<AuthResult> {
-    const otp = await this.otpService.validateOTP(code);
+  async signInWithOtp(tenantSlug: string, code: number): Promise<AuthResult> {
+    const { tenantId } =
+      await this.prismaService.client.tenant.findUniqueOrThrow({
+        where: { slug: tenantSlug },
+        select: { tenantId: true },
+      });
+    const otp = await this.otpService.validateOTP(tenantId, code);
     if (!otp) {
       throw new UnauthorizedException('Invalid or expired OTP');
     }
     const employee = await this.prismaService.client.employees.findUnique({
-      where: { employeeId: otp.employeeId },
+      where: {
+        tenantId_employeeId: {
+          tenantId: otp.tenantId,
+          employeeId: otp.employeeId,
+        },
+      },
     });
     if (!employee) {
       throw new UnauthorizedException('Invalid or expired OTP');
     }
-    await this.otpService.markOtpAsUsed(code);
+    await this.otpService.markOtpAsUsed(tenantSlug, code);
     return this.signIn(employee);
   }
 }

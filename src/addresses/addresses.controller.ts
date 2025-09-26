@@ -11,6 +11,7 @@ import {
   UseInterceptors,
   UseGuards,
   BadRequestException,
+  Request,
 } from '@nestjs/common';
 import { AddressesService } from './addresses.service';
 import { CacheInterceptor } from '@nestjs/cache-manager';
@@ -32,6 +33,7 @@ import { UpdateAddressDto } from 'prisma/src/generated/dto/update-address.dto';
 import { AddressDto } from 'prisma/src/generated/dto/address.dto';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
+import { requireTenantId } from 'lib/common/tenant.util';
 
 @Controller('addresses')
 @UseInterceptors(CacheInterceptor)
@@ -49,9 +51,10 @@ export class AddressesController {
   @Post()
   @ApiBody({ type: CreateAddressDto })
   @ApiOkResponse({ type: AddressDto })
-  create(@Body() createAddressDto: CreateAddressDto) {
-    console.log('Creating address with data:', createAddressDto);
-    return this.addressesService.create(createAddressDto);
+  create(@Request() req, @Body() createAddressDto: CreateAddressDto) {
+    const { tenantId } = requireTenantId(req);
+
+    return this.addressesService.create(tenantId, createAddressDto);
   }
 
   @Get()
@@ -72,27 +75,34 @@ export class AddressesController {
   })
   @ApiOkResponse({ type: PagingResultDto<AddressDto> })
   findAll(
+    @Request() req,
     @Query('limit', ParseIntPipe) limit = 10,
     @Query('page', ParseIntPipe) page = 1,
     @Query('query') query?: string,
   ) {
+    const { tenantId } = requireTenantId(req);
     if (limit > MAX_PAGE_SIZE) {
       throw new BadRequestException(`Limit cannot exceed ${MAX_PAGE_SIZE}`);
     }
-    return this.addressesService.findAllPaging(limit, page, query);
+    return this.addressesService.findAllPaging(tenantId, limit, page, query);
   }
 
   @Get('all')
   @ApiOkResponse({ type: [AddressDto] })
-  findAllAddresses() {
-    return this.addressesService.findAll();
+  findAllAddresses(@Request() req) {
+    const { tenantId } = requireTenantId(req);
+    return this.addressesService.findAll(tenantId);
   }
 
   @Get(':addressId')
   @ApiParam({ name: 'addressId', type: String })
   @ApiOkResponse({ type: AddressDto })
-  findOne(@Param('addressId', ParseUUIDPipe) addressId: string) {
-    return this.addressesService.findById(addressId);
+  findOne(
+    @Request() req,
+    @Param('addressId', ParseUUIDPipe) addressId: string,
+  ) {
+    const { tenantId } = requireTenantId(req);
+    return this.addressesService.findById(tenantId, addressId);
   }
 
   @Patch(':addressId')
@@ -100,9 +110,11 @@ export class AddressesController {
   @ApiBody({ type: UpdateAddressDto })
   @ApiOkResponse({ type: AddressDto })
   update(
+    @Request() req,
     @Param('addressId', ParseUUIDPipe) addressId: string,
     @Body() updateAddressDto: UpdateAddressDto,
   ) {
-    return this.addressesService.update(addressId, updateAddressDto);
+    const { tenantId } = requireTenantId(req);
+    return this.addressesService.update(tenantId, addressId, updateAddressDto);
   }
 }

@@ -21,7 +21,7 @@ export class CreatePermissionsDto {
       'Role must be in uppercase and can only contain letters and underscores',
   })
   @IsString()
-  role: string;
+  roleName: string;
 
   @ApiProperty({
     enum: Resources,

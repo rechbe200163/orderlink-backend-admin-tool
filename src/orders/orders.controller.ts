@@ -13,6 +13,7 @@ import {
   UseGuards,
   BadRequestException,
   ParseEnumPipe,
+  Request,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/create-order.dto';
@@ -34,6 +35,7 @@ import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { OrderDto } from './dto/order.dto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
 import { OrderState } from '@prisma/client';
+import { requireTenantId } from 'lib/common/tenant.util';
 
 @Controller('orders')
 @UseInterceptors(CacheInterceptor)
@@ -47,8 +49,9 @@ export class OrdersController {
   @Post()
   @ApiBody({ type: CreateOrderDto })
   @ApiOkResponse({ type: OrderDto, description: 'Order created successfully' })
-  create(@Body() createOrderDto: CreateOrderDto) {
-    return this.ordersService.create(createOrderDto);
+  create(@Request() req, @Body() createOrderDto: CreateOrderDto) {
+    const { tenantId } = requireTenantId(req);
+    return this.ordersService.create(tenantId, createOrderDto);
   }
 
   @Get()
@@ -99,6 +102,7 @@ export class OrdersController {
     >,
   })
   findAll(
+    @Request() req,
     @Query('limit', new ParseIntPipe()) limit = 10,
     @Query('page', new ParseIntPipe()) page = 1,
     @Query('orderState', new ParseEnumPipe(OrderState, { optional: true }))
@@ -108,18 +112,12 @@ export class OrdersController {
     @Query('customerReference', new ParseIntPipe({ optional: true }))
     customerReference?: number,
   ) {
-    console.log('Fetching orders with parameters:', {
-      limit,
-      page,
-      orderState,
-      startDate,
-      endDate,
-      customerReference,
-    });
+    const { tenantId } = requireTenantId(req);
     if (limit > MAX_PAGE_SIZE) {
       throw new BadRequestException(`Limit cannot exceed ${MAX_PAGE_SIZE}`);
     }
     return this.ordersService.findAll(
+      tenantId,
       limit,
       page,
       orderState,
@@ -130,15 +128,17 @@ export class OrdersController {
   }
 
   @Get('all')
-  findAllOrders() {
-    return this.ordersService.findAllOrders();
+  findAllOrders(@Request() req) {
+    const { tenantId } = requireTenantId(req);
+    return this.ordersService.findAllOrders(tenantId);
   }
 
   @Get(':orderId')
   @ApiParam({ name: 'orderId', type: String })
   @ApiOkResponse({ type: OrderDto })
-  findOne(@Param('orderId', ParseUUIDPipe) orderId: string) {
-    return this.ordersService.findOne(orderId);
+  findOne(@Request() req, @Param('orderId', ParseUUIDPipe) orderId: string) {
+    const { tenantId } = requireTenantId(req);
+    return this.ordersService.findOne(tenantId, orderId);
   }
 
   @Patch(':orderId')
@@ -146,9 +146,11 @@ export class OrdersController {
   @ApiBody({ type: UpdateOrderDto })
   @ApiOkResponse({ type: OrderDto })
   update(
+    @Request() req,
     @Param('orderId', ParseUUIDPipe) orderId: string,
     @Body() updateOrderDto: UpdateOrderDto,
   ) {
-    return this.ordersService.update(orderId, updateOrderDto);
+    const { tenantId } = requireTenantId(req);
+    return this.ordersService.update(tenantId, orderId, updateOrderDto);
   }
 }

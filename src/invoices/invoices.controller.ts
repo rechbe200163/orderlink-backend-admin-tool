@@ -11,6 +11,7 @@ import {
   UseInterceptors,
   UseGuards,
   BadRequestException,
+  Req,
 } from '@nestjs/common';
 import { InvoicesService } from './invoices.service';
 import { CacheInterceptor } from '@nestjs/cache-manager';
@@ -32,6 +33,7 @@ import { UpdateInvoiceDto } from './dto/update-invoice.dto';
 import { InvoiceDto } from 'prisma/src/generated/dto/invoice.dto';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
+import { requireTenantId } from 'lib/common/tenant.util';
 
 @Controller('invoices')
 @UseInterceptors(CacheInterceptor)
@@ -49,8 +51,9 @@ export class InvoicesController {
   @Post()
   @ApiBody({ type: CreateInvoiceDto })
   @ApiOkResponse({ type: InvoiceDto })
-  create(@Body() createInvoiceDto: CreateInvoiceDto) {
-    return this.invoicesService.create(createInvoiceDto);
+  create(@Req() req, @Body() createInvoiceDto: CreateInvoiceDto) {
+    const { tenantId } = requireTenantId(req);
+    return this.invoicesService.create(tenantId, createInvoiceDto);
   }
 
   @Get()
@@ -64,20 +67,26 @@ export class InvoicesController {
   @ApiQuery({ name: 'page', type: Number, required: false, default: 1 })
   @ApiOkResponse({ type: PagingResultDto<InvoiceDto> })
   findAll(
+    @Req() req,
     @Query('limit', ParseIntPipe) limit = 10,
     @Query('page', ParseIntPipe) page = 1,
   ) {
+    const { tenantId } = requireTenantId(req);
+    if (page < 1) {
+      throw new BadRequestException('Page must be greater than 0');
+    }
     if (limit > MAX_PAGE_SIZE) {
       throw new BadRequestException(`Limit cannot exceed ${MAX_PAGE_SIZE}`);
     }
-    return this.invoicesService.findAll(limit, page);
+    return this.invoicesService.findAll(tenantId, limit, page);
   }
 
   @Get(':invoiceId')
   @ApiParam({ name: 'invoiceId', type: String })
   @ApiOkResponse({ type: InvoiceDto })
-  findOne(@Param('invoiceId', ParseUUIDPipe) invoiceId: string) {
-    return this.invoicesService.findById(invoiceId);
+  findOne(@Req() req, @Param('invoiceId', ParseUUIDPipe) invoiceId: string) {
+    const { tenantId } = requireTenantId(req);
+    return this.invoicesService.findById(tenantId, invoiceId);
   }
 
   @Patch(':invoiceId')
@@ -85,9 +94,11 @@ export class InvoicesController {
   @ApiBody({ type: UpdateInvoiceDto })
   @ApiOkResponse({ type: InvoiceDto })
   update(
+    @Req() req,
     @Param('invoiceId', ParseUUIDPipe) invoiceId: string,
     @Body() updateInvoiceDto: UpdateInvoiceDto,
   ) {
-    return this.invoicesService.update(invoiceId, updateInvoiceDto);
+    const { tenantId } = requireTenantId(req);
+    return this.invoicesService.update(tenantId, invoiceId, updateInvoiceDto);
   }
 }

@@ -31,5 +31,5 @@ export class EmployeesDto {
 
   @Expose()
   @IsString()
-  role: string;
+  roleName: string;
 }

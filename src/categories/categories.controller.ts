@@ -12,6 +12,7 @@ import {
   Query,
   ParseIntPipe,
   BadRequestException,
+  Request,
 } from '@nestjs/common';
 import { CategoriesService } from './categories.service';
 import { CreateCategoryDto } from './dto/create-category.dto';
@@ -34,6 +35,7 @@ import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { CategoryDto } from './dto/category.dto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { requireTenantId } from 'lib/common/tenant.util';
 
 @Controller('categories')
 @UseInterceptors(CacheInterceptor)
@@ -62,8 +64,9 @@ export class CategoriesController {
   @ApiConflictResponse({
     description: 'Category with this name already exists',
   })
-  create(@Body() createCategoryDto: CreateCategoryDto) {
-    return this.categoriesService.create(createCategoryDto);
+  create(@Request() req, @Body() createCategoryDto: CreateCategoryDto) {
+    const { tenantId } = requireTenantId(req);
+    return this.categoriesService.create(tenantId, createCategoryDto);
   }
 
   @Get()
@@ -96,15 +99,18 @@ export class CategoriesController {
     example: 'electronics',
   })
   findAll(
+    @Request() req,
     @Query('limit', ParseIntPipe) limit: number = 10,
     @Query('page', ParseIntPipe) page: number = 1,
     @Query('search') search?: string,
   ) {
+    const { tenantId } = requireTenantId(req);
+
     const maxLimit = MAX_PAGE_SIZE; // Define a maximum limit for pagination
     if (limit > maxLimit) {
       throw new BadRequestException(`Limit cannot exceed ${maxLimit}`);
     }
-    return this.categoriesService.findAll(limit, page, search);
+    return this.categoriesService.findAll(tenantId, limit, page, search);
   }
 
   @Get(':categoryId')
@@ -119,8 +125,12 @@ export class CategoriesController {
     required: true,
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
-  findOne(@Param('categoryId', ParseUUIDPipe) categoryId: string) {
-    return this.categoriesService.findById(categoryId);
+  findOne(
+    @Request() req,
+    @Param('categoryId', ParseUUIDPipe) categoryId: string,
+  ) {
+    const { tenantId } = requireTenantId(req);
+    return this.categoriesService.findById(tenantId, categoryId);
   }
 
   @Get('name/:name')
@@ -135,8 +145,9 @@ export class CategoriesController {
     required: true,
     example: 'Electronics',
   })
-  findByName(@Param('name') name: string) {
-    return this.categoriesService.findByName(name);
+  findByName(@Request() req, @Param('name') name: string) {
+    const { tenantId } = requireTenantId(req);
+    return this.categoriesService.findByName(tenantId, name);
   }
 
   @Patch(':categoryId')
@@ -159,9 +170,15 @@ export class CategoriesController {
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   update(
+    @Request() req,
     @Param('categoryId', ParseUUIDPipe) categoryId: string,
     @Body() updateCategoryDto: UpdateCategoryDto,
   ) {
-    return this.categoriesService.update(categoryId, updateCategoryDto);
+    const { tenantId } = requireTenantId(req);
+    return this.categoriesService.update(
+      tenantId,
+      categoryId,
+      updateCategoryDto,
+    );
   }
 }

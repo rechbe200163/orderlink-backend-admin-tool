@@ -1,3 +1,4 @@
+import { Tenant } from './../src/tenants/entities/tenant.entity';
 import { Actions, PrismaClient, Resources } from '@prisma/client';
 import { pagination } from 'prisma-extension-pagination';
 
@@ -16,9 +17,14 @@ export const extendedPrismaClient = new PrismaClient()
             where: { email },
           });
         },
-        findByReference: (reference: number) =>
+        findByReference: (tenantId: string, reference: number) =>
           extendedPrismaClient.customer.findUnique({
-            where: { customerReference: reference },
+            where: {
+              tenantId_customerReference: {
+                tenantId,
+                customerReference: reference,
+              },
+            },
           }),
         findWithCart: (reference: number) =>
           extendedPrismaClient.customer.findUnique({
@@ -26,34 +32,30 @@ export const extendedPrismaClient = new PrismaClient()
             include: { cart: { include: { products: true } } },
           }),
       },
-      cart: {
-        addProduct: async (cartId: string, productId: string, quantity = 1) => {
-          return extendedPrismaClient.cartOnProducts.upsert({
-            where: { cartId_productId: { cartId, productId } },
-            update: { quantity: { increment: quantity } },
-            create: { cartId, productId, quantity },
-          });
-        },
-        removeProduct: async (cartId: string, productId: string) => {
-          return extendedPrismaClient.cartOnProducts.delete({
-            where: { cartId_productId: { cartId, productId } },
-          });
-        },
-      },
       employees: {
-        findEmployeeByEmail: async (email: string) => {
+        findEmployeeByEmail: async (tenantId: string, email: string) => {
+          return extendedPrismaClient.employees.findFirst({
+            where: { email, tenantId },
+          });
+        },
+        findEmployeeByEmailAuth: async (email: string) => {
           return extendedPrismaClient.employees.findFirst({
             where: { email },
           });
         },
-        findByRole: async (role: string) => {
+        findByRole: async (tenantId: string, role: string) => {
           return extendedPrismaClient.employees.findMany({
-            where: { role },
+            where: { tenantId, roleName: role },
           });
         },
-        findById: async (employeeId: string) => {
+        findById: async (tenantId: string, employeeId: string) => {
           return extendedPrismaClient.employees.findUnique({
-            where: { employeeId },
+            where: {
+              employee_tenant_employeeId_unique: {
+                employeeId,
+                tenantId,
+              },
+            },
           });
         },
         findByPermission: async (
@@ -92,9 +94,9 @@ export const extendedPrismaClient = new PrismaClient()
         },
       },
       role: {
-        findByName: async (name: string) => {
+        findByName: async (tenantId: string, name: string) => {
           return extendedPrismaClient.role.findFirst({
-            where: { name },
+            where: { name, tenantId },
           });
         },
       },

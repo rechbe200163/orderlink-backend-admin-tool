@@ -34,6 +34,7 @@ import { MAX_PAGE_SIZE } from 'lib/constants';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { EmployeesDto } from 'prisma/src/generated/dto/employees.dto';
 import { MaxEmployeeGuard } from 'src/auth/guards/max-employee.guard';
+import { requireTenantId } from 'lib/common/tenant.util';
 
 @Controller('employees')
 @UseInterceptors(CacheInterceptor)
@@ -50,8 +51,8 @@ export class EmployeesController {
   @UseGuards(JwtAuthGuard)
   @ApiOkResponse({ type: EmployeesDto })
   getProfile(@Request() req) {
-    const { employeeId } = req.user;
-    return this.employeesService.findById(employeeId);
+    const { employeeId, tenantId } = requireTenantId(req);
+    return this.employeesService.findById(tenantId, employeeId);
   }
 
   @Patch('me')
@@ -59,8 +60,12 @@ export class EmployeesController {
   @ApiBody({ type: UpdateEmployeesDto })
   @ApiOkResponse({ type: EmployeesDto })
   updateProfile(@Request() req, @Body() updateEmployeeDto: UpdateEmployeesDto) {
-    const { employeeId } = req.user;
-    return this.employeesService.updateProfile(employeeId, updateEmployeeDto);
+    const { employeeId, tenantId } = requireTenantId(req);
+    return this.employeesService.updateProfile(
+      tenantId,
+      employeeId,
+      updateEmployeeDto,
+    );
   }
 
   @Post()
@@ -69,8 +74,9 @@ export class EmployeesController {
     description: 'Create a new employee',
   })
   @UseGuards(MaxEmployeeGuard)
-  create(@Body() createEmployeeDto: CreateEmployeesDto) {
-    return this.employeesService.create(createEmployeeDto);
+  create(@Request() req, @Body() createEmployeeDto: CreateEmployeesDto) {
+    const { tenantId } = requireTenantId(req);
+    return this.employeesService.create(tenantId, createEmployeeDto);
   }
 
   @Get()
@@ -132,7 +138,6 @@ export class EmployeesController {
     }
     return this.employeesService.findAll(page, limit, search, permissions);
   }
-
   @Get(':employeeId')
   @ApiQuery({
     name: 'includeOtp',
@@ -142,18 +147,26 @@ export class EmployeesController {
     description: 'Include OTP data in the response',
   })
   findById(
+    @Request() req,
     @Param('employeeId', ParseUUIDPipe) employeeId: string,
     @Query('includeOtp') includeOtp?: string,
   ) {
+    const { tenantId } = requireTenantId(req);
     const withOtp = includeOtp === 'true';
-    return this.employeesService.findById(employeeId, withOtp);
+    return this.employeesService.findById(tenantId, employeeId, withOtp);
   }
 
   @Patch(':employeeId')
   update(
+    @Request() req,
     @Param('employeeId', ParseUUIDPipe) employeeId: string,
     @Body() updateEmployeeDto: UpdateEmployeesDto,
   ) {
-    return this.employeesService.update(employeeId, updateEmployeeDto);
+    const { tenantId } = requireTenantId(req);
+    return this.employeesService.update(
+      tenantId,
+      employeeId,
+      updateEmployeeDto,
+    );
   }
 }
