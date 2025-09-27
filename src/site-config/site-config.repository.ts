@@ -7,11 +7,11 @@ import {
 } from '@nestjs/common';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'prisma/prisma.extension';
-import { CreateSiteConfigDto } from 'src/onboardings/dto/create-siteConfig.dto';
 import { SiteConfigDto } from 'prisma/src/generated/dto/siteConfig.dto';
 import { UpdateSiteConfigDto } from 'prisma/src/generated/dto/update-siteConfig.dto';
 import { transformResponse } from 'lib/utils/transform';
 import { isNoChange } from 'lib/utils/isNoChange';
+import { CreateSiteConfigDto } from './dto/create-siteConfig.dto';
 
 @Injectable()
 export class SiteConfigRepository {

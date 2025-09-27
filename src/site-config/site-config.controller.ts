@@ -26,13 +26,13 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
-import { CreateSiteConfigDto } from 'src/onboardings/dto/create-siteConfig.dto';
 import { UpdateSiteConfigDto } from 'prisma/src/generated/dto/update-siteConfig.dto';
 import { SiteConfigDto } from 'prisma/src/generated/dto/siteConfig.dto';
 import { FileSizeValidationPipe } from 'lib/pipes/file-size-validation-pipe';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileTypeValidationPipe } from 'lib/pipes/file-name-validation-pipe.ts';
 import { requireTenantId } from 'lib/common/tenant.util';
+import { CreateSiteConfigDto } from './dto/create-siteConfig.dto';
 
 @Controller('site-config')
 @UseInterceptors(CacheInterceptor)

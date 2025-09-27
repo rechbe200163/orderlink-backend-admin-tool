@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { SiteConfigRepository } from './site-config.repository';
-import { CreateSiteConfigDto } from 'src/onboardings/dto/create-siteConfig.dto';
 import { UpdateSiteConfigDto } from 'prisma/src/generated/dto/update-siteConfig.dto';
 import { SiteConfigDto } from 'prisma/src/generated/dto/siteConfig.dto';
 import { FileRepositoryService } from 'src/file-repository/file-repository.service';
+import { CreateSiteConfigDto } from './dto/create-siteConfig.dto';
 
 @Injectable()
 export class SiteConfigService {
