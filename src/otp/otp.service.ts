@@ -1,6 +1,6 @@
 import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { Otp, Prisma } from '@prisma/client';
-import { customAlphabet, nanoid } from 'nanoid';
+import { Otp } from '@prisma/client';
+// import { customAlphabet } from 'nanoid'; // Replaced with dynamic import
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
@@ -15,6 +15,7 @@ export class OtpService {
   ) {}
 
   async createOTP(tenantId: string, employeeId: string): Promise<Otp> {
+    const { customAlphabet } = await import('nanoid');
     const nanoidNumbers = customAlphabet('0123456789', 6);
     const OTP = Number(nanoidNumbers());
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // OTP valid for 10 minutes

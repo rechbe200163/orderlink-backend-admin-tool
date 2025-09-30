@@ -10,7 +10,6 @@ import { CustomerDto } from 'src/customers/dto/customer.dto';
 import { CustomerPagingResultDto } from './dto/customer-paging.dto';
 import { BusinessSector, Prisma } from '@prisma/client';
 import { CreateCustomerDto } from 'src/customers/dto/create-customer.dto';
-import { customAlphabet } from 'nanoid';
 import { hash } from 'bcryptjs';
 import { UpdateCustomerDto } from 'src/customers/dto/update-customer.dto';
 import { isNoChange } from 'lib/utils/isNoChange';
@@ -125,10 +124,10 @@ export class CustomersRepository {
     if (!customerData.addressId) {
       throw new BadRequestException('Address ID is required');
     }
-    const password = generateCustomerPassword();
+    const password = await generateCustomerPassword();
     const hashedPassword = await hash(password, 10);
     const customerEntity: Prisma.CustomerCreateInput = {
-      customerReference: generateCustomerReferenceNumber(),
+      customerReference: await generateCustomerReferenceNumber(),
       email: customerData.email,
       phoneNumber: customerData.phoneNumber,
       password: hashedPassword,

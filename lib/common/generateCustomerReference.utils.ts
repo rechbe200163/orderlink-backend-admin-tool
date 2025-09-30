@@ -1,11 +1,11 @@
-import { customAlphabet } from 'nanoid';
-
-export function generateCustomerReferenceNumber(): number {
+export async function generateCustomerReferenceNumber(): Promise<number> {
+  const { customAlphabet } = await import('nanoid');
   const nanoid = customAlphabet('1234567890', 9);
   return Number(nanoid());
 }
 
-export function generateCustomerPassword(): string {
+export async function generateCustomerPassword(): Promise<string> {
+  const { customAlphabet } = await import('nanoid');
   const nanoid = customAlphabet(
     'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789',
     18,
