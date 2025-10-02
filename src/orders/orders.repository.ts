@@ -167,11 +167,12 @@ export class OrdersRepository {
   ): Promise<OrderDto> {
     const existing = await this.prismaService.client.order.findUnique({
       where: { tenantId_orderId: { orderId, tenantId } },
+      include: { products: true },
     });
     if (!existing) {
       throw new NotFoundException(`Order with ID ${orderId} not found`);
     }
-    if (isNoChange<UpdateOrderDto>(updateOrderDto, existing as any)) {
+    if (isNoChange<UpdateOrderDto>(updateOrderDto, existing)) {
       throw new BadRequestException(`No changes detected for order ${orderId}`);
     }
     const { products, ...rest } = updateOrderDto;

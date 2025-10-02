@@ -1,6 +1,8 @@
-import { Product } from './../../prisma/src/generated/dto/product.entity';
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { FileRepositoryService } from 'src/file-repository/file-repository.service';
+import {
+  FileRepositoryService,
+  StorageBucket,
+} from 'src/file-repository/file-repository.service';
 import { CreateProductDto } from 'src/products/dto/create-product.dto';
 import { UpdateProductDto } from 'src/products/dto/update-product.dto';
 import { ProductsRepository } from './products.repository';
@@ -8,6 +10,8 @@ import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { ProductDto } from './dto/product.dto';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
 import { ProductHistoryDto } from './dto/product-history';
+
+const PRODUCT_BUCKET: StorageBucket = 'products';
 
 @Injectable()
 export class ProductsService {
@@ -25,7 +29,11 @@ export class ProductsService {
     let imageFilename: string | undefined;
 
     if (productImage) {
-      imageFilename = await this.fileService.uploadFile(tenantId, productImage);
+      imageFilename = await this.fileService.uploadFile(
+        tenantId,
+        productImage,
+        PRODUCT_BUCKET,
+      );
     }
 
     const product = await this.productRepository.create(
@@ -44,7 +52,7 @@ export class ProductsService {
       categoryId: product.categoryId,
     });
 
-    return product;
+    return this.appendSignedImage(product);
   }
 
   async getHistory(
@@ -60,7 +68,10 @@ export class ProductsService {
         `Product history for ID ${productId} not found`,
       );
     }
-    return productHistory;
+    const historyWithSignedImages = await Promise.all(
+      productHistory.map((history) => this.appendSignedImage(history)),
+    );
+    return historyWithSignedImages;
   }
 
   async findAll(
@@ -78,30 +89,19 @@ export class ProductsService {
       categoryId,
     );
 
-    const productsWithCdnImageURL = products.map((product) => {
-      if (!product.imagePath?.startsWith('https')) {
-        return {
-          ...product,
-          imagePath: this.addCdnImageUrl(product.imagePath)!,
-        };
-      }
-      return {
-        ...product,
-      };
-    });
+    const productsWithSignedUrls = await Promise.all(
+      products.map((product) => this.appendSignedImage(product)),
+    );
+
     return {
-      data: productsWithCdnImageURL,
+      data: productsWithSignedUrls,
       meta,
     };
   }
 
   async findOne(tenantId: string, id: string): Promise<ProductDto> {
     const product = await this.productRepository.findById(tenantId, id);
-    const imageUrl = this.addCdnImageUrl(product.imagePath);
-    return {
-      ...product,
-      imagePath: imageUrl!,
-    };
+    return this.appendSignedImage(product);
   }
 
   async update(
@@ -116,7 +116,11 @@ export class ProductsService {
       await this.productRepository.findOriginalProductById(tenantId, id);
 
     if (file) {
-      imageFilename = await this.fileService.uploadFile(tenantId, file);
+      imageFilename = await this.fileService.uploadFile(
+        tenantId,
+        file,
+        PRODUCT_BUCKET,
+      );
     }
 
     const product = await this.productRepository.update(
@@ -137,17 +141,29 @@ export class ProductsService {
       categoryId: originalProduct.categoryId,
     });
 
-    return product;
+    return this.appendSignedImage(product);
   }
 
   remove(id: string) {
     return `This action removes a #${id} product`;
   }
 
-  private addCdnImageUrl(productImage: string | null): string | undefined {
-    if (!productImage) return;
+  private async appendSignedImage<T extends { imagePath?: string | null }>(
+    product: T,
+  ): Promise<T> {
+    if (!product?.imagePath) {
+      return product;
+    }
 
-    const cdnUrl = `https://localhost/product-images/${productImage}`;
-    return cdnUrl;
+    const signedUrl = await this.fileService.getSignedUrl(
+      PRODUCT_BUCKET,
+      product.imagePath,
+    );
+
+    return {
+      ...product,
+      imagePath: signedUrl ?? product.imagePath,
+    };
   }
 }
+

@@ -33,7 +33,7 @@ export class StripeService {
   private async handleStripeEvent(event: Stripe.Event) {
     switch (event.type) {
       case 'checkout.session.completed': {
-        const session = event.data.object as Stripe.Checkout.Session;
+        const session = event.data.object;
         console.log(
           `Stripe checkout completed for session ${session.id}, customer ${session.customer}, total: ${session.amount_total}, currency: ${session.currency}, session: ${JSON.stringify(session)}`,
         );

@@ -1,58 +1,115 @@
-import { Injectable } from '@nestjs/common';
-import { InjectMinio } from 'src/minio/minio.decorator';
-import * as Minio from 'minio';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { randomUUID } from 'crypto';
 import slugify from 'slugify';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { InjectSupabaseClient } from 'src/supabase-storage/supabase-storage.decorator';
+
+export type StorageBucket = 'products' | 'siteConfig' | 'invoices';
+
 @Injectable()
 export class FileRepositoryService {
-  protected _bucketName = 'product-images';
+  constructor(
+    @InjectSupabaseClient()
+    private readonly supabaseClient: SupabaseClient,
+    private readonly configService: ConfigService,
+  ) {}
 
-  constructor(@InjectMinio() private readonly minioService: Minio.Client) {}
-
-  async bucketsList() {
-    return await this.minioService.listBuckets();
+  async bucketsList(): Promise<any> {
+    const { data, error } = await this.supabaseClient.storage.listBuckets();
+    if (error) {
+      throw new InternalServerErrorException('Failed to list storage buckets');
+    }
+    return data;
   }
-
-  // async getFile(filename: string) {
-  //   try {
-  //     return await this.minioService.presignedUrl(
-  //       'GET',
-  //       this._bucketName,
-  //       filename,
-  //       24 * 60 * 60, // 1 day in seconds
-  //     );
-  //   } catch (error) {
-  //     console.error('Could not generate minio URL', error);
-  //     return '';
-  //   }
-  // }
 
   async uploadFile(
     tenantId: string,
-    productImage: Express.Multer.File,
+    file: Express.Multer.File,
+    bucket: StorageBucket,
   ): Promise<string> {
-    console.log(
-      'Uploading file:',
-      productImage.originalname,
-      productImage.mimetype,
-      productImage.size,
-      productImage.fieldname,
-    );
-    const originalName = productImage.originalname || 'file';
-    const ext = productImage.mimetype?.split('/')[1] ?? '';
+    if (!file?.buffer?.length) {
+      throw new InternalServerErrorException('Uploaded file buffer is empty');
+    }
+
+    const objectPath = this.buildObjectPath(tenantId, file);
+    const bucketName = this.resolveBucketName(bucket);
+
+    const { error } = await this.supabaseClient.storage
+      .from(bucketName)
+      .upload(objectPath, file.buffer, {
+        cacheControl: '3600',
+        contentType: file.mimetype,
+        upsert: true,
+      });
+
+    if (error) {
+      throw new InternalServerErrorException(
+        `Failed to upload file to bucket ${bucketName}`,
+      );
+    }
+
+    return objectPath;
+  }
+
+  async getSignedUrl(
+    bucket: StorageBucket,
+    objectPath?: string | null,
+    expiresInSeconds = 60 * 60 * 24, // 1 day
+  ): Promise<string | null> {
+    if (!objectPath) {
+      return null;
+    }
+
+    if (objectPath.startsWith('http')) {
+      return objectPath;
+    }
+
+    const bucketName = this.resolveBucketName(bucket);
+    const { data, error } = await this.supabaseClient.storage
+      .from(bucketName)
+      .createSignedUrl(objectPath, expiresInSeconds);
+
+    if (error) {
+      return null;
+    }
+
+    return data?.signedUrl ?? null;
+  }
+
+  private buildObjectPath(tenantId: string, file: Express.Multer.File) {
+    const originalName = file.originalname || 'file';
+    const extension = file.mimetype?.split('/')?.[1] ?? '';
     const cleanName = slugify(originalName, {
       lower: true,
       remove: /[0-9]/g,
       trim: true,
       strict: true,
     });
-    const filename = `${tenantId}-${cleanName}${ext ? '.' + ext : ''}`;
-    await this.minioService.putObject(
-      this._bucketName,
-      filename,
-      productImage.buffer,
-      productImage.size,
-    );
-    return filename;
+
+    const fileNameParts = [randomUUID(), cleanName].filter(Boolean);
+    const fileName = fileNameParts.join('-');
+    const extSuffix = extension ? `.${extension}` : '';
+
+    return `${tenantId}/${fileName}${extSuffix}`;
+  }
+
+  private resolveBucketName(bucket: StorageBucket): string {
+    switch (bucket) {
+      case 'products':
+        return this.configService.getOrThrow<string>(
+          'SUPABASE_PRODUCTS_BUCKET',
+        );
+      case 'siteConfig':
+        return this.configService.getOrThrow<string>(
+          'SUPABASE_SITE_CONFIG_BUCKET',
+        );
+      case 'invoices':
+        return this.configService.getOrThrow<string>(
+          'SUPABASE_INVOICES_BUCKET',
+        );
+      default:
+        throw new InternalServerErrorException('Unknown storage bucket type');
+    }
   }
 }

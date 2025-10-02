@@ -80,7 +80,7 @@ export class InvoicesRepository {
     if (!existing) {
       throw new NotFoundException(`Invoice with ID ${invoiceId} not found`);
     }
-    if (isNoChange<UpdateInvoiceDto>(data, existing as any)) {
+    if (isNoChange<UpdateInvoiceDto>(data, existing)) {
       throw new BadRequestException(
         `No changes detected for invoice ${invoiceId}`,
       );

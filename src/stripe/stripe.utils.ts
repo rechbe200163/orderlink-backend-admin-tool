@@ -28,7 +28,7 @@ export const setupFee = 49;
 
 export function calculateOrderLinkPricing(
   modules?: ModuleName[],
-  userTier?: UserTier
+  userTier?: UserTier,
 ): {
   netMonthly: number;
   setupFee: number;
@@ -37,7 +37,7 @@ export function calculateOrderLinkPricing(
 } {
   const moduleSum = (modules ?? []).reduce(
     (sum, mod) => sum + modulePrices[mod],
-    0
+    0,
   );
   const userFee = userTier ? userPrices[userTier] : 0;
   const netMonthly = moduleSum + userFee;

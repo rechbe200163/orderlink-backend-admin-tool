@@ -19,7 +19,7 @@ export class UpdateOrderDto {
   @ApiProperty({ type: String, format: 'date-time', required: false })
   @IsOptional()
   @IsDateString()
-  deliveryDate?: Date;
+  deliveryDate?: Date | null;
 
   @ApiProperty({ type: Boolean, required: false })
   @IsOptional()

@@ -117,12 +117,12 @@ export class CustomersController {
     @Request() req,
     @Query('limit', ParseIntPipe) limit: number = 10,
     @Query('page', ParseIntPipe) page: number = 1,
-    @Query('query') query?: string | undefined,
+    @Query('query') query?: string,
     @Query(
       'businessSector',
       new ParseEnumPipe(BusinessSector, { optional: true }),
     )
-    businessSector?: BusinessSector | undefined,
+    businessSector?: BusinessSector,
   ) {
     const { tenantId } = requireTenantId(req);
 

@@ -2,8 +2,13 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { SiteConfigRepository } from './site-config.repository';
 import { UpdateSiteConfigDto } from 'prisma/src/generated/dto/update-siteConfig.dto';
 import { SiteConfigDto } from 'prisma/src/generated/dto/siteConfig.dto';
-import { FileRepositoryService } from 'src/file-repository/file-repository.service';
+import {
+  FileRepositoryService,
+  StorageBucket,
+} from 'src/file-repository/file-repository.service';
 import { CreateSiteConfigDto } from './dto/create-siteConfig.dto';
+
+const SITE_CONFIG_BUCKET: StorageBucket = 'siteConfig';
 
 @Injectable()
 export class SiteConfigService {
@@ -18,21 +23,26 @@ export class SiteConfigService {
     file?: Express.Multer.File,
   ): Promise<SiteConfigDto> {
     if (file) {
-      const filename = await this.fileService.uploadFile(tenantId, file);
+      const filename = await this.fileService.uploadFile(
+        tenantId,
+        file,
+        SITE_CONFIG_BUCKET,
+      );
       createDto.logoPath = filename;
     }
-    return this.siteConfigRepository.create(tenantId, createDto);
+    const siteConfig = await this.siteConfigRepository.create(
+      tenantId,
+      createDto,
+    );
+    return this.appendSignedLogo(siteConfig);
   }
 
-  async findFirst(tenantId: string): Promise<SiteConfigDto> {
+  async findFirst(_tenantId: string): Promise<SiteConfigDto> {
     const siteConfig = await this.siteConfigRepository.findFirst();
     if (!siteConfig) {
       throw new NotFoundException('Site configuration not found');
     }
-    if (siteConfig && siteConfig.logoPath) {
-      siteConfig.logoPath = this.addCdnImageUrl(siteConfig.logoPath)!;
-    }
-    return siteConfig;
+    return this.appendSignedLogo(siteConfig);
   }
 
   async findById(tenantId: string, id: string): Promise<SiteConfigDto> {
@@ -40,10 +50,7 @@ export class SiteConfigService {
     if (!siteConfig) {
       throw new NotFoundException('Site configuration not found');
     }
-    if (siteConfig && siteConfig.logoPath) {
-      siteConfig.logoPath = this.addCdnImageUrl(siteConfig.logoPath)!;
-    }
-    return siteConfig;
+    return this.appendSignedLogo(siteConfig);
   }
 
   async update(
@@ -53,16 +60,37 @@ export class SiteConfigService {
     file?: Express.Multer.File,
   ): Promise<SiteConfigDto> {
     if (file) {
-      const filename = await this.fileService.uploadFile(tenantId, file);
+      const filename = await this.fileService.uploadFile(
+        tenantId,
+        file,
+        SITE_CONFIG_BUCKET,
+      );
       updateDto.logoPath = filename;
     }
-    return this.siteConfigRepository.update(tenantId, id, updateDto);
+    const siteConfig = await this.siteConfigRepository.update(
+      tenantId,
+      id,
+      updateDto,
+    );
+    return this.appendSignedLogo(siteConfig);
   }
 
-  private addCdnImageUrl(productImage: string | null): string | undefined {
-    if (!productImage) return;
+  private async appendSignedLogo<T extends { logoPath?: string | null }>(
+    siteConfig: T,
+  ): Promise<T> {
+    if (!siteConfig?.logoPath) {
+      return siteConfig;
+    }
 
-    const cdnUrl = `https://localhost/product-images/${productImage}`;
-    return cdnUrl;
+    const signedUrl = await this.fileService.getSignedUrl(
+      SITE_CONFIG_BUCKET,
+      siteConfig.logoPath,
+    );
+
+    return {
+      ...siteConfig,
+      logoPath: signedUrl ?? siteConfig.logoPath,
+    };
   }
 }
+

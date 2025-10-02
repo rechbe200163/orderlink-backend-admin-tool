@@ -82,7 +82,7 @@ export class CustomersRepository {
     tenantId: string,
     limit?: number,
     page?: number,
-    query?: string | undefined,
+    query?: string,
     businessSector?: BusinessSector,
   ): Promise<CustomerPagingResultDto> {
     console.log('businessSector', businessSector);

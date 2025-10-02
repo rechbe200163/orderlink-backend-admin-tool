@@ -9,8 +9,13 @@ import { OnEvent } from '@nestjs/event-emitter';
 import { EventPayloads } from 'src/event-emitter/interface/event-types.interface';
 import { ProductsRepository } from 'src/products/products.repository';
 import { Readable } from 'stream';
-import { FileRepositoryService } from 'src/file-repository/file-repository.service';
+import {
+  FileRepositoryService,
+  StorageBucket,
+} from 'src/file-repository/file-repository.service';
 import { PDFDocument, rgb, StandardFonts } from 'pdf-lib'; // Import der pdf-lib-Bibliothek
+
+const INVOICE_BUCKET: StorageBucket = 'invoices';
 
 @Injectable()
 export class InvoicesService {
@@ -21,31 +26,49 @@ export class InvoicesService {
     private readonly siteConfigRepository: SiteConfigRepository,
   ) {}
 
-  create(
+  async create(
     tenantId: string,
     createInvoiceDto: CreateInvoiceDto,
   ): Promise<InvoiceDto> {
-    return this.invoicesRepository.create(tenantId, createInvoiceDto);
+    const invoice = await this.invoicesRepository.create(
+      tenantId,
+      createInvoiceDto,
+    );
+    return this.appendSignedInvoice(invoice);
   }
 
-  findAll(
+  async findAll(
     tenantId: string,
     limit = 10,
     page = 1,
   ): Promise<PagingResultDto<InvoiceDto>> {
-    return this.invoicesRepository.findAll(limit, page);
+    const { data, meta } = await this.invoicesRepository.findAll(limit, page);
+    const dataWithSignedUrls = await Promise.all(
+      data.map((invoice) => this.appendSignedInvoice(invoice)),
+    );
+
+    return {
+      data: dataWithSignedUrls,
+      meta,
+    };
   }
 
-  findById(tenantId: string, id: string): Promise<InvoiceDto> {
-    return this.invoicesRepository.findById(tenantId, id);
+  async findById(tenantId: string, id: string): Promise<InvoiceDto> {
+    const invoice = await this.invoicesRepository.findById(tenantId, id);
+    return this.appendSignedInvoice(invoice);
   }
 
-  update(
+  async update(
     tenantId: string,
     id: string,
     updateInvoiceDto: UpdateInvoiceDto,
   ): Promise<InvoiceDto> {
-    return this.invoicesRepository.update(tenantId, id, updateInvoiceDto);
+    const invoice = await this.invoicesRepository.update(
+      tenantId,
+      id,
+      updateInvoiceDto,
+    );
+    return this.appendSignedInvoice(invoice);
   }
 
   @OnEvent('order.created')
@@ -266,13 +289,35 @@ export class InvoicesService {
       stream,
     };
 
-    const filename = await this.fileService.uploadFile(tenantId, file);
+    const filename = await this.fileService.uploadFile(
+      tenantId,
+      file,
+      INVOICE_BUCKET,
+    );
 
     await this.invoicesRepository.create(tenantId, {
       orderId,
       invoiceAmount,
       pdfUrl: filename,
     });
+  }
+
+  private async appendSignedInvoice<T extends { pdfUrl?: string | null }>(
+    invoice: T,
+  ): Promise<T> {
+    if (!invoice?.pdfUrl) {
+      return invoice;
+    }
+
+    const signedUrl = await this.fileService.getSignedUrl(
+      INVOICE_BUCKET,
+      invoice.pdfUrl,
+    );
+
+    return {
+      ...invoice,
+      pdfUrl: signedUrl ?? invoice.pdfUrl,
+    };
   }
 
   private formatPrice(n: number) {
@@ -285,3 +330,4 @@ export class InvoicesService {
     return d.toLocaleString('de-AT', { hour12: false });
   }
 }
+
