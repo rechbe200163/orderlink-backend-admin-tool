@@ -11,6 +11,7 @@ import {
   ParseIntPipe,
   Query,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import {
@@ -35,6 +36,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { FileSizeValidationPipe } from 'lib/pipes/file-size-validation-pipe';
 import { FileTypeValidationPipe } from 'lib/pipes/file-name-validation-pipe.ts';
 import { requireTenantId } from 'lib/common/tenant.util';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 
 @Controller('products')
 @UseInterceptors(CacheInterceptor)
@@ -43,10 +46,7 @@ import { requireTenantId } from 'lib/common/tenant.util';
   description: 'Internal server error',
 })
 @ApiBearerAuth()
-@ApiForbiddenResponse({
-  description:
-    'Role does not have the permissions to perform this action on the requeseted resource',
-})
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 // @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
@@ -108,7 +108,6 @@ export class ProductsController {
   })
   findAll(
     @Req() req: Request,
-
     @Query('search') search?: string,
     @Query('categoryId') categoryId?: string,
     @Query('page', ParseIntPipe) page: number = 1,

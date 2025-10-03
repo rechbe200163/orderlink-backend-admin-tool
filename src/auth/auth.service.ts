@@ -73,13 +73,14 @@ export class AuthService {
   }
 
   async signIn(user: SanitizedEmployee): Promise<AuthResult> {
-    const tenantData = await this.prismaService.client.tenant.findFirst({
+    const tenantData = await this.prismaService.client.tenant.findUnique({
       select: {
         enabledModules: { select: { moduleName: true } },
         status: true,
         trialStartedAt: true,
         trialEndsAt: true,
       },
+      where: { tenantId: user.tenantId },
     });
 
     if (!tenantData) {

@@ -6,19 +6,27 @@ import {
   Patch,
   Param,
   Delete,
+  UseGuards,
+  Req,
 } from '@nestjs/common';
 import { TenantsService } from './tenants.service';
 import { CreateTenantDto } from './dto/create-tenant.dto';
 import { UpdateTenantDto } from './dto/update-tenant.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { ApiBearerAuth } from '@nestjs/swagger';
+import { requireTenantId } from 'lib/common/tenant.util';
 
 @Controller('tenants')
 export class TenantsController {
   constructor(private readonly tenantsService: TenantsService) {}
 
-  @Post()
-  create(@Body() createTenantDto: CreateTenantDto) {
-    return this.tenantsService.create(createTenantDto);
-  }
+  // @Post('activate')
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBearerAuth()
+  // activate(@Req() req) {
+  //   const { tenantId } = requireTenantId(req);
+  //   return this.tenantsService.activate(tenantId);
+  // }
 
   @Get()
   findAll() {

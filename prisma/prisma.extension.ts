@@ -1,9 +1,10 @@
-import { Tenant } from './../src/tenants/entities/tenant.entity';
 import { Actions, PrismaClient, Resources } from '@prisma/client';
 import { pagination } from 'prisma-extension-pagination';
+import { withAccelerate } from '@prisma/extension-accelerate';
 
 export const extendedPrismaClient = new PrismaClient()
   .$extends(pagination())
+  // .$extends(withAccelerate())
   // .$extends(
   //   readReplicas({
   //     url: process.env.DATABASE_URL_REPLICA!,

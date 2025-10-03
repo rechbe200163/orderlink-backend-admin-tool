@@ -7,7 +7,7 @@ import { UpdateEmployeesDto } from 'prisma/src/generated/dto/update-employees.dt
 import { transformResponse } from 'lib/utils/transform';
 import { EmployeesDto } from 'prisma/src/generated/dto/employees.dto';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
-import { TenantsRepository } from 'src/tenants/tenants.repository copy';
+import { TenantsRepository } from 'src/tenants/tenants.repository';
 
 @Injectable()
 export class EmployeesService {
