@@ -107,8 +107,8 @@ export class StripeService {
       mode: 'subscription',
       customer_email: email,
       line_items,
-      success_url: 'https://yourapp.com/success',
-      cancel_url: 'https://yourapp.com/cancel',
+      success_url: `${process.env.FRONTEND_URL}/success`,
+      cancel_url: `${process.env.FRONTEND_URL}/cancel`,
     });
 
     return { url: session.url };

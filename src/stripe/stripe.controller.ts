@@ -1,29 +1,29 @@
 import { Body, Controller, Post, RawBodyRequest, Req } from '@nestjs/common';
 import { Request } from 'express';
 import { StripeService } from './stripe.service';
-import { ApiBody, ApiConsumes } from '@nestjs/swagger';
+import { ApiBody } from '@nestjs/swagger';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 
-@Controller('billing')
+@Controller('stripe')
 export class StripeController {
-  constructor(private readonly billingService: StripeService) {}
+  constructor(private readonly stripeService: StripeService) {}
 
   @ApiBody({
-    description: 'Billing information for checkout session',
+    description: 'Stripe checkout session information',
     type: CreateCheckoutSessionDto,
     required: true,
   })
   @Post('checkout')
   async startCheckout(@Body() body: CreateCheckoutSessionDto) {
     console.log('Starting checkout session:', body);
-    return this.billingService.createCheckoutSession(body);
+    return this.stripeService.createCheckoutSession(body);
   }
 
   @Post('webhook')
   async handleStripeWebhook(@Req() req: RawBodyRequest<Request>) {
     const signature = req.headers['stripe-signature'] as string;
     const rawBody = (req as any).rawBody as Buffer;
-    await this.billingService.processWebhook(rawBody, signature);
+    await this.stripeService.processWebhook(rawBody, signature);
     return { received: true };
   }
 }

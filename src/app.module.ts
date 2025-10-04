@@ -86,7 +86,7 @@ import { StripeModule } from './stripe/stripe.module';
     ProductHistoryModule,
     OtpModule,
     TenantsModule,
-    // StripeModule,
+    StripeModule,
   ],
   controllers: [AppController],
   providers: [AppService],
