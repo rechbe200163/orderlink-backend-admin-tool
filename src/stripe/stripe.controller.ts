@@ -3,6 +3,7 @@ import { Request } from 'express';
 import { StripeService } from './stripe.service';
 import { ApiBody } from '@nestjs/swagger';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
+import { requireTenantId } from 'lib/common/tenant.util';
 
 @Controller('stripe')
 export class StripeController {
@@ -14,9 +15,10 @@ export class StripeController {
     required: true,
   })
   @Post('checkout')
-  async startCheckout(@Body() body: CreateCheckoutSessionDto) {
+  async startCheckout(@Req() req, @Body() body: CreateCheckoutSessionDto) {
     console.log('Starting checkout session:', body);
-    return this.stripeService.createCheckoutSession(body);
+    const { tenantId } = requireTenantId(req);
+    return this.stripeService.createCheckoutSession({ ...body, tenantId });
   }
 
   @Post('webhook')

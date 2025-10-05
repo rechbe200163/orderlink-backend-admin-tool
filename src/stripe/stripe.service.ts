@@ -45,10 +45,12 @@ export class StripeService {
   }
 
   async createCheckoutSession({
+    tenantId,
     modules,
     userTier,
     email,
   }: {
+    tenantId: string;
     modules?: ModuleName[];
     userTier?: UserTier;
     email: string;
@@ -107,6 +109,11 @@ export class StripeService {
       mode: 'subscription',
       customer_email: email,
       line_items,
+      metadata: {
+        modules: modules ? modules.join(',') : '',
+        userTier: userTier || 'FREE',
+        tenantId,
+      },
       success_url: `${process.env.FRONTEND_URL}/success`,
       cancel_url: `${process.env.FRONTEND_URL}/cancel`,
     });
