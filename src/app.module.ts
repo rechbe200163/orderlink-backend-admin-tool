@@ -86,7 +86,7 @@ import { StripeModule } from './stripe/stripe.module';
     ProductHistoryModule,
     OtpModule,
     TenantsModule,
-    StripeModule,
+    StripeModule.forRootAsync(),
   ],
   controllers: [AppController],
   providers: [AppService],
