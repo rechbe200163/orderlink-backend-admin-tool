@@ -11,7 +11,7 @@ import {
 import { read } from 'fs';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'prisma/prisma.extension';
-import { ModuleEnum } from '@prisma/client';
+import { ModuleEnum, TenantStatus } from '@prisma/client';
 
 @Injectable()
 export class StripeService {
@@ -55,6 +55,7 @@ export class StripeService {
           this.prismaService.client.tenant.update({
             where: { tenantId },
             data: {
+              status: TenantStatus.ACTIVE,
               billingCustomerId: session.customer as string,
               maxEmployees:
                 userTier === UserTier.CORE
