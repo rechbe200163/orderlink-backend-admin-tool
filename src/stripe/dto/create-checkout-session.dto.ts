@@ -6,10 +6,11 @@ import { IsEnum, IsOptional } from 'class-validator';
 export class CreateCheckoutSessionDto {
   @ApiProperty({
     description: 'List of modules to include in the checkout session',
-    enum: ModuleName,
+    enum: [ModuleName],
+    default: [ModuleName.INSIGHT, ModuleName.FLOW],
   })
   @IsOptional()
-  modules?: ModuleName[];
+  modules?: [ModuleName];
 
   @ApiProperty({
     description: 'User tier for the checkout session',
@@ -21,10 +22,4 @@ export class CreateCheckoutSessionDto {
     message: `User tier must be one of: ${Object.values(UserTier).join(', ')}`,
   })
   userTier?: UserTier;
-
-  @ApiProperty({
-    description: 'Email address of the user',
-    type: String,
-  })
-  email: string;
 }

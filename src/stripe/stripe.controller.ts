@@ -24,8 +24,12 @@ export class StripeController {
   })
   @Post('checkout')
   async startCheckout(@Request() req, @Body() body: CreateCheckoutSessionDto) {
-    const { tenantId } = requireTenantId(req);
-    return this.stripeService.createCheckoutSession({ ...body, tenantId });
+    const { tenantId, email } = requireTenantId(req);
+    return this.stripeService.createCheckoutSession({
+      ...body,
+      tenantId,
+      email,
+    });
   }
 
   @Post('webhook')
