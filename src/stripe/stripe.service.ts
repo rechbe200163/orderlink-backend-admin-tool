@@ -95,8 +95,6 @@ export class StripeService {
     userTier?: UserTier;
     email: string;
   }) {
-    const pricing = calculateOrderLinkPricing(modules, userTier);
-
     const line_items: Stripe.Checkout.SessionCreateParams.LineItem[] = [];
 
     // Setup Fee (einmalig)

@@ -1,11 +1,19 @@
-import { Body, Controller, Post, RawBodyRequest, Req } from '@nestjs/common';
-import { Request } from 'express';
+import {
+  Body,
+  Controller,
+  Post,
+  RawBodyRequest,
+  Request,
+  UseGuards,
+} from '@nestjs/common';
 import { StripeService } from './stripe.service';
 import { ApiBody } from '@nestjs/swagger';
 import { CreateCheckoutSessionDto } from './dto/create-checkout-session.dto';
 import { requireTenantId } from 'lib/common/tenant.util';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 
 @Controller('stripe')
+@UseGuards(JwtAuthGuard)
 export class StripeController {
   constructor(private readonly stripeService: StripeService) {}
 
@@ -15,14 +23,13 @@ export class StripeController {
     required: true,
   })
   @Post('checkout')
-  async startCheckout(@Req() req, @Body() body: CreateCheckoutSessionDto) {
-    console.log('Starting checkout session:', body);
+  async startCheckout(@Request() req, @Body() body: CreateCheckoutSessionDto) {
     const { tenantId } = requireTenantId(req);
     return this.stripeService.createCheckoutSession({ ...body, tenantId });
   }
 
   @Post('webhook')
-  async handleStripeWebhook(@Req() req: RawBodyRequest<Request>) {
+  async handleStripeWebhook(@Request() req: RawBodyRequest<Request>) {
     const signature = req.headers['stripe-signature'] as string;
     const rawBody = (req as any).rawBody as Buffer;
     await this.stripeService.processWebhook(rawBody, signature);
