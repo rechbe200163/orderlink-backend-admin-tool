@@ -49,7 +49,8 @@ export class StripeService {
         const modules = session.metadata?.modules
           ? (session.metadata.modules.split(',') as ModuleName[])
           : [];
-        const userTier = (session.metadata?.userTier as UserTier) || 'FREE';
+        const userTier =
+          (session.metadata?.userTier as UserTier) || UserTier.CORE;
 
         if (session.metadata) {
           this.prismaService.client.tenant.update({
