@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable } from '@nestjs/common';
 import Stripe from 'stripe';
 import {
   ModuleName,
@@ -8,12 +8,19 @@ import {
   setupFee,
   userPrices,
 } from './stripe.utils';
+import { read } from 'fs';
+import { CustomPrismaService } from 'nestjs-prisma';
+import { ExtendedPrismaClient } from 'prisma/prisma.extension';
+import { ModuleEnum } from '@prisma/client';
 
 @Injectable()
 export class StripeService {
   private stripe: Stripe;
 
-  constructor() {
+  constructor(
+    @Inject('PrismaService')
+    private prismaService: CustomPrismaService<ExtendedPrismaClient>,
+  ) {
     this.stripe = new Stripe(process.env.STRIPE_SECRET_KEY || '', {
       apiVersion: '2025-08-27.basil',
       typescript: true,
@@ -37,6 +44,39 @@ export class StripeService {
         console.log(
           `Stripe checkout completed for session ${session.id}, customer ${session.customer}, total: ${session.amount_total}, currency: ${session.currency}, session: ${JSON.stringify(session)}`,
         );
+
+        const tenantId = session.metadata?.tenantId;
+        const modules = session.metadata?.modules
+          ? (session.metadata.modules.split(',') as ModuleName[])
+          : [];
+        const userTier = (session.metadata?.userTier as UserTier) || 'FREE';
+
+        if (session.metadata) {
+          this.prismaService.client.tenant.update({
+            where: { tenantId },
+            data: {
+              billingCustomerId: session.customer as string,
+              maxEmployees:
+                userTier === UserTier.CORE
+                  ? 3
+                  : userTier === UserTier.TEAM
+                    ? 5
+                    : userTier === UserTier.PRO
+                      ? 7
+                      : 3,
+              enabledModules: {
+                set:
+                  modules.map((m) => ({
+                    tenantId_moduleName: {
+                      tenantId: tenantId as string,
+                      moduleName: ModuleEnum[m],
+                    },
+                  })) || [],
+              },
+            },
+          });
+        }
+
         break;
       }
       default:
