@@ -13,7 +13,6 @@ import { requireTenantId } from 'lib/common/tenant.util';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 
 @Controller('stripe')
-@UseGuards(JwtAuthGuard)
 export class StripeController {
   constructor(private readonly stripeService: StripeService) {}
 
@@ -22,6 +21,7 @@ export class StripeController {
     type: CreateCheckoutSessionDto,
     required: true,
   })
+  @UseGuards(JwtAuthGuard)
   @Post('checkout')
   async startCheckout(@Request() req, @Body() body: CreateCheckoutSessionDto) {
     const { tenantId, email } = requireTenantId(req);

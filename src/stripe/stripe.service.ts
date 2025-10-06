@@ -75,6 +75,9 @@ export class StripeService {
               },
             },
           });
+          console.log(
+            `Update tenant ${tenantId} with modules ${modules} and userTier ${userTier}`,
+          );
         }
 
         break;
