@@ -60,6 +60,7 @@ export const extendedPrismaClient = new PrismaClient()
           });
         },
         findByPermission: async (
+          tenantId: string,
           paging: {
             limit: number;
             page: number;
@@ -76,6 +77,7 @@ export const extendedPrismaClient = new PrismaClient()
           return extendedPrismaClient.employees
             .paginate({
               where: {
+                tenantId,
                 Role: {
                   permissions: {
                     some: {

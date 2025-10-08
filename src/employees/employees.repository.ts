@@ -63,6 +63,7 @@ export class EmployeesRepository {
   }
 
   async findAll(
+    tenantId: string,
     page: number = 1,
     limit: number = 10,
     search?: string,
@@ -75,6 +76,7 @@ export class EmployeesRepository {
     if (permissions) {
       const [employees, meta] =
         await this.prismaService.client.employees.findByPermission(
+          tenantId,
           {
             limit,
             page,
@@ -92,6 +94,7 @@ export class EmployeesRepository {
     const [employees, meta] = await this.prismaService.client.employees
       .paginate({
         where: {
+          tenantId,
           deleted: false,
           lastName: {
             contains: search,

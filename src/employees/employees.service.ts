@@ -1,3 +1,4 @@
+import { Tenant } from './../tenants/entities/tenant.entity';
 import { Injectable } from '@nestjs/common';
 import { EmployeesRepository } from './employees.repository';
 import { Actions } from '@prisma/client';
@@ -42,6 +43,7 @@ export class EmployeesService {
   }
 
   findAll(
+    tenantId: string,
     page: number = 1,
     limit: number = 10,
     search?: string,
@@ -51,7 +53,13 @@ export class EmployeesService {
       allowed: boolean;
     },
   ) {
-    return this.employeesRepository.findAll(page, limit, search, permissions);
+    return this.employeesRepository.findAll(
+      tenantId,
+      page,
+      limit,
+      search,
+      permissions,
+    );
   }
 
   findById(tenantId: string, id: string, includeOtp = false) {
