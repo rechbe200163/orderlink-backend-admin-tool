@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Neue Berechtigungsanfrage - {{companyName}}</title>
+    <style>
+      body {
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        background-color: #f8fafc;
+        margin: 0;
+        padding: 0;
+        -webkit-font-smoothing: antialiased;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+      }
+      .header {
+        background-color: #0f172a;
+        padding: 25px 0;
+        text-align: center;
+        border-bottom: 4px solid #38bdf8;
+      }
+      .logo {
+        width: 180px;
+        margin: 0 auto;
+      }
+      .content {
+        padding: 40px 30px;
+        background-color: #ffffff;
+      }
+      h2 {
+        color: #0f172a;
+        font-size: 24px;
+        margin: 0 0 20px;
+      }
+      p {
+        color: #334155;
+        font-size: 16px;
+        line-height: 1.6;
+        margin: 0 0 20px;
+      }
+      .details {
+        background-color: #f1f5f9;
+        padding: 20px;
+        border-radius: 6px;
+        margin: 0 0 20px;
+      }
+      .details p {
+        margin: 0 0 10px;
+      }
+      .label {
+        font-weight: bold;
+        color: #0f172a;
+      }
+      .footer {
+        background-color: #0f172a;
+        color: #ffffff;
+        padding: 30px;
+        text-align: center;
+      }
+      .powered {
+        font-size: 14px;
+        color: #cbd5f5;
+        margin-top: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img
+          class="logo"
+          src="https://picsum.photos/200/300"
+          alt="OrderLink Logo"
+        />
+      </div>
+      <div class="content">
+        <h2>Neue Berechtigungsanfrage</h2>
+        <p>
+          F&uuml;r {{companyName}} liegt eine neue Anfrage auf erweiterte
+          Berechtigungen vor.
+        </p>
+        <div class="details">
+          <p><span class="label">Mitarbeiter-ID:</span> {{employeeId}}</p>
+          <p><span class="label">Rolle:</span> {{role}}</p>
+          <p><span class="label">Ressource:</span> {{resource}}</p>
+          <p><span class="label">Angeforderte Aktionen:</span> {{actions}}</p>
+        </div>
+        <p>
+          Bitte pr&uuml;fen Sie die Anfrage und passen Sie bei Bedarf die
+          Berechtigungen im Admin-Tool an.
+        </p>
+      </div>
+      <div class="footer">
+        <p>&copy; {{currentYear}} {{companyName}}. Alle Rechte vorbehalten.</p>
+        <div class="powered">Powered by OrderLink</div>
+      </div>
+    </div>
+  </body>
+</html>

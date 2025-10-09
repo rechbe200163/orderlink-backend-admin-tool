@@ -1,10 +1,10 @@
-doctype html
-html(lang="de")
-  head
-    meta(charset="UTF-8")
-    meta(name="viewport" content="width=device-width, initial-scale=1.0")
-    title Einmal-Code erneut gesendet – OrderLink
-    style.
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Einmal-Code erneut gesendet - {{companyName}}</title>
+    <style>
       body {
         font-family: 'Helvetica Neue', Arial, sans-serif;
         background-color: #e3f2fd;
@@ -60,18 +60,32 @@ html(lang="de")
         color: #aaaaaa;
         margin-top: 10px;
       }
-  body
-    .container
-      .header
-        img.logo(src="https://placeholder.svg?height=60&width=180" alt="OrderLink Logo")
-      .content
-        h2 Hallo #{firstName} #{lastName},
-        p Ihr Einmal-Code (OTP) für den Login wurde erneut gesendet.
-        p Bitte verwenden Sie den folgenden Code, um sich anzumelden:
-        p
-          span.otp #{otpCode}
-        p Aus Sicherheitsgründen empfehlen wir, nach dem Login Ihr Passwort zu setzen.
-        p Bei Fragen wenden Sie sich bitte an Ihren Administrator.
-      .footer
-        p &copy; #{new Date().getFullYear()} OrderLink. Alle Rechte vorbehalten.
-        .powered Powered by OrderLink
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img
+          class="logo"
+          src="https://picsum.photos/200/300"
+          alt="OrderLink Logo"
+        />
+      </div>
+      <div class="content">
+        <h2>Hallo {{firstName}} {{lastName}},</h2>
+        <p>Ihr Einmal-Code (OTP) f&uuml;r den Login wurde erneut gesendet.</p>
+        <p>Bitte verwenden Sie den folgenden Code, um sich anzumelden:</p>
+        <p class="otp">{{otpCode}}</p>
+        <p>
+          Aus Sicherheitsgr&uuml;nden empfehlen wir, nach dem Login Ihr Passwort
+          zu setzen.
+        </p>
+        <p>Bei Fragen wenden Sie sich bitte an Ihren Administrator.</p>
+      </div>
+      <div class="footer">
+        <p>&copy; {{currentYear}} {{companyName}}. Alle Rechte vorbehalten.</p>
+        <div class="powered">Powered by OrderLink</div>
+      </div>
+    </div>
+  </body>
+</html>

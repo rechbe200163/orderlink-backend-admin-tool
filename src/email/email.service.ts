@@ -1,16 +1,26 @@
 import { OtpService } from '../otp/otp.service';
-import { MailerService } from '@nestjs-modules/mailer';
 import { Injectable } from '@nestjs/common';
 import { OnEvent } from '@nestjs/event-emitter';
 import { EmployeesRepository } from 'src/employees/employees.repository';
 import { EventPayloads } from 'src/event-emitter/interface/event-types.interface';
+import { Resend } from 'resend';
+import { EmailTemplateService } from './email-template.service';
 
 @Injectable()
 export class EmailService {
+  private readonly companyName = process.env.COMPANY_NAME ?? 'OrderLink';
+  private readonly fromEmail = process.env.RESEND_FROM_EMAIL;
+  private readonly magicLinkBaseUrl =
+    process.env.MAGIC_LINK_BASE_URL ?? 'https://admin.orderlink.at/auth';
+  private readonly changePasswordUrl =
+    process.env.CHANGE_PASSWORD_URL ??
+    'https://admin.orderlink.at/account/change-password';
+
   constructor(
-    private readonly mailerService: MailerService,
+    private readonly resend: Resend,
     private readonly employeeRepository: EmployeesRepository,
     private readonly OtpService: OtpService,
+    private readonly emailTemplateService: EmailTemplateService,
   ) {}
 
   @OnEvent('customer.created')
@@ -23,14 +33,16 @@ export class EmailService {
       `with password: ${password}`,
     );
 
-    await this.mailerService.sendMail({
+    await this.sendEmail({
       to: email,
-      template: './created',
+      subject: `Willkommen bei ${this.companyName}`,
+      template: 'created',
       context: {
         firstName,
         lastName,
         email,
         password,
+        changePasswordUrl: this.changePasswordUrl,
       },
     });
   }
@@ -49,15 +61,18 @@ export class EmailService {
       employeeId,
     );
 
-    await this.mailerService.sendMail({
+    const magicLink = `${this.magicLinkBaseUrl}/${tenant.tenantSlug}/otp`;
+
+    await this.sendEmail({
       to: email,
-      template: './employee-created',
+      subject: `Ihr Mitarbeiterzugang fuer ${this.companyName}`,
+      template: 'employee-created',
       context: {
         firstName,
         lastName,
         email,
         otp: code,
-        magicLink: `https://admin.orderlink.at/auth/${tenant.tenantSlug}/otp`,
+        magicLink,
       },
     });
   }
@@ -82,21 +97,24 @@ export class EmailService {
       `lastName: ${lastName}, email: ${email}, role: ${role}, resource: ${resource}, action: ${action}`,
     );
 
-    for (const adminEmail of adminEmails) {
-      await this.mailerService.sendMail({
-        to: adminEmail,
-        template: './access-violation',
-        context: {
-          employeeId,
-          firstName,
-          lastName,
-          email,
-          role,
-          resource,
-          action,
-        },
-      });
+    if (!adminEmails.length) {
+      return;
     }
+
+    await this.sendEmail({
+      to: adminEmails,
+      subject: `Zugriffsverletzung im Mandanten ${tenantId}`,
+      template: 'access-violation',
+      context: {
+        employeeId,
+        firstName,
+        lastName,
+        email,
+        role,
+        resource,
+        action,
+      },
+    });
   }
 
   @OnEvent('permission.requested')
@@ -104,13 +122,16 @@ export class EmailService {
     const { tenantId, employeeId, role, resource, actions } = data;
     const adminEmails = await this.employeeRepository.findAdminEmails(tenantId);
 
-    for (const adminEmail of adminEmails) {
-      await this.mailerService.sendMail({
-        to: adminEmail,
-        template: './access-violation',
-        context: { employeeId, role, resource, actions },
-      });
+    if (!adminEmails.length) {
+      return;
     }
+
+    await this.sendEmail({
+      to: adminEmails,
+      subject: `Neue Berechtigungsanfrage fuer ${resource}`,
+      template: 'permission-request',
+      context: { employeeId, role, resource, actions: actions.join(', ') },
+    });
   }
 
   @OnEvent('otp.resend')
@@ -130,9 +151,10 @@ export class EmailService {
       `Resending OTP to ${employee.email} for employeeId: ${employeeId}`,
     );
 
-    await this.mailerService.sendMail({
+    await this.sendEmail({
       to: employee.email,
-      template: './otp-resend',
+      subject: `Ihr Einmal-Code fuer ${this.companyName}`,
+      template: 'otp-resend',
       context: {
         firstName: employee.firstName,
         lastName: employee.lastName,
@@ -140,4 +162,34 @@ export class EmailService {
       },
     });
   }
+
+  private async sendEmail({
+    to,
+    subject,
+    template,
+    context,
+  }: {
+    to: string | string[];
+    subject: string;
+    template: string;
+    context: Record<string, string | number | undefined>;
+  }) {
+    if (!this.fromEmail) {
+      throw new Error('RESEND_FROM_EMAIL environment variable is not set');
+    }
+
+    const html = await this.emailTemplateService.render(template, {
+      ...context,
+      companyName: this.companyName,
+      currentYear: new Date().getFullYear(),
+    });
+
+    await this.resend.emails.send({
+      from: this.fromEmail,
+      to,
+      subject,
+      html,
+    });
+  }
 }
+

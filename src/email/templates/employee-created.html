@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="de">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mitarbeiterkonto erstellt - {{companyName}}</title>
+    <style>
+      body {
+        font-family: 'Helvetica Neue', Arial, sans-serif;
+        background-color: #e3f2fd;
+        margin: 0;
+        padding: 0;
+        -webkit-font-smoothing: antialiased;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        background-color: #ffffff;
+      }
+      .header {
+        background-color: #1565c0;
+        padding: 25px 0;
+        text-align: center;
+        border-bottom: 4px solid #1976d2;
+      }
+      .logo {
+        width: 180px;
+        margin: 0 auto;
+      }
+      .content {
+        padding: 40px 30px;
+        background-color: #ffffff;
+      }
+      h2 {
+        color: #0d47a1;
+        font-size: 24px;
+        margin: 0 0 20px;
+      }
+      p {
+        color: #555555;
+        font-size: 16px;
+        line-height: 1.6;
+        margin: 0 0 20px;
+      }
+      .otp,
+      .magiclink {
+        font-size: 18px;
+        font-weight: bold;
+        color: #1976d2;
+        margin: 0 0 20px;
+        word-break: break-all;
+      }
+      a {
+        color: #1565c0;
+        text-decoration: underline;
+      }
+      .footer {
+        background-color: #1565c0;
+        color: #ffffff;
+        padding: 30px;
+        text-align: center;
+      }
+      .powered {
+        font-size: 14px;
+        color: #aaaaaa;
+        margin-top: 10px;
+      }
+      ul {
+        padding-left: 18px;
+        margin: 0 0 20px;
+      }
+      li {
+        color: #555555;
+        font-size: 16px;
+        line-height: 1.6;
+        margin-bottom: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <img
+          class="logo"
+          src="https://picsum.photos/200/300"
+          alt="OrderLink Logo"
+        />
+      </div>
+      <div class="content">
+        <h2>Willkommen im Team, {{firstName}} {{lastName}}!</h2>
+        <p>
+          Ihr Mitarbeiterkonto bei {{companyName}} wurde erfolgreich erstellt.
+        </p>
+        <p>
+          W&auml;hlen Sie eine der folgenden Optionen f&uuml;r den ersten Login:
+        </p>
+        <ul>
+          <li>Einmal-Code (OTP): <span class="otp">{{otp}}</span></li>
+          <li>
+            Anmelden unter Verwendung des folgenden Links:
+            <a class="magiclink" href="{{magicLink}}"
+              >Hier klicken, um zum Login zu gelangen</a
+            >
+          </li>
+        </ul>
+        <p>
+          Aus Sicherheitsgr&uuml;nden empfehlen wir, nach dem ersten Login Ihr
+          Passwort zu setzen.
+        </p>
+        <p>
+          Wir freuen uns, Sie an Bord zu haben und w&uuml;nschen Ihnen einen
+          erfolgreichen Start!
+        </p>
+      </div>
+      <div class="footer">
+        <p>&copy; {{currentYear}} {{companyName}}. Alle Rechte vorbehalten.</p>
+        <div class="powered">Powered by OrderLink</div>
+      </div>
+    </div>
+  </body>
+</html>
