@@ -80,7 +80,7 @@ model Tenant {
   status            TenantStatus @default(TRIAL)
   trialStartedAt    DateTime     @default(now())
   trialEndsAt       DateTime     @default(dbgenerated("(now() + interval '14 days')"))
-  billingCustomerId String?
+  stripeCustomerId  String?
   maxEmployees      Int          @default(3)
   createdAt         DateTime     @default(now()) @db.Timestamptz
   updatedAt         DateTime     @updatedAt @db.Timestamptz

@@ -39,4 +39,11 @@ export class StripeController {
     await this.stripeService.processWebhook(rawBody, signature);
     return { received: true };
   }
+
+  @UseGuards(JwtAuthGuard)
+  @Post('portal-session')
+  async createPortalSession(@Request() req) {
+    const { tenantId } = requireTenantId(req);
+    return this.stripeService.createPortalSession(tenantId);
+  }
 }
