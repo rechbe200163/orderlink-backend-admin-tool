@@ -19,7 +19,7 @@ import { PermissionsService } from './permissions.service';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { Resource } from 'lib/decorators/resource.decorator';
-import { Resources } from '../rbac/resources.enum';
+import { Resources } from '../../lib/rbac/resources.enum';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,

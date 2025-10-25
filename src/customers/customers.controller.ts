@@ -16,7 +16,7 @@ import {
 import { CustomersService } from './customers.service';
 import { Resource } from 'lib/decorators/resource.decorator';
 import { BusinessSector } from '@prisma/client';
-import { Resources } from '../rbac/resources.enum';
+import { Resources } from '../../lib/rbac/resources.enum';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import {
   ApiBearerAuth,

@@ -10,7 +10,7 @@ import { FastifyRequest } from 'fastify';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { Actions } from '@prisma/client';
-import { Resources } from '../../rbac/resources.enum';
+import { Resources } from '../../../lib/rbac/resources.enum';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
 import { JwtPayload } from '../auth.service';
 import { FastifyUserRequest } from 'lib/types';

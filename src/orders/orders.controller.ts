@@ -27,7 +27,7 @@ import {
   ApiQuery,
 } from '@nestjs/swagger';
 import { CacheInterceptor } from '@nestjs/cache-manager';
-import { Resources } from '../rbac/resources.enum';
+import { Resources } from '../../lib/rbac/resources.enum';
 import { Resource } from 'lib/decorators/resource.decorator';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';

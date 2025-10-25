@@ -2,7 +2,7 @@ import { Tenant } from './../tenants/entities/tenant.entity';
 import { Injectable } from '@nestjs/common';
 import { EmployeesRepository } from './employees.repository';
 import { Actions } from '@prisma/client';
-import { Resources } from '../rbac/resources.enum';
+import { Resources } from '../../lib/rbac/resources.enum';
 import { CreateEmployeesDto } from 'prisma/src/generated/dto/create-employees.dto';
 import { UpdateEmployeesDto } from 'prisma/src/generated/dto/update-employees.dto';
 import { transformResponse } from 'lib/utils/transform';

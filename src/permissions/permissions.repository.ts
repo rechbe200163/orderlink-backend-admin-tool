@@ -9,7 +9,7 @@ import { CreatePermissionsDto } from './dto/create-permissions.dto';
 import { UpdatePermissionDto } from 'prisma/src/generated/dto/update-permission.dto';
 import { CustomerDto } from 'src/customers/dto/customer.dto';
 import { Actions } from '@prisma/client';
-import { Resources } from '../rbac/resources.enum';
+import { Resources } from '../../lib/rbac/resources.enum';
 import { RolesRepository } from 'src/roles/roles.repository';
 
 @Injectable()

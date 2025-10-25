@@ -16,7 +16,7 @@ import {
 import { EmployeesService } from './employees.service';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { Actions } from '@prisma/client';
-import { Resources } from '../rbac/resources.enum';
+import { Resources } from '../../lib/rbac/resources.enum';
 import { Resource } from 'lib/decorators/resource.decorator';
 import {
   ApiBadRequestResponse,

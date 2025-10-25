@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { InvoicesService } from './invoices.service';
 import { CacheInterceptor } from '@nestjs/cache-manager';
-import { Resources } from '../rbac/resources.enum';
+import { Resources } from '../../lib/rbac/resources.enum';
 import { Resource } from 'lib/decorators/resource.decorator';
 import {
   ApiBearerAuth,

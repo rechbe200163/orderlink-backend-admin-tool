@@ -15,7 +15,7 @@ import {
 } from '@nestjs/common';
 import { RolesService } from './roles.service';
 import { Resource } from 'lib/decorators/resource.decorator';
-import { Resources } from '../rbac/resources.enum';
+import { Resources } from '../../lib/rbac/resources.enum';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import {
   ApiBadRequestResponse,

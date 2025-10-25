@@ -8,7 +8,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { Actions, Otp } from '@prisma/client';
-import { Resources } from '../rbac/resources.enum';
+import { Resources } from '../../lib/rbac/resources.enum';
 import { isNoChange } from 'lib/utils/isNoChange';
 import { transformResponse } from 'lib/utils/transform';
 import { CustomPrismaService } from 'nestjs-prisma';

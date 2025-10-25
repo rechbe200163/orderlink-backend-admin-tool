@@ -1,6 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Actions } from '@prisma/client';
-import { Resources } from '../../rbac/resources.enum';
+import { Resources } from '../../../lib/rbac/resources.enum';
 import {
   ArrayNotEmpty,
   IsArray,
