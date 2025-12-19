@@ -2,9 +2,9 @@ name: Build and Deploy NestJs App
 
 on:
   push:
-    branches: [ "master" ]
+    branches: ['master']
   pull_request:
-    branches: [ "master" ]
+    branches: ['master']
 
 jobs:
   build:
@@ -29,5 +29,5 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
+          platforms: linux/arm64
           tags: rechbe200163/orderlink-admintool-backend:latest
-
