@@ -17,8 +17,8 @@ import {
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
-import { Resource } from 'lib/decorators/resource.decorator';
 import { Resources } from '@prisma/client';
+import { Resource } from 'lib/decorators/resource.decorator';
 
 @Controller('otp')
 @Resource(Resources.OTP)
@@ -30,7 +30,6 @@ import { Resources } from '@prisma/client';
   description:
     'Role does not have the permissions to perform this action on the requeseted resource',
 })
-@UseGuards(JwtAuthGuard, PermissionsGuard)
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class OtpController {
   constructor(private readonly otpService: OtpService) {}

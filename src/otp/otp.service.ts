@@ -15,7 +15,7 @@ export class OtpService {
   ) {}
 
   async createOTP(employeeId: string) {
-    const nanoidNumbers = customAlphabet('0123456789', 6);
+    const nanoidNumbers = customAlphabet('0123456789', 8);
     const OTP = Number(nanoidNumbers());
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // OTP valid for 10 minutes
     return await this.prismaService.client.otp.create({
@@ -40,16 +40,13 @@ export class OtpService {
   }
 
   async validateOTP(code: number): Promise<Otp | null> {
-    console.log('Validating OTP:', code);
     const otp = await this.prismaService.client.otp.findUnique({
       where: { code, used: false },
     });
     if (!otp) {
-      console.error('OTP not found');
       return null;
     }
     if (otp.expiresAt < new Date()) {
-      console.error('OTP has expired');
       return null;
     }
     return otp;

@@ -8,12 +8,10 @@ import {
   Param,
   ParseIntPipe,
   Post,
-  Query,
   Request,
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-// import { AuthGuard } from './guards/auth.guard';
 import { JwtAuthGuard } from './guards/jwt.guard';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import {
@@ -32,6 +30,7 @@ export class AuthController {
   constructor(private authService: AuthService) {}
 
   @Post('signIn')
+  @UseGuards(ThrottlerGuard)
   @HttpCode(HttpStatus.OK)
   @ApiBody({ type: AuthInputDto })
   @ApiOkResponse({ type: AuthResultDto })
@@ -39,7 +38,6 @@ export class AuthController {
     description: 'Invalid credentials',
   })
   login(@Body() body: AuthInputDto) {
-    console.log('Received login request:', body);
     return this.authService.authenticate(body);
   }
 
@@ -64,6 +62,7 @@ export class AuthController {
   }
 
   @Post('otp/:otp')
+  @UseGuards(ThrottlerGuard)
   @HttpCode(HttpStatus.OK)
   @ApiOkResponse({ type: AuthResultDto })
   @ApiUnauthorizedResponse({

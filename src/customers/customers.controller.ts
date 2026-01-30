@@ -119,9 +119,6 @@ export class CustomersController {
     if (limit > maxLimit) {
       throw new BadRequestException(`Limit cannot exceed ${maxLimit}`);
     }
-    console.log(
-      `Fetching customers with limit: ${limit}, page: ${page}, businessSector: ${businessSector}`,
-    );
     return await this.customersService.getCustomers(
       limit,
       page,
@@ -164,9 +161,6 @@ export class CustomersController {
     @Param('reference', ParseIntPipe) reference: number,
     @Body() updateCustomerDto: UpdateCustomerDto,
   ) {
-    console.log(
-      `Updating customer with reference: ${reference}, data: ${JSON.stringify(updateCustomerDto)}`,
-    );
     return await this.customersService.updateCustomer(
       reference,
       updateCustomerDto,
