@@ -1,5 +1,5 @@
-import { Actions, PrismaClient, Resources } from '@prisma/client';
 import { pagination } from 'prisma-extension-pagination';
+import { Actions, PrismaClient, Resources } from '@prisma/client';
 
 export const extendedPrismaClient = new PrismaClient()
   .$extends(pagination())

@@ -133,8 +133,9 @@ export class ProductsService {
 
   private addCdnImageUrl(productImage: string | null): string | undefined {
     if (!productImage) return;
-
-    const cdnUrl = `https://localhost/product-images/${productImage}`;
-    return cdnUrl;
+    if (productImage.startsWith('http://') || productImage.startsWith('https://')) {
+      return productImage;
+    }
+    return this.fileService.getPublicUrl(productImage, 'products');
   }
 }

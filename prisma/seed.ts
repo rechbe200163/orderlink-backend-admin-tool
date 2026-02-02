@@ -2,17 +2,15 @@ import {
   Actions,
   BusinessSector,
   ModuleEnum,
-  OrderState,
   PrismaClient,
   Resources,
-  TenantStatus,
 } from '@prisma/client';
 import { faker } from '@faker-js/faker';
 import { hash } from 'bcryptjs';
 
 const prisma = new PrismaClient();
 
-async function hashPassword(plain: string) {
+async function hashPassword(plain: string): Promise<string> {
   const saltRounds = 10;
   return hash(plain, saltRounds);
 }
@@ -271,68 +269,40 @@ async function main() {
     ),
   );
 
-  // 18. Create TenantData
-  const tenants = await Promise.all(
-    Array.from({ length: 3 }).map(() =>
-      prisma.tenantData.create({
-        data: {
-          status: faker.helpers.arrayElement(Object.values(TenantStatus)),
-          billingCustomerId: faker.string.uuid(),
-          maxEmployees: faker.number.int({ min: 1, max: 20 }),
-        },
-      }),
-    ),
-  );
-
-  // 19. Create SiteConfig linked to TenantData
+  // 18. Create Modules
+  const moduleEnums = Object.values(ModuleEnum);
   await Promise.all(
-    tenants.map((tenant, i) =>
-      prisma.siteConfig.create({
-        data: {
-          tenantId: tenant.tenantId,
-          companyName: faker.company.name(),
-          logoPath: faker.image.urlPicsumPhotos(),
-          email: faker.internet.email(),
-          phoneNumber: faker.phone.number({ style: 'international' }),
-          iban: faker.finance.iban(),
-          companyNumber: faker.string.uuid(),
-          addressId: addresses[i % addresses.length].addressId,
-        },
-      }),
-    ),
-  );
-
-  // 20. Create Modules
-  const modules = await Promise.all(
-    Object.values(ModuleEnum).map((mod) =>
+    moduleEnums.map((name) =>
       prisma.module.create({
         data: {
-          name: mod,
-          description: faker.commerce.productDescription(),
-          priceCents: faker.number.int({ min: 0, max: 5000 }),
+          name,
+          description: `Module: ${name}`,
         },
       }),
     ),
   );
 
-  // 21. Enable random Modules for Tenants
+  // 19. Enable all modules
   await Promise.all(
-    tenants.flatMap((tenant) =>
-      faker.helpers
-        .arrayElements(
-          modules,
-          faker.number.int({ min: 1, max: modules.length }),
-        )
-        .map((mod) =>
-          prisma.enabledModule.create({
-            data: {
-              tenantId: tenant.tenantId,
-              moduleName: mod.name,
-            },
-          }),
-        ),
+    moduleEnums.map((name) =>
+      prisma.enabledModule.create({
+        data: { moduleName: name },
+      }),
     ),
   );
+
+  // 20. Create SiteConfig
+  await prisma.siteConfig.create({
+    data: {
+      companyName: faker.company.name(),
+      logoPath: faker.image.urlPicsumPhotos(),
+      email: faker.internet.email(),
+      phoneNumber: faker.phone.number({ style: 'international' }),
+      iban: faker.finance.iban(),
+      companyNumber: faker.string.uuid(),
+      addressId: addresses[0].addressId,
+    },
+  });
 
   console.log('✅ Seeding complete!');
 }

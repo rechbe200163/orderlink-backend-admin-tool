@@ -1,7 +1,6 @@
 import { Inject, Injectable } from '@nestjs/common';
 import { CustomPrismaService } from 'nestjs-prisma';
 import { ExtendedPrismaClient } from 'prisma/prisma.extension';
-import { OrderState, BusinessSector } from '@prisma/client';
 import { OrderStateCountDto } from './dto/order-state-count.dto';
 import { CustomerBusinessSectorDto } from './dto/customer-business-sector.dto';
 import { QuickStatsDto } from './dto/quick-stats.dto';
@@ -9,6 +8,7 @@ import { RevenueStatsDto } from './dto/revenue-stats.dto';
 import { SalesStatsDto } from './dto/sales-stats.dto';
 import { AverageOrderValueStatsDto } from './dto/average-order-value-stats.dto';
 import { CustomerStatsDto } from './dto/customer-stats.dto';
+import { BusinessSector, OrderState } from '@prisma/client';
 
 @Injectable()
 export class StatisticsRepository {
@@ -87,7 +87,9 @@ export class StatisticsRepository {
   }
 
   async getRevenueStats(): Promise<RevenueStatsDto> {
-    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(new Date());
+    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(
+      new Date(),
+    );
     const { start: lastStart, end: lastEnd } = this.getMonthDateRange(
       new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
     );
@@ -114,7 +116,9 @@ export class StatisticsRepository {
   }
 
   async getSalesStats(): Promise<SalesStatsDto> {
-    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(new Date());
+    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(
+      new Date(),
+    );
     const { start: lastStart, end: lastEnd } = this.getMonthDateRange(
       new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
     );
@@ -135,7 +139,9 @@ export class StatisticsRepository {
   }
 
   async getAverageOrderValueStats(): Promise<AverageOrderValueStatsDto> {
-    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(new Date());
+    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(
+      new Date(),
+    );
     const { start: lastStart, end: lastEnd } = this.getMonthDateRange(
       new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
     );
@@ -169,7 +175,9 @@ export class StatisticsRepository {
   }
 
   async getCustomerStats(): Promise<CustomerStatsDto> {
-    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(new Date());
+    const { start: currentStart, end: currentEnd } = this.getMonthDateRange(
+      new Date(),
+    );
     const { start: lastStart, end: lastEnd } = this.getMonthDateRange(
       new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
     );

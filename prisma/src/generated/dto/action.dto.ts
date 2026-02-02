@@ -1,13 +1,11 @@
-
-import {Actions} from '@prisma/client'
-import {ApiProperty} from '@nestjs/swagger'
-
+import { ApiProperty } from '@nestjs/swagger';
+import { Actions } from '@prisma/client';
 
 export class ActionDto {
   @ApiProperty({
-  enum: Actions,
-})
-name: Actions ;
-description: string  | null;
-deleted: boolean ;
+    enum: Actions,
+  })
+  name: Actions;
+  description: string | null;
+  deleted: boolean;
 }

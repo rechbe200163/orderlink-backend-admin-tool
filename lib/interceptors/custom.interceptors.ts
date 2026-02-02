@@ -2,11 +2,11 @@ import { Injectable, Inject } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { CallHandler, ExecutionContext, NestInterceptor } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
-import { Resources } from '@prisma/client';
 import { RESOURCE_KEY } from 'lib/decorators/resource.decorator';
 import { Observable } from 'rxjs';
 import { tap } from 'rxjs/operators';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import { Resources } from 'src/rbac/resources.enum';
 @Injectable()
 export class CustomInterceptors implements NestInterceptor {
   constructor(

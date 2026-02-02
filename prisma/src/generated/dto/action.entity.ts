@@ -1,15 +1,13 @@
-
-import {Actions} from '@prisma/client'
-import {ApiProperty} from '@nestjs/swagger'
-import {ResourceAction} from './resourceAction.entity'
-
+import { ApiProperty } from '@nestjs/swagger';
+import { ResourceAction } from './resourceAction.entity';
+import { Actions } from '@prisma/client';
 
 export class Action {
   @ApiProperty({
-  enum: Actions,
-})
-name: Actions ;
-description: string  | null;
-deleted: boolean ;
-resourceLinks?: ResourceAction[] ;
+    enum: Actions,
+  })
+  name: Actions;
+  description: string | null;
+  deleted: boolean;
+  resourceLinks?: ResourceAction[];
 }

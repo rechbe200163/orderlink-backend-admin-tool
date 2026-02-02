@@ -27,11 +27,11 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
-import { CreateAddressDto } from 'prisma/src/generated/dto/create-address.dto';
-import { UpdateAddressDto } from 'prisma/src/generated/dto/update-address.dto';
-import { AddressDto } from 'prisma/src/generated/dto/address.dto';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
+import { AddressDto } from 'prisma/src/generated/dto/address.dto';
+import { CreateAddressDto } from 'prisma/src/generated/dto/create-address.dto';
+import { UpdateAddressDto } from 'prisma/src/generated/dto/update-address.dto';
 
 @Controller('addresses')
 @UseInterceptors(CacheInterceptor)

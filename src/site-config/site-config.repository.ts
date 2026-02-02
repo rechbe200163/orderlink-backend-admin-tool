@@ -1,4 +1,3 @@
-import { SiteConfig } from './../../prisma/src/generated/dto/siteConfig.entity';
 import {
   BadRequestException,
   Inject,

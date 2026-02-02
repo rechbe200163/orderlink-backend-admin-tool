@@ -17,6 +17,5 @@ export class SiteConfig {
     format: `date-time`,
   })
   modifiedAt: Date | null;
-  tenantId: string;
   address?: Address;
 }

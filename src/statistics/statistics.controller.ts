@@ -1,4 +1,3 @@
-import { Ressource } from './../../prisma/src/generated/client/index.d';
 import { Controller, Get, UseInterceptors, UseGuards } from '@nestjs/common';
 import { CacheInterceptor } from '@nestjs/cache-manager';
 import { StatisticsService } from './statistics.service';
@@ -19,8 +18,8 @@ import { ModuleTag } from 'lib/decorators/module.decorators';
 import { ModuleEnum } from 'src/site-config/dto/modules-entity.dto';
 import { ModulesGuard } from 'src/auth/guards/modules.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
+import { Resources } from 'src/rbac/resources.enum';
 import { Resource } from 'lib/decorators/resource.decorator';
-import { Resources } from '@prisma/client';
 
 @Controller('statistics')
 @UseInterceptors(CacheInterceptor)

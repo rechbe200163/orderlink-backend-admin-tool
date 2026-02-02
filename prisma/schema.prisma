@@ -4,7 +4,7 @@
 
 generator client {
   provider      = "prisma-client-js"
-  // output        = "./src/generated/client"
+  //output        = "./src/generated/client"
   binaryTargets = ["native", "debian-openssl-3.0.x", "linux-arm64-openssl-3.0.x"]
 }
 
@@ -23,7 +23,7 @@ generator client {
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL_DEV")
+  url      = env("DATABASE_URL")
 }
 
 enum Actions {
@@ -282,8 +282,6 @@ model Employees {
 
 model SiteConfig {
   siteConfigId String   @id @default(uuid())
-  tenantId     String?   @unique
-  tenant       TenantData? @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
 
   companyName  String
   logoPath     String?
@@ -296,17 +294,6 @@ model SiteConfig {
   modifiedAt   DateTime @updatedAt
 }
 
-model TenantData {
-  tenantId          String       @id @default(uuid())
-  status            TenantStatus? @default(TRIAL)
-  trialStartedAt    DateTime     @default(now())
-  trialEndsAt       DateTime     @default(dbgenerated("(now() + interval '3 days')"))
-  billingCustomerId String?
-  maxEmployees      Int          @default(3)
-
-  enabledModules EnabledModule[]
-  siteConfig     SiteConfig?
-}
 model Action {
   name          Actions          @id
   description   String?          @db.VarChar(255)
@@ -415,13 +402,6 @@ model RoutesOnOrders {
   @@map("routesOrders")
 }
 
-enum TenantStatus {
-  TRIAL
-  ACTIVE
-  SUSPENDED
-  CANCELLED
-}
-
 enum ModuleEnum {
   CUSTOM_ROLES
   STATISTICS
@@ -439,12 +419,10 @@ model Module {
 
 model EnabledModule {
   id           String      @id @default(uuid())
-  tenantData   TenantData  @relation(fields: [tenantId], references: [tenantId], onDelete: Cascade)
-  tenantId     String
   module       Module      @relation(fields: [moduleName], references: [name], onDelete: Cascade)
   moduleName   ModuleEnum
 
   enabledAt DateTime @default(now()) @db.Timestamptz
 
-  @@unique([tenantId, moduleName]) // Prevent duplicate activations
+  @@unique([moduleName]) // Prevent duplicate activations
 }

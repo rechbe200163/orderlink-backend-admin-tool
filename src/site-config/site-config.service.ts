@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { SiteConfigRepository } from './site-config.repository';
-import { CreateSiteConfigDto } from 'prisma/src/generated/dto/create-siteConfig.dto';
-import { UpdateSiteConfigDto } from 'prisma/src/generated/dto/update-siteConfig.dto';
-import { SiteConfigDto } from 'prisma/src/generated/dto/siteConfig.dto';
 import { FileRepositoryService } from 'src/file-repository/file-repository.service';
+import { CreateSiteConfigDto } from 'prisma/src/generated/dto/create-siteConfig.dto';
+import { SiteConfigDto } from 'prisma/src/generated/dto/siteConfig.dto';
+import { UpdateSiteConfigDto } from 'prisma/src/generated/dto/update-siteConfig.dto';
 
 @Injectable()
 export class SiteConfigService {
@@ -59,8 +59,9 @@ export class SiteConfigService {
 
   private addCdnImageUrl(productImage: string | null): string | undefined {
     if (!productImage) return;
-
-    const cdnUrl = `https://localhost/product-images/${productImage}`;
-    return cdnUrl;
+    if (productImage.startsWith('http://') || productImage.startsWith('https://')) {
+      return productImage;
+    }
+    return this.fileService.getPublicUrl(productImage, 'siteConfig');
   }
 }

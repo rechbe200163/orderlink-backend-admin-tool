@@ -31,12 +31,12 @@ export class ModulesGuard implements CanActivate {
       return true; // No module specified, allow access
     }
 
-    const tenantData = await this.prismaService.client.tenantData.findFirst({
-      select: { enabledModules: { select: { moduleName: true } } },
+    // Get enabled modules from database
+    const enabledModules = await this.prismaService.client.enabledModule.findMany({
+      select: { moduleName: true },
     });
 
-    const allowedModules =
-      tenantData?.enabledModules.map((m) => m.moduleName) ?? [];
+    const allowedModules = enabledModules.map((m) => m.moduleName);
 
     const hasAccess = allowedModules.includes(module);
 

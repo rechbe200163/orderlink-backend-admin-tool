@@ -3,7 +3,11 @@
   "collection": "@nestjs/schematics",
   "sourceRoot": "src",
   "compilerOptions": {
-    "assets": ["email/templates/**/*"],
+    "assets": [
+      "email/templates/**/*",
+      { "include": "@prisma/client/**/*", "outDir": "dist" },
+      { "include": "prisma/src/generated/dto/**/*", "outDir": "dist" }
+    ],
     "watchAssets": true,
     "deleteOutDir": true
   }
