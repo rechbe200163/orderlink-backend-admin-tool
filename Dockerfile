@@ -18,4 +18,6 @@ RUN pnpm prisma generate
 # Baue dein Projekt (optional)
 RUN pnpm build
 
+EXPOSE 3001
+
 CMD ["pnpm", "start"]
