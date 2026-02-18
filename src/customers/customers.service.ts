@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CustomersRepository } from './customer.repository';
-import { BusinessSector } from '@prisma/client';
+import { BusinessSector } from 'generated/prisma/client';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';

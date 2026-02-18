@@ -1,10 +1,9 @@
-import { BusinessSector } from '@prisma/client';
-import { ApiProperty } from '@nestjs/swagger';
 import { Address } from './address.entity';
 import { Cart } from './cart.entity';
 import { Order } from './order.entity';
 import { CustomerHistory } from './customerHistory.entity';
 import { Exclude, Expose } from 'class-transformer';
+import { BusinessSector } from 'generated/prisma/client';
 
 export class CustomerEntity {
   @Exclude()

@@ -1,21 +1,9 @@
-import {
-  BadRequestException,
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  Inject,
-  Injectable,
-} from '@nestjs/common';
-import { CustomPrismaService } from 'nestjs-prisma/dist/custom';
-import { ExtendedPrismaClient } from 'prisma/prisma.extension';
-import { JwtPayload } from '../auth.service';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class MaxEmployeeGuard implements CanActivate {
-  constructor(
-    @Inject('PrismaService')
-    private prismaService: CustomPrismaService<ExtendedPrismaClient>,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     // No employee limit enforcement - allow all requests

@@ -1,6 +1,4 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Actions } from '@prisma/client';
-import { Resources } from '@prisma/client';
 import { Expose } from 'class-transformer';
 import { IsBoolean, IsString, IsUUID, Matches } from 'class-validator';
 
@@ -26,31 +24,21 @@ export class PermissionDto {
   @Expose()
   role: string;
 
-  @IsString()
+  @IsUUID()
   @ApiProperty({
-    enum: Resources,
     description: 'The resource for which the permission is granted',
     example: 'CUSTOMER',
   })
-  @Matches(/^[A-Z_]+$/, {
-    message:
-      'Resource must be in uppercase and can only contain letters and underscores',
-  })
   @Expose()
-  resource: Resources;
+  resource: string;
 
-  @IsString()
+  @IsUUID()
   @ApiProperty({
-    enum: Actions,
     description: 'The action for which the permission is granted',
     example: 'CREATE',
   })
-  @Matches(/^[A-Z_]+$/, {
-    message:
-      'Action must be in uppercase and can only contain letters and underscores',
-  })
   @Expose()
-  action: Actions;
+  action: string;
 
   @ApiProperty({
     type: Boolean,

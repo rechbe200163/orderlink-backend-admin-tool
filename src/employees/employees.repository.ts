@@ -1,52 +1,47 @@
-import { hash } from 'bcryptjs';
+import { UpdateEmployeesDto } from 'prisma/src/generated/dto/update-employees.dto';
+import { CreateEmployeesDto } from 'prisma/src/generated/dto/create-employees.dto';
+import { EmployeesDto } from 'prisma/src/generated/dto/employees.dto';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { RolesRepository } from './../roles/roles.repository';
+import { transformResponse } from 'lib/utils/transform';
+import { PrismaService } from 'src/prisma.service';
+import { isNoChange } from 'lib/utils/isNoChange';
+import { Otp } from 'generated/prisma/client';
+import { customAlphabet } from 'nanoid';
+import { hash } from 'bcryptjs';
 import {
   BadRequestException,
-  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { Actions, Otp } from '@prisma/client';
-import { Resources } from '../rbac/resources.enum';
-import { isNoChange } from 'lib/utils/isNoChange';
-import { transformResponse } from 'lib/utils/transform';
-import { CustomPrismaService } from 'nestjs-prisma';
-import { ExtendedPrismaClient } from 'prisma/prisma.extension';
-import { UpdateEmployeesDto } from 'prisma/src/generated/dto/update-employees.dto';
-import { EmployeesDto } from 'prisma/src/generated/dto/employees.dto';
-import { CreateEmployeesDto } from 'prisma/src/generated/dto/create-employees.dto';
-import { customAlphabet } from 'nanoid';
 
 @Injectable()
 export class EmployeesRepository {
   constructor(
     // ✅ use `ExtendedPrismaClient` type for correct type-safety of your extended PrismaClient
-    @Inject('PrismaService')
-    private prismaService: CustomPrismaService<ExtendedPrismaClient>,
+    private readonly prisma: PrismaService,
     private readonly rolesRepository: RolesRepository,
   ) {}
 
   async create(createEmployeeDto: CreateEmployeesDto): Promise<{
     employee: EmployeesDto;
   }> {
-    const existingEmployee =
-      await this.prismaService.client.employees.findEmployeeByEmail(
-        createEmployeeDto.email,
-      );
+    const existingEmployee = await this.prisma.db.employees.findUnique({
+      where: { email: createEmployeeDto.email },
+    });
     if (existingEmployee) {
       throw new BadRequestException(`Employee with this email already exists`);
     }
-    const existingRole = await this.rolesRepository.findByName(
-      createEmployeeDto.role,
+    const existingRole = await this.rolesRepository.findById(
+      createEmployeeDto.roleId,
     );
     if (!existingRole) {
       throw new NotFoundException(
-        `Role ${createEmployeeDto.role} does not exist`,
+        `Role ${createEmployeeDto.roleId} does not exist`,
       );
     }
 
-    const createdEmployee = await this.prismaService.client.employees.create({
+    const createdEmployee = await this.prisma.db.employees.create({
       data: {
         ...createEmployeeDto,
         password: '',
@@ -61,30 +56,8 @@ export class EmployeesRepository {
     page: number = 1,
     limit: number = 10,
     search?: string,
-    permissions?: {
-      resource: Resources;
-      action: Actions;
-      allowed: boolean;
-    },
   ): Promise<PagingResultDto<EmployeesDto>> {
-    if (permissions) {
-      const [employees, meta] =
-        await this.prismaService.client.employees.findByPermission(
-          {
-            limit,
-            page,
-          },
-          permissions,
-        );
-
-      return {
-        data: employees.map((employee: EmployeesDto) =>
-          transformResponse(EmployeesDto, employee),
-        ),
-        meta,
-      };
-    }
-    const [employees, meta] = await this.prismaService.client.employees
+    const [employees, meta] = await this.prisma.db.employees
       .paginate({
         where: {
           deleted: false,
@@ -108,28 +81,28 @@ export class EmployeesRepository {
   }
 
   async findById(employeeId: string, includeOtp = false) {
-    const employee = (await this.prismaService.client.employees.findUnique({
+    const employee = (await this.prisma.db.employees.findUnique({
       where: { employeeId },
-      ...(includeOtp && { include: { Otp: true } }),
+      ...(includeOtp && { include: { otp: true } }),
     })) as EmployeesDto & { Otp?: Otp };
     const base = transformResponse(EmployeesDto, employee);
     return includeOtp ? { ...base, Otp: employee?.Otp } : base;
   }
 
-  async findByRole(role: string) {
-    // check if role exists
-    const existingRole = await this.rolesRepository.findByName(role);
-    if (!existingRole) {
-      throw new NotFoundException(`Role ${role} does not exist`);
-    }
-    const employees =
-      await this.prismaService.client.employees.findByRole(role);
-    return transformResponse(EmployeesDto, employees);
-  }
+  // async findByRole(roleId: string) {
+  //   // check if role exists
+  //   const existingRole = await this.rolesRepository.findById(role);
+  //   if (!existingRole) {
+  //     throw new NotFoundException(`Role ${role} does not exist`);
+  //   }
+  //   const employees = await this.prisma.db.employees.findByRole(role);
+  //   return transformResponse(EmployeesDto, employees);
+  // }
 
   async findByEmail(email: string) {
-    const employee =
-      await this.prismaService.client.employees.findEmployeeByEmail(email);
+    const employee = await this.prisma.db.employees.findUnique({
+      where: { email },
+    });
     if (!employee) {
       throw new NotFoundException(`Employee with email ${email} not found`);
     }
@@ -155,7 +128,7 @@ export class EmployeesRepository {
         `No changes detected for employee ${employeeId}`,
       );
     }
-    const updatedEmployee = await this.prismaService.client.employees.update({
+    const updatedEmployee = await this.prisma.db.employees.update({
       where: { employeeId },
       data: updateEmployee,
     });
@@ -163,8 +136,13 @@ export class EmployeesRepository {
   }
 
   async findAdminEmails(): Promise<string[]> {
-    const admins = await this.prismaService.client.employees.findMany({
-      where: { role: 'ADMIN', superAdmin: true, deleted: false },
+    const admins = await this.prisma.db.employees.findMany({
+      where: {
+        role: {
+          name: 'ADMIN',
+        },
+        deleted: false,
+      },
       select: { email: true },
     });
     return admins.map((admin) => admin.email);

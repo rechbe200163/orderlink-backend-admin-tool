@@ -1,24 +1,22 @@
-import { BadRequestException, Inject, Injectable } from '@nestjs/common';
-import { CustomPrismaService } from 'nestjs-prisma';
-import { ExtendedPrismaClient } from 'prisma/prisma.extension';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { PermissionPagingResultDto } from './dto/permissions-paging';
 import { transformResponse } from 'lib/utils/transform';
 import { PermissionDto } from 'prisma/src/generated/dto/permission.dto';
-import { CreatePermissionDto } from 'prisma/src/generated/dto/create-permission.dto';
-import { CreatePermissionsDto } from './dto/create-permissions.dto';
-import { UpdatePermissionDto } from 'prisma/src/generated/dto/update-permission.dto';
-import { CustomerDto } from 'src/customers/dto/customer.dto';
-import { Actions } from '@prisma/client';
 import { Resources } from '../rbac/resources.enum';
 import { RolesRepository } from 'src/roles/roles.repository';
+import { PrismaService } from 'src/prisma.service';
+import { CreatePermissionsDto } from './dto/create-permision.dto';
+import { UpdatePermissionDto } from './dto/update-permision.dto';
+import { ActionsRepository } from 'src/actions/actions.repository';
 
 @Injectable()
 export class PermissionsRepository {
   constructor(
     // ✅ use `ExtendedPrismaClient` type for correct type-safety of your extended PrismaClient
-    @Inject('PrismaService')
-    private prismaService: CustomPrismaService<ExtendedPrismaClient>,
+    private readonly prisma: PrismaService,
     private readonly rolesRepository: RolesRepository,
+    private readonly actionsRepository: ActionsRepository,
+    private readonly rolesRepo: RolesRepository,
   ) {}
 
   async findAll(
@@ -26,10 +24,10 @@ export class PermissionsRepository {
     page?: number,
     role?: string,
   ): Promise<PermissionPagingResultDto> {
-    const [permissions, meta] = await this.prismaService.client.permission
+    const [permissions, meta] = await this.prisma.db.permission
       .paginate({
         where: {
-          role: role ? role : undefined,
+          roleId: role ? role : undefined,
         },
       })
       .withPages({
@@ -47,9 +45,9 @@ export class PermissionsRepository {
   }
 
   async findAllPermissions(role?: string): Promise<PermissionDto[]> {
-    const permissions = await this.prismaService.client.permission.findMany({
+    const permissions = await this.prisma.db.permission.findMany({
       where: {
-        role: role ? role : undefined,
+        roleId: role ? role : undefined,
       },
     });
 
@@ -59,8 +57,10 @@ export class PermissionsRepository {
   }
 
   async findById(permissionId: string): Promise<PermissionDto> {
-    const permission = await this.prismaService.client.permission.findUnique({
-      where: { permissionId },
+    const permission = await this.prisma.db.permission.findUnique({
+      where: {
+        id: permissionId,
+      },
     });
     if (!permission) {
       throw new Error(`Permission with ID ${permissionId} not found`);
@@ -68,68 +68,47 @@ export class PermissionsRepository {
     return transformResponse(PermissionDto, permission);
   }
 
-  async create(dto: CreatePermissionsDto): Promise<PermissionDto[]> {
-    const results: PermissionDto[] = [];
-    for (const action of dto.actions) {
-      if (!Object.values(Actions).includes(action)) {
-        throw new BadRequestException(
-          `Invalid action type: ${action}. Must be one of ${Object.values(Actions).join(', ')}`,
-        );
-      }
-
-      if (!Object.values(Resources).includes(dto.resource)) {
-        throw new BadRequestException(
-          `Invalid resource type: ${dto.resource}. Must be one of ${Object.values(Resources).join(', ')}`,
-        );
-      }
-
-      const roleExists = await this.rolesRepository.findByName(dto.role);
-
-      if (!roleExists) {
-        throw new BadRequestException(
-          `Role with name ${dto.role} does not exist`,
-        );
-      }
-
-      const existingPermission =
-        await this.prismaService.client.permission.findFirst({
-          where: {
-            action,
-            resource: dto.resource,
-            role: dto.role,
-          },
-        });
-
-      if (existingPermission) {
-        throw new BadRequestException(
-          `Permission with action ${action}, resource ${dto.resource}, and role ${dto.role} already exists`,
-        );
-      }
-
-      const createdPermission =
-        await this.prismaService.client.permission.create({
-          data: {
-            role: dto.role,
-            resource: dto.resource,
-            action,
-            allowed: dto.allowed,
-          },
-        });
-      results.push(transformResponse(PermissionDto, createdPermission));
+  async create(dto: CreatePermissionsDto): Promise<PermissionDto> {
+    const roleExists = await this.rolesRepo.findById(dto.roleId);
+    if (!roleExists) {
+      throw new BadRequestException(
+        `Role with ID ${dto.roleId} does not exist`,
+      );
     }
 
-    return results;
+    const existingPermission = await this.prisma.db.permission.findFirst({
+      where: {
+        actionId: dto.actionId,
+        resourceId: dto.resourceId,
+        roleId: dto.roleId,
+      },
+    });
+
+    if (existingPermission) {
+      throw new BadRequestException(
+        `Permission with action ${dto.actionId}, resource ${dto.resourceId}, and role ${dto.roleId} already exists`,
+      );
+    }
+
+    const createdPermission = await this.prisma.db.permission.create({
+      data: {
+        roleId: dto.roleId,
+        resourceId: dto.resourceId,
+        actionId: dto.actionId,
+        allowed: dto.allowed,
+      },
+    });
+    return transformResponse(PermissionDto, createdPermission);
   }
+
   async update(
     permissionId: string,
     permissionData: Partial<UpdatePermissionDto>,
   ): Promise<PermissionDto> {
-    const updatedPermission = await this.prismaService.client.permission.update(
-      {
-        where: { permissionId },
-        data: permissionData,
-      },
-    );
+    const updatedPermission = await this.prisma.db.permission.update({
+      where: { id: permissionId },
+      data: permissionData,
+    });
     return transformResponse(PermissionDto, updatedPermission);
   }
 }

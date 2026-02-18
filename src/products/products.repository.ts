@@ -1,52 +1,63 @@
-import { Inject, Injectable, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
-import { CustomPrismaService } from 'nestjs-prisma';
-import { ExtendedPrismaClient } from 'prisma/prisma.extension';
-import { FileRepositoryService } from 'src/file-repository/file-repository.service';
+
 import { CreateProductDto } from 'src/products/dto/create-product.dto';
 import { ProductDto } from './dto/product.dto';
 import { transformResponse } from 'lib/utils/transform';
-import { NotFoundError } from 'rxjs';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { ProductHistoryDto } from './dto/product-history';
-import { Prisma } from '@prisma/client';
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class ProductsRepository {
   constructor(
     // ✅ use `ExtendedPrismaClient` type for correct type-safety of your extended PrismaClient
-    @Inject('PrismaService')
-    private prismaService: CustomPrismaService<ExtendedPrismaClient>,
+    private readonly prisma: PrismaService,
   ) {}
 
   // products.repository.ts
   async create(createProductDto: CreateProductDto, imageName?: string) {
     console.log('Creating product with data:', imageName);
-    return this.prismaService.client.product.create({
+    // Connect category if provided
+    if (!createProductDto.categoryId!) {
+      throw new BadRequestException('Category ID is required');
+    }
+
+    const product = await this.prisma.db.product.create({
       data: {
         name: createProductDto.name,
         price: createProductDto.price,
         description: createProductDto.description,
         stock: createProductDto.stock,
         imagePath: imageName, // in DB speichern
-        categoryId: createProductDto.categoryId, // Kategorie zuordnen
       },
     });
-    // Kategorien zuordnen
+
+    await this.prisma.db.categoriesOnProducts.create({
+      data: {
+        productId: product.productId,
+        categoryId: createProductDto.categoryId,
+      },
+    });
+
+    return product;
   }
 
-  async getHistory(productId: string): Promise<ProductHistoryDto[]> {
-    const product = await this.prismaService.client.productHistory.findMany({
-      where: { productId },
-      orderBy: { version: 'desc' },
-    });
-    if (!product) {
-      throw new NotFoundException(`Product with ID ${productId} not found`);
-    }
-    return product.map((history) =>
-      transformResponse(ProductHistoryDto, history),
-    );
-  }
+  // async getHistory(productId: string): Promise<ProductHistoryDto[]> {
+  //   const product = await this.prisma.db.productHistory.findMany({
+  //     where: { productId },
+  //     orderBy: { version: 'desc' },
+  //   });
+  //   if (!product) {
+  //     throw new NotFoundException(`Product with ID ${productId} not found`);
+  //   }
+  //   return product.map((history) =>
+  //     transformResponse(ProductHistoryDto, history),
+  //   );
+  // }
 
   async findAll(
     limit: number = 10,
@@ -55,7 +66,7 @@ export class ProductsRepository {
     categoryId?: string,
     includeStock?: boolean,
   ): Promise<PagingResultDto<ProductDto>> {
-    const [products, meta] = await this.prismaService.client.product
+    const [products, meta] = await this.prisma.db.product
       .paginate({
         where: {
           ...(search && {
@@ -64,7 +75,13 @@ export class ProductsRepository {
               mode: 'insensitive',
             },
           }),
-          categoryId: categoryId ? { equals: categoryId } : undefined,
+          categories: {
+            every: categoryId
+              ? {
+                  categoryId,
+                }
+              : undefined,
+          },
         },
         orderBy: {
           createdAt: 'desc',
@@ -83,7 +100,7 @@ export class ProductsRepository {
   }
 
   async findById(productId: string): Promise<ProductDto> {
-    const product = await this.prismaService.client.product.findUnique({
+    const product = await this.prisma.db.product.findUnique({
       where: { productId },
     });
     if (!product) {
@@ -97,14 +114,23 @@ export class ProductsRepository {
     updateProductDto: UpdateProductDto,
     imageName?: string,
   ): Promise<ProductDto> {
-    const product = await this.prismaService.client.product.update({
+    const product = await this.prisma.db.product.update({
       where: { productId },
       data: {
         name: updateProductDto.name,
         price: updateProductDto.price,
         description: updateProductDto.description,
         stock: updateProductDto.stock,
-        categoryId: updateProductDto.categoryId,
+        ...(updateProductDto.categoryId && {
+          categories: {
+            connect: {
+              productId_categoryId: {
+                productId,
+                categoryId: updateProductDto.categoryId,
+              },
+            },
+          },
+        }),
         imagePath: imageName,
       },
     });
@@ -115,7 +141,7 @@ export class ProductsRepository {
   }
 
   async findOriginalProductById(productId: string) {
-    const product = await this.prismaService.client.product.findUnique({
+    const product = await this.prisma.db.product.findUnique({
       where: { productId },
     });
     if (!product) {
@@ -125,7 +151,7 @@ export class ProductsRepository {
   }
 
   async findProductByIds(productIds: string[]): Promise<ProductDto[]> {
-    const products = await this.prismaService.client.product.findMany({
+    const products = await this.prisma.db.product.findMany({
       where: {
         productId: { in: productIds },
       },

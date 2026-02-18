@@ -33,7 +33,7 @@ import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { OrderDto } from './dto/order.dto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
-import { OrderState } from '@prisma/client';
+import { OrderState } from 'generated/prisma/client';
 
 @Controller('orders')
 @UseInterceptors(CacheInterceptor)

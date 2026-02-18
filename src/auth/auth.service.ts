@@ -1,14 +1,9 @@
-import {
-  Inject,
-  Injectable,
-  UnauthorizedException,
-} from '@nestjs/common';
+import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compare } from 'bcryptjs';
 import { SanitizedEmployee } from 'lib/types';
-import { CustomPrismaService } from 'nestjs-prisma';
-import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { OtpService } from 'src/otp/otp.service';
+import { PrismaService } from 'src/prisma.service';
 
 type AuthInput = {
   email: string;
@@ -31,8 +26,7 @@ export type JwtPayload = SanitizedEmployee;
 @Injectable()
 export class AuthService {
   constructor(
-    @Inject('PrismaService')
-    private readonly prismaService: CustomPrismaService<ExtendedPrismaClient>,
+    private readonly prisma: PrismaService,
     private readonly otpService: OtpService,
     private readonly jwtService: JwtService,
   ) {}
@@ -49,9 +43,10 @@ export class AuthService {
   }
 
   async validateUser(authInput: AuthInput): Promise<SanitizedEmployee | null> {
-    const user = await this.prismaService.client.employees.findEmployeeByEmail(
-      authInput.email,
-    );
+    const user = await this.prisma.db.employees.findUnique({
+      where: { email: authInput.email },
+    });
+
     if (user && (await compare(authInput.password, user.password))) {
       const { password, ...result } = user;
       return result;
@@ -65,15 +60,15 @@ export class AuthService {
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
-      role: user.role,
+      roleId: user.roleId,
       superAdmin: user.superAdmin,
     };
     const accessToken = this.jwtService.sign(tokenPayload);
     const { ...sanitized } = tokenPayload;
-    
+
     // Decode JWT to get actual issued and expiry times
     const decoded = this.jwtService.decode(accessToken) as any;
-    
+
     return {
       token: {
         accessToken,
@@ -93,7 +88,7 @@ export class AuthService {
     if (!otp) {
       throw new UnauthorizedException('Invalid or expired OTP');
     }
-    const employee = await this.prismaService.client.employees.findUnique({
+    const employee = await this.prisma.db.employees.findUnique({
       where: { employeeId: otp.employeeId },
     });
     if (!employee) {

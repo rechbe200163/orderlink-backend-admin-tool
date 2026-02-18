@@ -8,6 +8,4 @@ export class RoleDto {
   description: string | null;
   @Expose()
   deleted: boolean;
-  @Expose()
-  permissions: PermissionDto[];
 }

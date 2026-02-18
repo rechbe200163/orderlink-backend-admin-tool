@@ -4,24 +4,21 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CustomPrismaService } from 'nestjs-prisma';
-import { ExtendedPrismaClient } from 'prisma/prisma.extension';
+
 import { CreateAddressDto } from 'prisma/src/generated/dto/create-address.dto';
 import { AddressDto } from 'prisma/src/generated/dto/address.dto';
 import { UpdateAddressDto } from 'prisma/src/generated/dto/update-address.dto';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { transformResponse } from 'lib/utils/transform';
 import { isNoChange } from 'lib/utils/isNoChange';
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class AddressesRepository {
-  constructor(
-    @Inject('PrismaService')
-    private prismaService: CustomPrismaService<ExtendedPrismaClient>,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateAddressDto): Promise<AddressDto> {
-    const address = await this.prismaService.client.address.create({ data });
+    const address = await this.prisma.db.address.create({ data });
     return transformResponse(AddressDto, address);
   }
 
@@ -30,7 +27,7 @@ export class AddressesRepository {
     page = 1,
     query?: string,
   ): Promise<PagingResultDto<AddressDto>> {
-    const [addresses, meta] = await this.prismaService.client.address
+    const [addresses, meta] = await this.prisma.db.address
       .paginate({
         where: {
           deleted: false,
@@ -51,14 +48,14 @@ export class AddressesRepository {
   }
 
   async findAll(): Promise<AddressDto[]> {
-    const addresses = await this.prismaService.client.address.findMany({
+    const addresses = await this.prisma.db.address.findMany({
       where: { deleted: false },
     });
     return addresses.map((a: AddressDto) => transformResponse(AddressDto, a));
   }
 
   async findById(addressId: string): Promise<AddressDto> {
-    const address = await this.prismaService.client.address.findUnique({
+    const address = await this.prisma.db.address.findUnique({
       where: { addressId },
     });
     if (!address) {
@@ -68,7 +65,7 @@ export class AddressesRepository {
   }
 
   async update(addressId: string, data: UpdateAddressDto): Promise<AddressDto> {
-    const existing = await this.prismaService.client.address.findUnique({
+    const existing = await this.prisma.db.address.findUnique({
       where: { addressId },
     });
     if (!existing) {
@@ -79,7 +76,7 @@ export class AddressesRepository {
         `No changes detected for address ${addressId}`,
       );
     }
-    const address = await this.prismaService.client.address.update({
+    const address = await this.prisma.db.address.update({
       where: { addressId },
       data,
     });

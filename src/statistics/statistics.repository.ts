@@ -1,6 +1,3 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { CustomPrismaService } from 'nestjs-prisma';
-import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { OrderStateCountDto } from './dto/order-state-count.dto';
 import { CustomerBusinessSectorDto } from './dto/customer-business-sector.dto';
 import { QuickStatsDto } from './dto/quick-stats.dto';
@@ -8,17 +5,16 @@ import { RevenueStatsDto } from './dto/revenue-stats.dto';
 import { SalesStatsDto } from './dto/sales-stats.dto';
 import { AverageOrderValueStatsDto } from './dto/average-order-value-stats.dto';
 import { CustomerStatsDto } from './dto/customer-stats.dto';
-import { BusinessSector, OrderState } from '@prisma/client';
+import { BusinessSector, OrderState } from 'generated/prisma/client';
+import { PrismaService } from 'src/prisma.service';
+import { Injectable } from '@nestjs/common';
 
 @Injectable()
 export class StatisticsRepository {
-  constructor(
-    @Inject('PrismaService')
-    private readonly prisma: CustomPrismaService<ExtendedPrismaClient>,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async getOrderStateCounts(): Promise<OrderStateCountDto[]> {
-    const grouped = await this.prisma.client.order.groupBy({
+    const grouped = await this.prisma.db.order.groupBy({
       by: ['orderState'],
       _count: true,
     });
@@ -30,7 +26,7 @@ export class StatisticsRepository {
   }
 
   async getCustomerBusinessSectors(): Promise<CustomerBusinessSectorDto> {
-    const grouped = await this.prisma.client.customer.groupBy({
+    const grouped = await this.prisma.db.customer.groupBy({
       by: ['businessSector'],
       _count: true,
     });
@@ -45,7 +41,7 @@ export class StatisticsRepository {
       {} as Record<BusinessSector, number>,
     );
 
-    const totalCustomers = await this.prisma.client.customer.count();
+    const totalCustomers = await this.prisma.db.customer.count();
 
     return { totalCustomers, sectors };
   }
@@ -59,14 +55,14 @@ export class StatisticsRepository {
       totalCategories,
       totalRoutes,
       totalInvoices,
-    ] = await this.prisma.client.$transaction([
-      this.prisma.client.customer.count(),
-      this.prisma.client.order.count(),
-      this.prisma.client.employees.count(),
-      this.prisma.client.product.count(),
-      this.prisma.client.category.count(),
-      this.prisma.client.route.count(),
-      this.prisma.client.invoice.count(),
+    ] = await this.prisma.db.$transaction([
+      this.prisma.db.customer.count(),
+      this.prisma.db.order.count(),
+      this.prisma.db.employees.count(),
+      this.prisma.db.product.count(),
+      this.prisma.db.category.count(),
+      this.prisma.db.route.count(),
+      this.prisma.db.invoice.count(),
     ]);
 
     return {
@@ -94,12 +90,12 @@ export class StatisticsRepository {
       new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
     );
 
-    const [current, last] = await this.prisma.client.$transaction([
-      this.prisma.client.invoice.aggregate({
+    const [current, last] = await this.prisma.db.$transaction([
+      this.prisma.db.invoice.aggregate({
         _sum: { invoiceAmount: true },
         where: { paymentDate: { gte: currentStart, lt: currentEnd } },
       }),
-      this.prisma.client.invoice.aggregate({
+      this.prisma.db.invoice.aggregate({
         _sum: { invoiceAmount: true },
         where: { paymentDate: { gte: lastStart, lt: lastEnd } },
       }),
@@ -123,11 +119,11 @@ export class StatisticsRepository {
       new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
     );
 
-    const [current, last] = await this.prisma.client.$transaction([
-      this.prisma.client.order.count({
+    const [current, last] = await this.prisma.db.$transaction([
+      this.prisma.db.order.count({
         where: { orderDate: { gte: currentStart, lt: currentEnd } },
       }),
-      this.prisma.client.order.count({
+      this.prisma.db.order.count({
         where: { orderDate: { gte: lastStart, lt: lastEnd } },
       }),
     ]);
@@ -146,12 +142,12 @@ export class StatisticsRepository {
       new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
     );
 
-    const [current, last] = await this.prisma.client.$transaction([
-      this.prisma.client.invoice.aggregate({
+    const [current, last] = await this.prisma.db.$transaction([
+      this.prisma.db.invoice.aggregate({
         _avg: { invoiceAmount: true },
         where: { paymentDate: { gte: currentStart, lt: currentEnd } },
       }),
-      this.prisma.client.invoice.aggregate({
+      this.prisma.db.invoice.aggregate({
         _avg: { invoiceAmount: true },
         where: { paymentDate: { gte: lastStart, lt: lastEnd } },
       }),
@@ -182,11 +178,11 @@ export class StatisticsRepository {
       new Date(new Date().getFullYear(), new Date().getMonth() - 1, 1),
     );
 
-    const [current, last] = await this.prisma.client.$transaction([
-      this.prisma.client.customer.count({
+    const [current, last] = await this.prisma.db.$transaction([
+      this.prisma.db.customer.count({
         where: { signedUp: { gte: currentStart, lt: currentEnd } },
       }),
-      this.prisma.client.customer.count({
+      this.prisma.db.customer.count({
         where: { signedUp: { gte: lastStart, lt: lastEnd } },
       }),
     ]);

@@ -17,11 +17,10 @@ import {
   ApiForbiddenResponse,
   ApiInternalServerErrorResponse,
 } from '@nestjs/swagger';
-import { Resources } from '@prisma/client';
 import { Resource } from 'lib/decorators/resource.decorator';
 
 @Controller('otp')
-@Resource(Resources.OTP)
+@Resource('OTP')
 @ApiInternalServerErrorResponse({
   description: 'Internal server error',
 })

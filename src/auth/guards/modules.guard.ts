@@ -8,15 +8,14 @@ import {
 import { Reflector } from '@nestjs/core';
 import { MODULE_KEY } from 'lib/decorators/module.decorators';
 import { ModuleEnum } from 'src/site-config/dto/modules-entity.dto';
-import { CustomPrismaService } from 'nestjs-prisma';
-import { ExtendedPrismaClient } from 'prisma/prisma.extension';
+
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class ModulesGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
-    @Inject('PrismaService')
-    private readonly prismaService: CustomPrismaService<ExtendedPrismaClient>,
+    private readonly prisma: PrismaService,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
@@ -32,7 +31,7 @@ export class ModulesGuard implements CanActivate {
     }
 
     // Get enabled modules from database
-    const enabledModules = await this.prismaService.client.enabledModule.findMany({
+    const enabledModules = await this.prisma.db.enabledModule.findMany({
       select: { moduleName: true },
     });
 

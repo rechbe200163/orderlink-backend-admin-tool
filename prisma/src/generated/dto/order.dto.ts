@@ -1,5 +1,5 @@
-import { OrderState } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
+import { OrderState } from 'generated/prisma/client';
 
 export class OrderDto {
   orderId: string;

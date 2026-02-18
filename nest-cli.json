@@ -6,7 +6,8 @@
     "assets": [
       "email/templates/**/*",
       { "include": "@prisma/client/**/*", "outDir": "dist" },
-      { "include": "prisma/src/generated/dto/**/*", "outDir": "dist" }
+      { "include": "prisma/src/generated/dto/**/*", "outDir": "dist" },
+      { "include": "../generated/**/*", "outDir": "dist/generated" }
     ],
     "watchAssets": true,
     "deleteOutDir": true

@@ -1,7 +1,7 @@
 import { SetMetadata } from '@nestjs/common';
-import { Resources } from '@prisma/client';
-
 export const RESOURCE_KEY = 'resource'; // <-- Konstanter Schlüssel
 
-export const Resource = (resource: Resources) =>
+type ResourceType = 'ADDRESSES' | 'USERS' | 'ROLES'; // <-- Definieren Sie den Typ für Ressourcen
+
+export const Resource = (resource: string) =>
   SetMetadata(RESOURCE_KEY, resource);

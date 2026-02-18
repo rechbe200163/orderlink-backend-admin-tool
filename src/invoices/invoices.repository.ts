@@ -1,38 +1,33 @@
 import {
   BadRequestException,
-  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CustomPrismaService } from 'nestjs-prisma';
-import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { CreateInvoiceDto } from './dto/create-invoice.dto';
 import { UpdateInvoiceDto } from './dto/update-invoice.dto';
 import { InvoiceDto } from 'prisma/src/generated/dto/invoice.dto';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { transformResponse } from 'lib/utils/transform';
 import { isNoChange } from 'lib/utils/isNoChange';
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class InvoicesRepository {
-  constructor(
-    @Inject('PrismaService')
-    private prismaService: CustomPrismaService<ExtendedPrismaClient>,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateInvoiceDto): Promise<InvoiceDto> {
-    const existing = await this.prismaService.client.invoice.findUnique({
+    const existing = await this.prisma.db.invoice.findUnique({
       where: { orderId: data.orderId },
     });
     if (existing) {
       throw new BadRequestException(`Invoice for this order already exists`);
     }
-    const invoice = await this.prismaService.client.invoice.create({ data });
+    const invoice = await this.prisma.db.invoice.create({ data });
     return transformResponse(InvoiceDto, invoice);
   }
 
   async findAll(limit = 10, page = 1): Promise<PagingResultDto<InvoiceDto>> {
-    const [invoices, meta] = await this.prismaService.client.invoice
+    const [invoices, meta] = await this.prisma.db.invoice
       .paginate({ where: { deleted: false } })
       .withPages({ limit, page, includePageCount: true });
 
@@ -43,7 +38,7 @@ export class InvoicesRepository {
   }
 
   async findById(invoiceId: string): Promise<InvoiceDto> {
-    const invoice = await this.prismaService.client.invoice.findUnique({
+    const invoice = await this.prisma.db.invoice.findUnique({
       where: { invoiceId },
     });
     if (!invoice) {
@@ -53,7 +48,7 @@ export class InvoicesRepository {
   }
 
   async update(invoiceId: string, data: UpdateInvoiceDto): Promise<InvoiceDto> {
-    const existing = await this.prismaService.client.invoice.findUnique({
+    const existing = await this.prisma.db.invoice.findUnique({
       where: { invoiceId },
     });
     if (!existing) {
@@ -64,7 +59,7 @@ export class InvoicesRepository {
         `No changes detected for invoice ${invoiceId}`,
       );
     }
-    const invoice = await this.prismaService.client.invoice.update({
+    const invoice = await this.prisma.db.invoice.update({
       where: { invoiceId },
       data,
     });

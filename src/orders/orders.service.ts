@@ -4,7 +4,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { OrderDto } from './dto/order.dto';
-import { OrderState } from '@prisma/client';
+import { OrderState } from 'generated/prisma/client';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
 
 @Injectable()

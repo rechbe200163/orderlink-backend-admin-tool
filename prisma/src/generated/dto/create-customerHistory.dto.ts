@@ -1,5 +1,5 @@
-import { BusinessSector } from '@prisma/client';
 import { ApiProperty, getSchemaPath } from '@nestjs/swagger';
+import { BusinessSector } from 'generated/prisma/client';
 
 export class CreateCustomerHistoryDto {
   email: string;

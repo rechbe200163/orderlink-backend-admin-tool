@@ -1,4 +1,4 @@
-import { OrderState } from '@prisma/client';
+import { OrderState } from 'generated/prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 import { CustomerEntity } from './customer.entity';
 import { OrderOnProducts } from './orderOnProducts.entity';

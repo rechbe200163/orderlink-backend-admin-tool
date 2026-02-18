@@ -1,24 +1,21 @@
 import {
   BadRequestException,
-  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
-import { CustomPrismaService } from 'nestjs-prisma';
-import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { CategoryDto } from './dto/category.dto';
 import { transformResponse } from 'lib/utils/transform';
 import { CreateCategoryDto } from './dto/create-category.dto';
 import { isNoChange } from 'lib/utils/isNoChange';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class CategoriesRepository {
   constructor(
     // ✅ use `ExtendedPrismaClient` type for correct type-safety of your extended PrismaClient
-    @Inject('PrismaService')
-    private prismaService: CustomPrismaService<ExtendedPrismaClient>,
+    private readonly prisma: PrismaService,
   ) {}
 
   async findAll(
@@ -26,7 +23,7 @@ export class CategoriesRepository {
     page: number = 1,
     search?: string,
   ): Promise<PagingResultDto<CategoryDto>> {
-    const [categories, meta] = await this.prismaService.client.category
+    const [categories, meta] = await this.prisma.db.category
       .paginate({
         where: {
           name: search ? { contains: search } : undefined,
@@ -46,7 +43,7 @@ export class CategoriesRepository {
   }
 
   async findById(categoryId: string): Promise<CategoryDto> {
-    const category = await this.prismaService.client.category.findUnique({
+    const category = await this.prisma.db.category.findUnique({
       where: { categoryId },
     });
     if (!category) {
@@ -56,7 +53,7 @@ export class CategoriesRepository {
   }
 
   async findByName(name: string): Promise<CategoryDto> {
-    const category = await this.prismaService.client.category.findFirst({
+    const category = await this.prisma.db.category.findFirst({
       where: { name },
     });
 
@@ -67,10 +64,9 @@ export class CategoriesRepository {
   }
 
   async create(data: CreateCategoryDto): Promise<CategoryDto> {
-    const existingCategory =
-      await this.prismaService.client.category.findUnique({
-        where: { name: data.name },
-      });
+    const existingCategory = await this.prisma.db.category.findUnique({
+      where: { name: data.name },
+    });
 
     if (existingCategory) {
       throw new NotFoundException(
@@ -78,7 +74,7 @@ export class CategoriesRepository {
       );
     }
 
-    const category = await this.prismaService.client.category.create({
+    const category = await this.prisma.db.category.create({
       data,
     });
     return transformResponse(CategoryDto, category);
@@ -88,17 +84,16 @@ export class CategoriesRepository {
     categoryId: string,
     data: UpdateCategoryDto,
   ): Promise<UpdateCategoryDto> {
-    const existingCategory =
-      await this.prismaService.client.category.findUnique({
-        where: { categoryId },
-      });
+    const existingCategory = await this.prisma.db.category.findUnique({
+      where: { categoryId },
+    });
 
     if (!existingCategory) {
       throw new NotFoundException(`Category with ID ${categoryId} not found`);
     }
 
     if (data.name && data.name !== existingCategory.name) {
-      const nameConflict = await this.prismaService.client.category.findUnique({
+      const nameConflict = await this.prisma.db.category.findUnique({
         where: { name: data.name },
       });
 
@@ -114,7 +109,7 @@ export class CategoriesRepository {
         `No changes detected for category ${categoryId}`,
       );
     }
-    const category = await this.prismaService.client.category.update({
+    const category = await this.prisma.db.category.update({
       where: { categoryId },
       data,
     });

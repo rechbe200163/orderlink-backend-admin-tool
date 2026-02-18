@@ -4,11 +4,12 @@ import { ProductsController } from './products.controller';
 import { ProductsRepository } from './products.repository';
 import { FileRepositoryModule } from 'src/file-repository/file-repository.module';
 import { TypedEventEmitterModule } from 'src/event-emitter/event-emitter.module';
+import { PrismaService } from 'src/prisma.service';
 
 @Module({
   imports: [FileRepositoryModule, TypedEventEmitterModule],
   controllers: [ProductsController],
-  providers: [ProductsService, ProductsRepository],
+  providers: [ProductsService, ProductsRepository, PrismaService],
   exports: [ProductsService, ProductsRepository],
 })
 export class ProductsModule {}

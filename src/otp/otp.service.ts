@@ -1,16 +1,16 @@
-import { Inject, Injectable, UnauthorizedException } from '@nestjs/common';
-import { Otp, Prisma } from '@prisma/client';
-import { customAlphabet, nanoid } from 'nanoid';
-import { CustomPrismaService } from 'nestjs-prisma';
-import { ExtendedPrismaClient } from 'prisma/prisma.extension';
+import { Inject, Injectable } from '@nestjs/common';
+import { Otp } from 'generated/prisma/client';
+
+import { customAlphabet } from 'nanoid';
+
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class OtpService {
   constructor(
     // ✅ use `ExtendedPrismaClient` type for correct type-safety of your extended PrismaClient
-    @Inject('PrismaService')
-    private readonly prismaService: CustomPrismaService<ExtendedPrismaClient>,
+    private readonly prisma: PrismaService,
     private readonly eventEmitter: TypedEventEmitter, // Assuming you have a TypedEventEmitter for event handling
   ) {}
 
@@ -18,7 +18,7 @@ export class OtpService {
     const nanoidNumbers = customAlphabet('0123456789', 8);
     const OTP = Number(nanoidNumbers());
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // OTP valid for 10 minutes
-    return await this.prismaService.client.otp.create({
+    return await this.prisma.db.otp.create({
       data: {
         code: OTP,
         expiresAt,
@@ -28,11 +28,11 @@ export class OtpService {
   }
 
   async markOtpAsUsed(otp: number) {
-    const otpRecord = await this.prismaService.client.otp.findUnique({
+    const otpRecord = await this.prisma.db.otp.findUnique({
       where: { code: otp },
     });
     if (otpRecord) {
-      await this.prismaService.client.otp.update({
+      await this.prisma.db.otp.update({
         where: { code: otp },
         data: { used: true },
       });
@@ -40,7 +40,7 @@ export class OtpService {
   }
 
   async validateOTP(code: number): Promise<Otp | null> {
-    const otp = await this.prismaService.client.otp.findUnique({
+    const otp = await this.prisma.db.otp.findUnique({
       where: { code, used: false },
     });
     if (!otp) {

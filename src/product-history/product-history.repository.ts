@@ -1,18 +1,15 @@
-import { Inject, Injectable } from '@nestjs/common';
-import { CustomPrismaService } from 'nestjs-prisma';
-import { ExtendedPrismaClient } from 'prisma/prisma.extension';
-import { EventPayloads } from 'src/event-emitter/interface/event-types.interface';
+// import { Inject, Injectable } from '@nestjs/common';
 
-@Injectable()
-export class ProductHistoryRepository {
-  constructor(
-    @Inject('PrismaService')
-    private readonly prisma: CustomPrismaService<ExtendedPrismaClient>,
-  ) {}
+// import { EventPayloads } from 'src/event-emitter/interface/event-types.interface';
+// import { PrismaService } from 'src/prisma.service';
 
-  async create(data: EventPayloads['product.updated']) {
-    await this.prisma.client.productHistory.create({
-      data,
-    });
-  }
-}
+// @Injectable()
+// export class ProductHistoryRepository {
+//   constructor(private readonly prisma: PrismaService) {}
+
+//   async create(data: EventPayloads['product.updated']) {
+//     await this.prisma.db.productHistory.create({
+//       data,
+//     });
+//   }
+// }

@@ -15,7 +15,6 @@ import {
 } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { CacheInterceptor } from '@nestjs/cache-manager';
-import { Actions } from '@prisma/client';
 import { Resources } from '../rbac/resources.enum';
 import { Resource } from 'lib/decorators/resource.decorator';
 import {
@@ -105,7 +104,7 @@ export class EmployeesController {
     required: false,
     example: {
       resource: Resources.EMPLOYEE,
-      action: Actions.READ,
+      actionId: 'uuid-of-action',
       allowed: true,
     },
   })
@@ -120,17 +119,11 @@ export class EmployeesController {
     @Query('page') page: number = 1,
     @Query('limit') limit: number = 10,
     @Query('search') search?: string,
-    @Query('permissions')
-    permissions?: {
-      resource: Resources;
-      action: Actions;
-      allowed: boolean;
-    },
   ) {
     if (limit > MAX_PAGE_SIZE) {
       throw new BadRequestException(`Limit cannot exceed ${MAX_PAGE_SIZE}`);
     }
-    return this.employeesService.findAll(page, limit, search, permissions);
+    return this.employeesService.findAll(page, limit, search);
   }
 
   @Get(':employeeId')

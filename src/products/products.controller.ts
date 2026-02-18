@@ -121,17 +121,17 @@ export class ProductsController {
     return this.productsService.findOne(productId);
   }
 
-  @Get('history/:productId')
-  @ApiOkResponse({
-    description: 'Product history retrieved successfully',
-    type: [ProductDto],
-  })
-  @ApiBadRequestResponse({
-    description: 'Invalid product ID format',
-  })
-  getHistory(@Param('productId', ParseUUIDPipe) productId: string) {
-    return this.productsService.getHistory(productId);
-  }
+  // @Get('history/:productId')
+  // @ApiOkResponse({
+  //   description: 'Product history retrieved successfully',
+  //   type: [ProductDto],
+  // })
+  // @ApiBadRequestResponse({
+  //   description: 'Invalid product ID format',
+  // })
+  // getHistory(@Param('productId', ParseUUIDPipe) productId: string) {
+  //   return this.productsService.getHistory(productId);
+  // }
 
   @Patch(':productId')
   @ApiConsumes('multipart/form-data')

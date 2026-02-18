@@ -1,32 +1,30 @@
 import {
   BadRequestException,
-  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CustomPrismaService } from 'nestjs-prisma';
-import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { CustomerDto } from 'src/customers/dto/customer.dto';
 import { CustomerPagingResultDto } from './dto/customer-paging.dto';
-import { BusinessSector, Prisma, PrismaPromise } from '@prisma/client';
 import { CreateCustomerDto } from 'src/customers/dto/create-customer.dto';
 import { customAlphabet } from 'nanoid';
 import { hash } from 'bcryptjs';
 import { UpdateCustomerDto } from 'src/customers/dto/update-customer.dto';
 import { isNoChange } from 'lib/utils/isNoChange';
 import { transformResponse } from 'lib/utils/transform';
+import { PrismaService } from 'src/prisma.service';
+import { BusinessSector, Prisma } from 'generated/prisma/client';
 
 @Injectable()
 export class CustomersRepository {
   constructor(
     // ✅ use `ExtendedPrismaClient` type for correct type-safety of your extended PrismaClient
-    @Inject('PrismaService')
-    private prismaService: CustomPrismaService<ExtendedPrismaClient>,
+    private readonly prisma: PrismaService,
   ) {}
 
   async findCustomerByEmail(email: string): Promise<CustomerDto> {
-    const customer =
-      await this.prismaService.client.customer.findCustomerByEmail(email);
+    const customer = await this.prisma.db.customer.findUnique({
+      where: { email },
+    });
     if (!customer) {
       throw new NotFoundException(`Customer with email ${email} not found`);
     }
@@ -46,7 +44,7 @@ export class CustomersRepository {
       ];
     }
 
-    const customers = await this.prismaService.client.customer.findMany({
+    const customers = await this.prisma.db.customer.findMany({
       where,
       orderBy: { signedUp: 'desc' },
     });
@@ -59,10 +57,9 @@ export class CustomersRepository {
   async findCustomerByReference(
     customerReference: number,
   ): Promise<CustomerDto> {
-    const customer =
-      await this.prismaService.client.customer.findByReference(
-        customerReference,
-      );
+    const customer = await this.prisma.db.customer.findUnique({
+      where: { customerReference },
+    });
     if (!customer) {
       throw new NotFoundException(
         `Customer with reference ${customerReference} not found`,
@@ -78,7 +75,7 @@ export class CustomersRepository {
     businessSector?: BusinessSector,
   ): Promise<CustomerPagingResultDto> {
     console.log('businessSector', businessSector);
-    const [users, meta] = await this.prismaService.client.customer
+    const [users, meta] = await this.prisma.db.customer
       .paginate({
         where: {
           ...(businessSector && { businessSector }),
@@ -129,7 +126,7 @@ export class CustomersRepository {
       },
     };
 
-    const customer = await this.prismaService.client.customer.create({
+    const customer = await this.prisma.db.customer.create({
       data: customerEntity,
     });
     return {
@@ -142,10 +139,9 @@ export class CustomersRepository {
     customerReference: number,
     customerData: UpdateCustomerDto,
   ): Promise<CustomerDto> {
-    const originalCustomer =
-      await this.prismaService.client.customer.findByReference(
-        customerReference,
-      );
+    const originalCustomer = await this.prisma.db.customer.findUnique({
+      where: { customerReference },
+    });
 
     if (!originalCustomer) {
       throw new NotFoundException('Customer not found');
@@ -158,11 +154,11 @@ export class CustomersRepository {
     // Exclude customerId from history entry
     const { customerId, ...customerHistoryData } = originalCustomer;
 
-    const [, updatedCustomer] = await this.prismaService.client.$transaction([
-      this.prismaService.client.customerHistory.create({
+    const [, updatedCustomer] = await this.prisma.db.$transaction([
+      this.prisma.db.customerHistory.create({
         data: customerHistoryData,
       }),
-      this.prismaService.client.customer.update({
+      this.prisma.db.customer.update({
         where: { customerReference },
         data: customerData,
       }),

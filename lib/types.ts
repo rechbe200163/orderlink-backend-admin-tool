@@ -1,5 +1,5 @@
-import { Customer, Employees } from '@prisma/client';
 import { FastifyRequest } from 'fastify';
+import { Customer, Employees } from 'generated/prisma/client';
 
 export type AuthResultCustomer = {
   token: string;
@@ -18,7 +18,7 @@ export type SanitizedCustomer = Pick<
 
 export type SanitizedEmployee = Pick<
   Employees,
-  'email' | 'firstName' | 'lastName' | 'employeeId' | 'role' | 'superAdmin'
+  'email' | 'firstName' | 'lastName' | 'employeeId' | 'roleId' | 'superAdmin'
 >;
 
 export type PagingData<T> = [

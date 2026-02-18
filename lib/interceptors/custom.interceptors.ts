@@ -1,5 +1,5 @@
 import { Injectable, Inject } from '@nestjs/common';
-import { Cache } from 'cache-manager';
+import type { Cache } from 'cache-manager';
 import { CallHandler, ExecutionContext, NestInterceptor } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { RESOURCE_KEY } from 'lib/decorators/resource.decorator';

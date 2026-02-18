@@ -34,7 +34,6 @@ export interface EventPayloads {
     description: string;
     stock: number;
     imagePath: string | null;
-    categoryId: string;
   };
   'product.created': {
     productId: string;
@@ -43,7 +42,6 @@ export interface EventPayloads {
     description: string;
     stock: number;
     imagePath: string | null;
-    categoryId: string;
   };
   'order.created': {
     orderId: string;

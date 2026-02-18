@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { BusinessSector } from '@prisma/client';
+import { BusinessSector } from 'generated/prisma/client';
 
 export class CustomerBusinessSectorDto {
   @ApiProperty()

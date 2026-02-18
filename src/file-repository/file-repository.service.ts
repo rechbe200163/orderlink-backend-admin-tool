@@ -2,6 +2,7 @@ import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import { randomUUID } from 'crypto';
+import { config } from 'process';
 import slugify from 'slugify';
 @Injectable()
 export class FileRepositoryService {
@@ -14,12 +15,23 @@ export class FileRepositoryService {
   };
 
   constructor(private readonly configService: ConfigService) {
-    this.supabaseUrl = this.requireEnv('SUPABASE_URL');
-    const serviceRoleKey = this.requireEnv('SUPABASE_SERVICE_ROLE');
+    this.supabaseUrl = configService.getOrThrow<string>('SUPABASE_URL');
+    const serviceRoleKey = configService.getOrThrow<string>(
+      'SUPABASE_SERVICE_ROLE',
+    );
+    const productsBucket = configService.get<string>(
+      'SUPABASE_PRODUCTS_BUCKET',
+    );
+    const invoicesBucket = configService.get<string>(
+      'SUPABASE_INVOICES_BUCKET',
+    );
+    const siteConfigBucket = configService.get<string>(
+      'SUPABASE_SITE_CONFIG_BUCKET',
+    );
     this.buckets = {
-      products: this.requireEnv('SUPABASE_PRODUCTS_BUCKET'),
-      invoices: this.requireEnv('SUPABASE_INVOICES_BUCKET'),
-      siteConfig: this.requireEnv('SUPABASE_SITE_CONFIG_BUCKET'),
+      products: productsBucket!,
+      invoices: invoicesBucket!,
+      siteConfig: siteConfigBucket!,
     };
     this.supabase = createClient(this.supabaseUrl, serviceRoleKey, {
       auth: { persistSession: false },

@@ -3,10 +3,11 @@ import { SiteConfigService } from './site-config.service';
 import { SiteConfigController } from './site-config.controller';
 import { SiteConfigRepository } from './site-config.repository';
 import { FileRepositoryModule } from 'src/file-repository/file-repository.module';
+import { PrismaService } from 'src/prisma.service';
 @Module({
   imports: [FileRepositoryModule],
   controllers: [SiteConfigController],
   exports: [SiteConfigService, SiteConfigRepository],
-  providers: [SiteConfigService, SiteConfigRepository],
+  providers: [SiteConfigService, SiteConfigRepository, PrismaService],
 })
 export class SiteConfigModule {}

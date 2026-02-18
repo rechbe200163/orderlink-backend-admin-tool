@@ -1,13 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Type } from 'class-transformer'; // ✅ import this
-import {
-  IsInt,
-  IsOptional,
-  IsPositive,
-  IsString,
-  IsUUID,
-  Min,
-} from 'class-validator';
+import { IsInt, IsPositive, IsString, IsUUID, Min } from 'class-validator';
 
 export class CreateProductDto {
   @ApiProperty({ type: String, required: true })
@@ -50,7 +43,7 @@ export class CreateProductDto {
     example: '123e4567-e89b-12d3-a456-426614174000',
   })
   @IsUUID()
-  categoryId: string;
+  categoryId!: string;
 
   @ApiProperty({ type: 'string', format: 'binary' })
   productImage: string;

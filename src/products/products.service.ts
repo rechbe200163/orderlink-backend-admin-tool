@@ -39,21 +39,20 @@ export class ProductsService {
       description: product.description,
       stock: product.stock,
       imagePath: product.imagePath ?? null,
-      categoryId: product.categoryId,
     });
 
     return product;
   }
 
-  async getHistory(productId: string): Promise<ProductHistoryDto[]> {
-    const productHistory = await this.productRepository.getHistory(productId);
-    if (!productHistory) {
-      throw new NotFoundException(
-        `Product history for ID ${productId} not found`,
-      );
-    }
-    return productHistory;
-  }
+  // async getHistory(productId: string): Promise<ProductHistoryDto[]> {
+  //   const productHistory = await this.productRepository.getHistory(productId);
+  //   if (!productHistory) {
+  //     throw new NotFoundException(
+  //       `Product history for ID ${productId} not found`,
+  //     );
+  //   }
+  //   return productHistory;
+  // }
 
   async findAll(
     limit = 10,
@@ -121,7 +120,6 @@ export class ProductsService {
       description: originalProduct.description,
       stock: originalProduct.stock,
       imagePath: originalProduct.imagePath ?? null,
-      categoryId: originalProduct.categoryId,
     });
 
     return product;
@@ -133,7 +131,10 @@ export class ProductsService {
 
   private addCdnImageUrl(productImage: string | null): string | undefined {
     if (!productImage) return;
-    if (productImage.startsWith('http://') || productImage.startsWith('https://')) {
+    if (
+      productImage.startsWith('http://') ||
+      productImage.startsWith('https://')
+    ) {
       return productImage;
     }
     return this.fileService.getPublicUrl(productImage, 'products');

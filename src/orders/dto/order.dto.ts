@@ -1,6 +1,6 @@
 import { Exclude, Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { OrderState } from '@prisma/client';
+import { OrderState } from 'generated/prisma/client';
 import {
   IsBoolean,
   IsDateString,

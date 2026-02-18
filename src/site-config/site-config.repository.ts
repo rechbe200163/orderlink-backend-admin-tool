@@ -1,26 +1,21 @@
 import {
   BadRequestException,
-  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CustomPrismaService } from 'nestjs-prisma';
-import { ExtendedPrismaClient } from 'prisma/prisma.extension';
 import { CreateSiteConfigDto } from 'prisma/src/generated/dto/create-siteConfig.dto';
 import { SiteConfigDto } from 'prisma/src/generated/dto/siteConfig.dto';
 import { UpdateSiteConfigDto } from 'prisma/src/generated/dto/update-siteConfig.dto';
 import { transformResponse } from 'lib/utils/transform';
 import { isNoChange } from 'lib/utils/isNoChange';
+import { PrismaService } from 'src/prisma.service';
 
 @Injectable()
 export class SiteConfigRepository {
-  constructor(
-    @Inject('PrismaService')
-    private readonly prismaService: CustomPrismaService<ExtendedPrismaClient>,
-  ) {}
+  constructor(private readonly prisma: PrismaService) {}
 
   async create(data: CreateSiteConfigDto): Promise<SiteConfigDto> {
-    const siteConfig = await this.prismaService.client.siteConfig.create({
+    const siteConfig = await this.prisma.db.siteConfig.create({
       data: {
         ...data,
       },
@@ -29,7 +24,7 @@ export class SiteConfigRepository {
   }
 
   async findFirst(): Promise<SiteConfigDto> {
-    const siteConfig = await this.prismaService.client.siteConfig.findFirst({
+    const siteConfig = await this.prisma.db.siteConfig.findFirst({
       include: {
         address: true, // Include address if needed
       },
@@ -38,7 +33,7 @@ export class SiteConfigRepository {
   }
 
   async findById(siteConfigId: string): Promise<SiteConfigDto> {
-    const config = await this.prismaService.client.siteConfig.findUnique({
+    const config = await this.prisma.db.siteConfig.findUnique({
       where: { siteConfigId },
     });
     if (!config) {
@@ -53,7 +48,7 @@ export class SiteConfigRepository {
     siteConfigId: string,
     data: UpdateSiteConfigDto,
   ): Promise<SiteConfigDto> {
-    const existing = await this.prismaService.client.siteConfig.findUnique({
+    const existing = await this.prisma.db.siteConfig.findUnique({
       where: { siteConfigId },
     });
     if (!existing) {
@@ -74,9 +69,12 @@ export class SiteConfigRepository {
         `No changes detected for site config ${siteConfigId}`,
       );
     }
-    const config = await this.prismaService.client.siteConfig.update({
+    const cleanData = Object.fromEntries(
+      Object.entries(data).filter(([, value]) => value !== null),
+    );
+    const config = await this.prisma.db.siteConfig.update({
       where: { siteConfigId },
-      data,
+      data: cleanData,
     });
     return transformResponse(SiteConfigDto, config);
   }

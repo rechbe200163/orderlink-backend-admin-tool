@@ -31,15 +31,14 @@ import {
 } from '@nestjs/swagger';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
-import { CreatePermissionsDto } from './dto/create-permissions.dto';
-import { UpdatePermissionDto } from 'prisma/src/generated/dto/update-permission.dto';
 import { PermissionDto } from 'prisma/src/generated/dto/permission.dto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
 import { PermissionPagingResultDto } from './dto/permissions-paging';
-import { CreatePermissionDto } from 'prisma/src/generated/dto/create-permission.dto';
 import { ModuleTag } from 'lib/decorators/module.decorators';
 import { ModuleEnum } from 'src/site-config/dto/modules-entity.dto';
 import { ModulesGuard } from 'src/auth/guards/modules.guard';
+import { CreatePermissionsDto } from './dto/create-permision.dto';
+import { UpdatePermissionDto } from './dto/update-permision.dto';
 
 @Controller('permissions')
 @UseInterceptors(CacheInterceptor)
@@ -80,20 +79,20 @@ export class PermissionsController {
     return this.permissionsService.create(createPermissionsDto);
   }
 
-  @Post('request')
-  @UseGuards(JwtAuthGuard)
-  @ApiBody({ type: CreatePermissionsDto })
-  @ApiOkResponse({ description: 'Permission request submitted' })
-  requestPermission(@Request() req, @Body() dto: CreatePermissionsDto) {
-    const { employeeId } = req.user;
-    this.eventEmitter.emit('permission.requested', {
-      employeeId,
-      role: dto.role,
-      resource: dto.resource,
-      actions: dto.actions,
-    });
-    return { success: true };
-  }
+  // @Post('request')
+  // @UseGuards(JwtAuthGuard)
+  // @ApiBody({ type: CreatePermissionsDto })
+  // @ApiOkResponse({ description: 'Permission request submitted' })
+  // requestPermission(@Request() req, @Body() dto: CreatePermissionsDto) {
+  //   const { employeeId } = req.user;
+  //   this.eventEmitter.emit('permission.requested', {
+  //     employeeId,
+  //     role: dto.roleId,
+  //     resource: dto.resourceId,
+  //     actions: dto.actionId,
+  //   });
+  //   return { success: true };
+  // }
 
   @Get('all')
   @ApiOkResponse({
@@ -151,7 +150,7 @@ export class PermissionsController {
   @Get(':permissionId')
   @ApiOkResponse({
     description: 'Permission found successfully',
-    type: CreatePermissionDto,
+    type: CreatePermissionsDto,
   })
   @ApiBadRequestResponse({
     description: 'Invalid permission ID format',
@@ -169,8 +168,8 @@ export class PermissionsController {
     description: 'Invalid permission ID format',
   })
   @ApiOkResponse({
-    description: 'Permission found successfully',
-    type: CreatePermissionDto,
+    description: 'Permission updated successfully',
+    type: CreatePermissionsDto,
   })
   update(
     @Param('permissionId', ParseUUIDPipe) permissionId: string,

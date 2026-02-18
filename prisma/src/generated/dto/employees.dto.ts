@@ -30,6 +30,6 @@ export class EmployeesDto {
   superAdmin: boolean;
 
   @Expose()
-  @IsString()
-  role: string;
+  @IsUUID()
+  roleId: string;
 }

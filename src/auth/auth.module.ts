@@ -7,8 +7,9 @@ import { JwtStrategy } from './strategy/jwt.strategy';
 import { EmployeesModule } from 'src/employees/employees.module';
 import { TypedEventEmitterModule } from 'src/event-emitter/event-emitter.module';
 import { OtpModule } from 'src/otp/otp.module';
+import { PrismaService } from 'src/prisma.service';
 @Module({
-  providers: [AuthService, JwtStrategy],
+  providers: [AuthService, JwtStrategy, PrismaService],
   controllers: [AuthController],
   imports: [
     TypedEventEmitterModule,

@@ -16,7 +16,7 @@ export class RolesService {
   }
 
   findOne(name: string) {
-    return this.rolesRepository.findByName(name);
+    return this.rolesRepository.findById(name);
   }
 
   findAllRoleNames() {

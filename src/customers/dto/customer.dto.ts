@@ -1,7 +1,7 @@
-import { BusinessSector } from '@prisma/client';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEmail, IsInt, IsString } from 'class-validator';
 import { Exclude, Expose } from 'class-transformer';
+import { BusinessSector } from 'generated/prisma/client';
 
 export class CustomerDto {
   @IsInt()
