@@ -31,11 +31,11 @@ import {
 } from '@nestjs/swagger';
 import { CustomerPagingResultDto } from './dto/customer-paging.dto';
 import { CreateCustomerDto } from 'src/customers/dto/create-customer.dto';
-import { CustomerDto } from 'src/customers/dto/customer.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { UpdateCustomerDto } from 'src/customers/dto/update-customer.dto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
+import { CustomerDto } from './dto/customer.dto';
 
 @Controller('customers')
 @UseInterceptors(CacheInterceptor)

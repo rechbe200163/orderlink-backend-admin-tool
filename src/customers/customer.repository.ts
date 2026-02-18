@@ -3,7 +3,6 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CustomerDto } from 'src/customers/dto/customer.dto';
 import { CustomerPagingResultDto } from './dto/customer-paging.dto';
 import { CreateCustomerDto } from 'src/customers/dto/create-customer.dto';
 import { customAlphabet } from 'nanoid';
@@ -13,6 +12,7 @@ import { isNoChange } from 'lib/utils/isNoChange';
 import { transformResponse } from 'lib/utils/transform';
 import { PrismaService } from 'src/prisma.service';
 import { BusinessSector, Prisma } from 'generated/prisma/client';
+import { CustomerDto } from './dto/customer.dto';
 
 @Injectable()
 export class CustomersRepository {
