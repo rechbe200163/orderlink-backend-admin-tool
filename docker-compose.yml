@@ -23,6 +23,15 @@ services:
     restart: unless-stopped
     env_file:
       - .env.production
+
+  redis-insight:
+    image: redis/redisinsight:latest
+    container_name: redis-insight
+    ports:
+      - '5540:5540'
+    restart: unless-stopped
+    depends_on:
+      - redis
+
 volumes:
   redis-data:
-  minio-data:

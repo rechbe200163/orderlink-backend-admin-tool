@@ -7,7 +7,7 @@ import { CustomersModule } from './customers/customers.module';
 import { AuthModule } from './auth/auth.module';
 import { CacheModule } from '@nestjs/cache-manager';
 import { CacheableMemory } from 'cacheable';
-import { createKeyv } from '@keyv/redis';
+import KeyvRedis, { createKeyv } from '@keyv/redis';
 import { Keyv } from 'keyv';
 import { RolesModule } from './roles/roles.module';
 import { PermissionsModule } from './permissions/permissions.module';
@@ -59,10 +59,7 @@ const envSchema = z.object({
         return {
           ttl: 60000, // 1-minute
           stores: [
-            createKeyv(process.env.REDIS_URL),
-            new Keyv({
-              store: new CacheableMemory({ ttl: 60000, lruSize: 5000 }),
-            }),
+            new KeyvRedis(process.env.REDIS_URL || 'redis://localhost:6379'),
           ],
         };
       },

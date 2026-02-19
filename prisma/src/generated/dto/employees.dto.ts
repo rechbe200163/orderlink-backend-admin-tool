@@ -1,4 +1,4 @@
-import { Exclude, Expose } from 'class-transformer';
+import { Expose } from 'class-transformer';
 import { IsEmail, IsString, IsUUID } from 'class-validator';
 
 export class EmployeesDto {
@@ -11,7 +11,7 @@ export class EmployeesDto {
   email: string;
 
   @IsString()
-  @Exclude()
+  @Expose()
   password: string;
 
   @IsString()

@@ -17,6 +17,8 @@ import type { Cache } from 'cache-manager';
 
 const ACTIONS_KEY = 'rbac:actions:v1';
 const ROLE_PERMS_KEY = (roleId: string) => `rbac:perms:role:${roleId}:v1`;
+const RESOURCE_ID_KEY = (resourceKey: string) =>
+  `rbac:resourceId:${resourceKey}:v1`;
 
 @Injectable()
 export class PermissionsGuard implements CanActivate {
@@ -34,53 +36,76 @@ export class PermissionsGuard implements CanActivate {
     if (!employee) {
       throw new ForbiddenException('Missing user role or resource.');
     }
+    if (employee.superAdmin) return true;
 
-    if (employee.superAdmin) {
-      return true;
-    }
-
-    const method = req.method;
     const handler = context.getHandler();
     const controller = context.getClass();
-    const resource =
+
+    // resourceKey ist dein Enum/String z.B. "ROLE" / "CUSTOMER"
+    const resourceKey =
       this.reflector.get<Resources>('resource', handler) ||
       this.reflector.get<Resources>('resource', controller);
 
-    if (!employee.roleId || !resource) {
+    if (!employee.roleId || !resourceKey) {
       throw new ForbiddenException('Resource not defined for this route.');
     }
 
+    // 0) resourceId aus Cache, sonst DB -> Cache
+    let resourceId = await this.cache.get<string>(RESOURCE_ID_KEY(resourceKey));
+    if (!resourceId) {
+      const row = await this.prisma.db.resource.findUnique({
+        where: { key: resourceKey }, // <- deine Resource Tabelle hat "key" = "ROLE"/"CUSTOMER"/...
+        select: { id: true },
+      });
+
+      if (!row) {
+        throw new ForbiddenException(`Unknown resource "${resourceKey}"`);
+      }
+
+      resourceId = row.id;
+
+      // sehr lang cachen, weil stabil
+      await this.cache.set(
+        RESOURCE_ID_KEY(resourceKey),
+        resourceId,
+        60 * 60 * 24 * 7, // 7 Tage
+      );
+    }
+
     // 1) Actions aus Cache, sonst DB -> Cache
-    let actions = (await this.cache.get<Action[]>(ACTIONS_KEY)) ?? null;
+    let actions = await this.cache.get<Action[]>(ACTIONS_KEY);
     if (!actions) {
       actions = await this.prisma.db.action.findMany();
-      await this.cache.set(ACTIONS_KEY, actions, 60 * 60); // 1h (seconds)
+      await this.cache.set(ACTIONS_KEY, actions, 60 * 60 * 24); // 24h
     }
 
     // 2) Permissions pro Role aus Cache, sonst DB -> Cache
-    let permissions =
-      (await this.cache.get<
-        { resourceId: string; actionId: string; allowed: boolean }[]
-      >(ROLE_PERMS_KEY(employee.roleId))) ?? null;
+    let permissions = await this.cache.get<
+      { resourceId: string; actionId: string; allowed: boolean }[]
+    >(ROLE_PERMS_KEY(employee.roleId));
 
     if (!permissions) {
       permissions = await this.prisma.db.permission.findMany({
         where: { roleId: employee.roleId },
         select: { resourceId: true, actionId: true, allowed: true },
       });
-      await this.cache.set(ROLE_PERMS_KEY(employee.roleId), permissions, 60); // 60s
+      await this.cache.set(
+        ROLE_PERMS_KEY(employee.roleId),
+        permissions,
+        60, // 60s
+      );
     }
 
-    // 3) Action für HTTP Method bestimmen (in-memory!)
+    // 3) Action für HTTP Method bestimmen
     const actionKey = this.httpMethodToActionKey(req.method);
-    const action = actions!.find((a) => a.key === actionKey);
+    const action = actions.find((a) => a.key === actionKey);
     if (!action) throw new ForbiddenException('Unsupported HTTP method.');
 
-    // 4) Permission in-memory checken (kein DB roundtrip)
-    const allowed = permissions!.some(
+    // 4) Permission check: UUID vs UUID (korrekt!)
+    const allowed = permissions.some(
       (p) =>
         p.allowed === true &&
-        p.resourceId === resource &&
+        p.resourceId === resourceId &&
         p.actionId === action.id,
     );
 
@@ -91,11 +116,12 @@ export class PermissionsGuard implements CanActivate {
         lastName: employee.lastName,
         email: employee.email,
         role: employee.roleId,
-        resource,
+        resource: resourceKey,
         action: action.key,
       });
+
       throw new ForbiddenException(
-        `Role "${employee.roleId}" is not allowed to ${action.key} ${resource}`,
+        `Role "${employee.roleId}" is not allowed to ${action.key} ${resourceKey}`,
       );
     }
 
@@ -116,7 +142,6 @@ export class PermissionsGuard implements CanActivate {
       case 'DELETE':
         return 'DELETE';
       default:
-        // du kannst hier auch eine Exception werfen statt default
         return 'READ';
     }
   }

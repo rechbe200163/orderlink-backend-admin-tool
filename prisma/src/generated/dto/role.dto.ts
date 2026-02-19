@@ -1,7 +1,8 @@
 import { Expose } from 'class-transformer';
-import { PermissionDto } from './permission.dto';
 
 export class RoleDto {
+  @Expose()
+  id: string;
   @Expose()
   name: string;
   @Expose()
