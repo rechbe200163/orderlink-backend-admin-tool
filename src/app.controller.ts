@@ -1,10 +1,11 @@
-import { Controller } from '@nestjs/common';
+import { Controller, Get } from '@nestjs/common';
 
 @Controller()
 export class AppController {
   constructor() {}
 
-  ping() {
-    return 200;
+  @Get('/health')
+  healthCheck(): { status: string } {
+    return { status: 'ok' };
   }
 }
