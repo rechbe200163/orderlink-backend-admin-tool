@@ -11,7 +11,7 @@ import {
   UploadedFile,
 } from '@nestjs/common';
 import { SiteConfigService } from './site-config.service';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+import { CacheInterceptor, CacheTTL } from '@nestjs/cache-manager';
 import { Resources } from '../rbac/resources.enum';
 import { Resource } from 'lib/decorators/resource.decorator';
 import {
@@ -28,8 +28,6 @@ import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { CreateSiteConfigDto } from 'prisma/src/generated/dto/create-siteConfig.dto';
 import { UpdateSiteConfigDto } from 'prisma/src/generated/dto/update-siteConfig.dto';
 import { SiteConfigDto } from 'prisma/src/generated/dto/siteConfig.dto';
-import { diskStorage } from 'multer';
-import { editFileName, imageFileFilter } from 'lib/utils/file-upload-util';
 import { FileSizeValidationPipe } from 'lib/pipes/file-size-validation-pipe';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileTypeValidationPipe } from 'lib/pipes/file-name-validation-pipe.ts';
@@ -37,6 +35,7 @@ import { FileTypeValidationPipe } from 'lib/pipes/file-name-validation-pipe.ts';
 @Controller('site-config')
 @UseInterceptors(CacheInterceptor)
 @Resource(Resources.SITE_CONFIG)
+@CacheTTL(60 * 60 * 1000) // Cache for 1 hour
 @ApiInternalServerErrorResponse({ description: 'Internal server error' })
 @ApiBearerAuth()
 @UseGuards(JwtAuthGuard, PermissionsGuard)

@@ -27,6 +27,7 @@ import { OtpModule } from './otp/otp.module';
 import { z } from 'zod';
 import { ActionsModule } from './actions/actions.module';
 import { ResourcesModule } from './resources/resources.module';
+import { DataAnalysisModule } from './data-analysis/data-analysis.module';
 
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1), // url() kann bei prisma strings manchmal nerven
@@ -49,6 +50,7 @@ const envSchema = z.object({
   STRIPE_WEBHOOK_SECRET: z.string().min(1),
 
   FRONTEND_URL: z.string().url().optional(),
+  DTA_API_URL: z.string().url().optional(),
 });
 
 @Module({
@@ -97,6 +99,7 @@ const envSchema = z.object({
     OtpModule,
     ActionsModule,
     ResourcesModule,
+    DataAnalysisModule,
   ],
   controllers: [AppController],
   providers: [AppService],
