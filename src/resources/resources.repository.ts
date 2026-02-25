@@ -17,6 +17,7 @@ export class ResourceRepository {
   ) {}
 
   async create(resourceData: CreateResourceDto) {
+    console.log('Creating resource with data:', resourceData);
     const existingResource = await this.prisma.db.resource.findUnique({
       where: { key: resourceData.key },
     });
@@ -26,7 +27,10 @@ export class ResourceRepository {
       );
     }
     const createdResource = await this.prisma.db.resource.create({
-      data: resourceData,
+      data: {
+        key: resourceData.key,
+        description: resourceData.description,
+      },
     });
     return transformResponse(ResourceEntity, createdResource);
   }

@@ -1,18 +1,25 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Transform } from 'class-transformer';
-import { IsString } from 'class-validator';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 
 export class CreateResourceDto {
   @ApiProperty({
-    description: 'The unique key for the action',
-    example: 'CREATE',
-  })
-  @Transform(({ value }) => value.toUpperCase())
-  key: string;
-  @ApiProperty({
-    description: 'A brief description of the action',
-    example: 'This action allows users to create new resources.',
+    description: 'The unique key for the resource',
+    example: 'ORDER',
   })
   @IsString()
-  description: string;
+  @IsNotEmpty()
+  @Transform(({ value }) =>
+    typeof value === 'string' ? value.toUpperCase() : value,
+  )
+  key: string;
+
+  @ApiProperty({
+    description: 'A brief description of the resource',
+    example: 'Orders module access',
+    required: false,
+  })
+  @IsOptional()
+  @IsString()
+  description?: string;
 }

@@ -22,12 +22,12 @@ import { DataAnalysisTokenServiceService } from './external-api.token-service';
 
 @Controller('data-analysis')
 @UseInterceptors(CacheInterceptor)
-@Resource(Resources.CUSTOMER)
+@Resource(Resources.STATISTICS)
 @CacheTTL(60 * 60 * 1000) // Cache for 1 hour
 @ApiBearerAuth()
 @ApiForbiddenResponse({
   description:
-    'Role does not have the permissions to perform this action on the requeseted resource',
+    'Role does not have the permissions to perform this action on the requested resource',
 })
 @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class DataAnalysisController {
