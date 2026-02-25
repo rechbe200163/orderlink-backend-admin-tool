@@ -82,4 +82,52 @@ export class DataAnalysisController {
       show_zeros,
     );
   }
+
+
+  @Get('customers-growth')
+  @ApiServiceUnavailableResponse({
+    description: 'Data analysis service temporarily unavailable',
+  })
+  @ApiQuery({
+    name: 'one_day',
+    required: true,
+    description: 'Whether to include the previous day in the analysis',
+    example: true,
+  })
+  @ApiQuery({
+    name: 'seven_days',
+    required: true,
+    description: 'Whether to include the last 7 days in the analysis',
+    example: true,
+  })
+  @ApiQuery({
+    name: 'month',
+    required: false,
+    description: 'Whether to include the current month in the analysis',
+    example: true,
+  })
+  @ApiQuery({
+    name: 'year',
+    required: false,
+    description: 'Whether to include the current year in the analysis',
+    example: true,
+  })
+  async get_customers_growth(
+    @Request() req,
+    @Query('one_day') one_day: boolean = false,
+    @Query('seven_days') seven_days: boolean = false,
+    @Query('month') month: boolean = false,
+    @Query('year') year: boolean = false,
+  ) {
+    const { email } = req.user;
+    const token = await this.tokenService.getToken(email);
+    return this.dataAnalysisService.get_customers_growth(
+      token,
+      one_day,
+      seven_days,
+      month,
+      year,
+    );
+  }
+
 }
