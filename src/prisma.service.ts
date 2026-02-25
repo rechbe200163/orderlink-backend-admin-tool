@@ -6,8 +6,6 @@ import { pagination } from 'prisma-extension-pagination';
 
 function createPrisma(databaseUrl: string) {
   const adapter = new PrismaPg({ connectionString: databaseUrl });
-
-  // WICHTIG: Typen bleiben erhalten, weil TS den Return-Typ hier konkret inferiert
   return new PrismaClient({ adapter }).$extends(pagination());
 }
 

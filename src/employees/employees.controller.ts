@@ -12,6 +12,8 @@ import {
   Query,
   BadRequestException,
   Request,
+  ParseBoolPipe,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { CacheInterceptor } from '@nestjs/cache-manager';
@@ -31,8 +33,8 @@ import { CreateEmployeesDto } from 'prisma/src/generated/dto/create-employees.dt
 import { UpdateEmployeesDto } from 'prisma/src/generated/dto/update-employees.dto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
-import { EmployeesDto } from 'prisma/src/generated/dto/employees.dto';
 import { MaxEmployeeGuard } from 'src/auth/guards/max-employee.guard';
+import { EmployeesDto } from './dto/employees.dto';
 
 @Controller('employees')
 @UseInterceptors(CacheInterceptor)
@@ -108,6 +110,13 @@ export class EmployeesController {
       allowed: true,
     },
   })
+  @ApiQuery({
+    name: 'includeRole',
+    description: 'Whether to include role information in the response',
+    type: Boolean,
+    required: false,
+    example: true,
+  })
   @ApiOkResponse({
     description: 'List of employees',
     type: PagingResultDto<EmployeesDto>,
@@ -116,14 +125,24 @@ export class EmployeesController {
     description: 'Invalid query parameters',
   })
   findAll(
-    @Query('page') page: number = 1,
-    @Query('limit') limit: number = 10,
+    @Request() req,
+    @Query('page', ParseIntPipe) page: number = 1,
+    @Query('limit', ParseIntPipe) limit: number = 10,
+    @Query('includeRole', ParseBoolPipe) includeRole: boolean = false,
     @Query('search') search?: string,
   ) {
     if (limit > MAX_PAGE_SIZE) {
       throw new BadRequestException(`Limit cannot exceed ${MAX_PAGE_SIZE}`);
     }
-    return this.employeesService.findAll(page, limit, search);
+    console.log('includeRole:', includeRole);
+    const { employeeId } = req.user;
+    return this.employeesService.findAll(
+      page,
+      limit,
+      includeRole,
+      search,
+      employeeId,
+    );
   }
 
   @Get(':employeeId')

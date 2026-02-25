@@ -1,5 +1,6 @@
-import { Expose } from 'class-transformer';
+import { Expose, Type } from 'class-transformer';
 import { IsEmail, IsString, IsUUID } from 'class-validator';
+import { RoleEntity } from 'src/roles/entities/role.entity';
 
 export class EmployeesDto {
   @IsUUID()
@@ -32,4 +33,10 @@ export class EmployeesDto {
   @Expose()
   @IsUUID()
   roleId: string;
+
+  @Expose()
+  @Type(() => RoleEntity)
+  role?: {
+    name: string;
+  };
 }

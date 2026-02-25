@@ -1,6 +1,5 @@
 import { UpdateEmployeesDto } from 'prisma/src/generated/dto/update-employees.dto';
 import { CreateEmployeesDto } from 'prisma/src/generated/dto/create-employees.dto';
-import { EmployeesDto } from 'prisma/src/generated/dto/employees.dto';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { RolesRepository } from './../roles/roles.repository';
 import { transformResponse } from 'lib/utils/transform';
@@ -14,6 +13,7 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
+import { EmployeesDto } from './dto/employees.dto';
 
 @Injectable()
 export class EmployeesRepository {
@@ -55,16 +55,28 @@ export class EmployeesRepository {
   async findAll(
     page: number = 1,
     limit: number = 10,
+    includeRole: boolean,
     search?: string,
+    exludeEmployeeId?: string,
   ): Promise<PagingResultDto<EmployeesDto>> {
     const [employees, meta] = await this.prisma.db.employees
       .paginate({
         where: {
+          employeeId: exludeEmployeeId ? { not: exludeEmployeeId } : undefined,
           deleted: false,
           lastName: {
             contains: search,
             mode: 'insensitive',
           },
+        },
+        include: {
+          role: includeRole
+            ? {
+                select: {
+                  name: true,
+                },
+              }
+            : false,
         },
       })
       .withPages({

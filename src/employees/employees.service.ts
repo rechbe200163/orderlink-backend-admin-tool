@@ -3,8 +3,8 @@ import { EmployeesRepository } from './employees.repository';
 import { CreateEmployeesDto } from 'prisma/src/generated/dto/create-employees.dto';
 import { UpdateEmployeesDto } from 'prisma/src/generated/dto/update-employees.dto';
 import { transformResponse } from 'lib/utils/transform';
-import { EmployeesDto } from 'prisma/src/generated/dto/employees.dto';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
+import { EmployeesDto } from './dto/employees.dto';
 
 @Injectable()
 export class EmployeesService {
@@ -29,8 +29,20 @@ export class EmployeesService {
     return transformResponse(EmployeesDto, employee);
   }
 
-  findAll(page: number = 1, limit: number = 10, search?: string) {
-    return this.employeesRepository.findAll(page, limit, search);
+  findAll(
+    page: number = 1,
+    limit: number = 10,
+    includeRole: boolean,
+    search?: string,
+    exludeEmployeeId?: string,
+  ) {
+    return this.employeesRepository.findAll(
+      page,
+      limit,
+      includeRole,
+      search,
+      exludeEmployeeId,
+    );
   }
 
   findById(id: string, includeOtp = false) {
