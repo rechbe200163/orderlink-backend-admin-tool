@@ -83,6 +83,52 @@ export class DataAnalysisController {
     );
   }
 
+  @Get('products-mostly-bought')
+  @ApiServiceUnavailableResponse({
+    description: 'Data analysis service temporarily unavailable',
+  })
+  @ApiQuery({
+    name: 'last_days',
+    required: false,
+    description: 'Number of last days to include in the analysis',
+    example: 0,
+  })
+  @ApiQuery({
+    name: 'month',
+    required: false,
+    description: 'Whether to include the current month in the analysis',
+    example: true,
+  })
+  @ApiQuery({
+    name: 'year',
+    required: false,
+    description: 'Whether to include the current year in the analysis',
+    example: true,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Number of top products to return',
+    example: 5,
+  })
+  async get_products_mostly_bought(
+    @Request() req,
+    @Query('last_days') last_days: number = 0,
+    @Query('month') month: boolean = false,
+    @Query('year') year: boolean = false,
+    @Query('limit') limit: number = 5,
+  ) {
+    const { email } = req.user;
+    const token = await this.tokenService.getToken(email);
+    return this.dataAnalysisService.get_products_mostly_bought(
+      token,
+      last_days,
+      month,
+      year,
+      limit,
+    );
+  }
+
 
   @Get('customers-growth')
   @ApiServiceUnavailableResponse({
@@ -128,6 +174,64 @@ export class DataAnalysisController {
       month,
       year,
     );
+  }
+
+  @Get('orders-growth')
+  @ApiServiceUnavailableResponse({
+    description: 'Data analysis service temporarily unavailable',
+  })
+  @ApiQuery({
+    name: 'one_day',
+    required: true,
+    description: 'Whether to include the previous day in the analysis',
+    example: true,
+  })
+  @ApiQuery({
+    name: 'seven_days',
+    required: true,
+    description: 'Whether to include the last 7 days in the analysis',
+    example: true,
+  })
+  @ApiQuery({
+    name: 'month',
+    required: false,
+    description: 'Whether to include the current month in the analysis',
+    example: true,
+  })
+  @ApiQuery({
+    name: 'year',
+    required: false,
+    description: 'Whether to include the current year in the analysis',
+    example: true,
+  })
+  async get_orders_growth(
+    @Request() req,
+    @Query('one_day') one_day: boolean = false,
+    @Query('seven_days') seven_days: boolean = false,
+    @Query('month') month: boolean = false,
+    @Query('year') year: boolean = false,
+  ) {
+    const { email } = req.user;
+    const token = await this.tokenService.getToken(email);
+    return this.dataAnalysisService.get_orders_growth(
+      token,
+      one_day,
+      seven_days,
+      month,
+      year,
+    );
+  }
+
+
+  @Get('products-orders-correlation')
+  @ApiServiceUnavailableResponse({
+    description: 'Data analysis service temporarily unavailable',
+  })
+  async get_products_orders_correlation(@Request() req) {
+    const { email } = req.user;
+    const token = await this.tokenService.getToken(email);
+    return this.dataAnalysisService.get_products_orders_correlation(token);
+
   }
 
 }
