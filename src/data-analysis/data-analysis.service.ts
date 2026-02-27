@@ -114,4 +114,26 @@ export class DataAnalysisService {
       });
   }
 
+  get_products_amount(
+    token: string,
+    well_stocked: boolean = false,
+    out_of_stock: boolean = false,
+    limit: number = 5,
+  ) {
+    const queryParams = new URLSearchParams({
+      well_stocked: well_stocked.toString(),
+      out_of_stock: out_of_stock.toString(),
+      limit: limit.toString(),
+      token,
+    }).toString();
+    const url = `${this.dtaApiUrl}/descriptive/products-amount/?${queryParams}`;
+    return axios
+      .get(url)
+      .then((response) => response.data)
+      .catch((error) => {
+        console.error('Error fetching products amount:', error);
+        throw new Error('Failed to fetch products amount');
+      });
+    }
+
 }

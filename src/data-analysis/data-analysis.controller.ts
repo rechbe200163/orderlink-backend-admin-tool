@@ -222,6 +222,44 @@ export class DataAnalysisController {
     );
   }
 
+  @Get('products-amount')
+  @ApiServiceUnavailableResponse({
+    description: 'Data analysis service temporarily unavailable',
+  })
+  @ApiQuery({
+    name: 'well_stocked',
+    required: false,
+    description: 'Whether to include only well-stocked products in the analysis',
+    example: true,
+  })
+  @ApiQuery({
+    name: 'out_of_stock',
+    required: false,
+    description: 'Whether to include only out-of-stock products in the analysis',
+    example: false,
+  })
+  @ApiQuery({
+    name: 'limit',
+    required: false,
+    description: 'Number of top products to return',
+    example: 5,
+  })
+  async get_products_amount(
+    @Request() req,
+    @Query('well_stocked') well_stocked: boolean = false,
+    @Query('out_of_stock') out_of_stock: boolean = false,
+    @Query('limit') limit: number = 5,
+  ) {
+    const { email } = req.user;
+    const token = await this.tokenService.getToken(email);
+    return this.dataAnalysisService.get_products_amount(
+      token,
+      well_stocked,
+      out_of_stock,
+      limit,
+    );
+  }
+
 
   @Get('products-orders-correlation')
   @ApiServiceUnavailableResponse({
