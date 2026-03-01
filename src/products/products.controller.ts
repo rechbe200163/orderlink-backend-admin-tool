@@ -10,6 +10,7 @@ import {
   ParseUUIDPipe,
   Query,
   Req,
+  UseGuards,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
 import {
@@ -33,6 +34,8 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { FileSizeValidationPipe } from 'lib/pipes/file-size-validation-pipe';
 import { FileTypeValidationPipe } from 'lib/pipes/file-name-validation-pipe.ts';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
+import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 
 @Controller('products')
 @UseInterceptors(CacheInterceptor)
@@ -41,7 +44,7 @@ import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
   description: 'Internal server error',
 })
 @ApiBearerAuth()
-// @UseGuards(JwtAuthGuard, PermissionsGuard)
+@UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiForbiddenResponse({
   description:
     'Role does not have the permissions to perform this action on the requeseted resource',
