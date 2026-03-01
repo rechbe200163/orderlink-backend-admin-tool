@@ -59,7 +59,7 @@ const envSchema = z.object({
       isGlobal: true,
       useFactory: async () => {
         return {
-          ttl: 60000, // 1-minute
+          ttl: 60 * 5 * 1000, // 5 minutes in milliseconds
           stores: [
             new KeyvRedis(process.env.REDIS_URL || 'redis://localhost:6379'),
           ],
