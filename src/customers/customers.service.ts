@@ -4,6 +4,7 @@ import { BusinessSector } from 'generated/prisma/client';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
 import { CreateCustomerDto } from './dto/create-customer.dto';
 import { UpdateCustomerDto } from './dto/update-customer.dto';
+import { SortOrder } from 'src/common/enums/sort-order.enum';
 
 @Injectable()
 export class CustomersService {
@@ -24,13 +25,17 @@ export class CustomersService {
   async getCustomers(
     limit: number = 10,
     page: number = 1,
-    query?: string | undefined,
+    sort?: string,
+    order?: SortOrder,
+    search?: string | undefined,
     businessSector?: BusinessSector,
   ) {
     return this.customerRepository.getCustomers(
       limit,
       page,
-      query,
+      sort,
+      order,
+      search,
       businessSector,
     );
   }

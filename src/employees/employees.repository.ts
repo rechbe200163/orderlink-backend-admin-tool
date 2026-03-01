@@ -14,6 +14,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { EmployeesDto } from './dto/employees.dto';
+import { SortOrder } from 'src/common/enums/sort-order.enum';
 
 @Injectable()
 export class EmployeesRepository {
@@ -56,6 +57,8 @@ export class EmployeesRepository {
     page: number = 1,
     limit: number = 10,
     includeRole: boolean,
+    sort?: string,
+    order?: SortOrder,
     search?: string,
     exludeEmployeeId?: string,
   ): Promise<PagingResultDto<EmployeesDto>> {
@@ -78,6 +81,11 @@ export class EmployeesRepository {
               }
             : false,
         },
+        orderBy: sort
+          ? {
+              [sort]: order || 'asc',
+            }
+          : undefined,
       })
       .withPages({
         limit,

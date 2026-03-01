@@ -34,8 +34,8 @@ import { CreateCustomerDto } from 'src/customers/dto/create-customer.dto';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { UpdateCustomerDto } from 'src/customers/dto/update-customer.dto';
-import { MAX_PAGE_SIZE } from 'lib/constants';
 import { CustomerDto } from './dto/customer.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Controller('customers')
 @UseInterceptors(CacheInterceptor)
@@ -72,23 +72,6 @@ export class CustomersController {
 
   @Get()
   @ApiQuery({
-    name: 'limit',
-    description: 'Number of customers to return per page',
-    type: Number,
-    default: 10,
-    required: true,
-    maximum: MAX_PAGE_SIZE,
-    example: 10,
-  })
-  @ApiQuery({
-    name: 'page',
-    description: 'Page number to return',
-    type: Number,
-    default: 1,
-    required: true,
-    example: 1,
-  })
-  @ApiQuery({
     name: 'businessSector',
     description: 'Filter customers by business sector',
     enum: BusinessSector,
@@ -97,8 +80,8 @@ export class CustomersController {
     default: undefined,
   })
   @ApiQuery({
-    name: 'query',
-    description: 'Search query to filter customers by name or email',
+    name: 'search',
+    description: 'Search to filter customers by name or email',
     type: String,
     required: false,
     example: 'John Doe',
@@ -106,23 +89,21 @@ export class CustomersController {
   })
   @ApiOkResponse({ type: CustomerPagingResultDto })
   async getCustomers(
-    @Query('limit', ParseIntPipe) limit: number = 10,
-    @Query('page', ParseIntPipe) page: number = 1,
-    @Query('query') query?: string | undefined,
+    @Query() query: PaginationQueryDto,
+    @Query('search') search?: string | undefined,
     @Query(
       'businessSector',
       new ParseEnumPipe(BusinessSector, { optional: true }),
     )
     businessSector?: BusinessSector | undefined,
   ) {
-    const maxLimit = MAX_PAGE_SIZE; // Define a maximum limit for pagination
-    if (limit > maxLimit) {
-      throw new BadRequestException(`Limit cannot exceed ${maxLimit}`);
-    }
+    const { limit, page, sort, order } = query;
     return await this.customersService.getCustomers(
       limit,
       page,
-      query,
+      sort,
+      order,
+      search,
       businessSector,
     );
   }

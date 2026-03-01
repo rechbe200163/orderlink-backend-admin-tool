@@ -34,6 +34,7 @@ import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { OrderDto } from './dto/order.dto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
 import { OrderState } from 'generated/prisma/client';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Controller('orders')
 @UseInterceptors(CacheInterceptor)
@@ -52,13 +53,6 @@ export class OrdersController {
   }
 
   @Get()
-  @ApiQuery({
-    name: 'limit',
-    type: Number,
-    example: 10,
-    maximum: MAX_PAGE_SIZE,
-  })
-  @ApiQuery({ name: 'page', type: Number, example: 1 })
   @ApiParam({
     name: 'customerReference',
     description: 'Customer reference number',
@@ -99,8 +93,7 @@ export class OrdersController {
     >,
   })
   findAll(
-    @Query('limit', new ParseIntPipe()) limit = 10,
-    @Query('page', new ParseIntPipe()) page = 1,
+    @Query() query: PaginationQueryDto,
     @Query('orderState', new ParseEnumPipe(OrderState, { optional: true }))
     orderState?: OrderState,
     @Query('startDate') startDate?: Date,
@@ -108,20 +101,12 @@ export class OrdersController {
     @Query('customerReference', new ParseIntPipe({ optional: true }))
     customerReference?: number,
   ) {
-    console.log('Fetching orders with parameters:', {
-      limit,
-      page,
-      orderState,
-      startDate,
-      endDate,
-      customerReference,
-    });
-    if (limit > MAX_PAGE_SIZE) {
-      throw new BadRequestException(`Limit cannot exceed ${MAX_PAGE_SIZE}`);
-    }
+    const { limit, page, sort, order } = query;
     return this.ordersService.findAll(
       limit,
       page,
+      sort,
+      order,
       orderState,
       startDate,
       endDate,

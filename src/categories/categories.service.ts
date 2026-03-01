@@ -18,9 +18,11 @@ export class CategoriesService {
   findAll(
     limit: number = 10,
     page: number = 1,
+    sort?: string,
+    order?: string,
     search?: string,
   ): Promise<PagingResultDto<CategoryDto>> {
-    return this.categoriesRepository.findAll(limit, page, search);
+    return this.categoriesRepository.findAll(limit, page, sort, order, search);
   }
 
   findById(id: string): Promise<CategoryDto> {

@@ -21,12 +21,17 @@ export class CategoriesRepository {
   async findAll(
     limit: number = 10,
     page: number = 1,
+    sort?: string,
+    order?: string,
     search?: string,
   ): Promise<PagingResultDto<CategoryDto>> {
     const [categories, meta] = await this.prisma.db.category
       .paginate({
         where: {
           name: search ? { contains: search } : undefined,
+        },
+        orderBy: {
+          [sort || 'createdAt']: order,
         },
       })
       .withPages({

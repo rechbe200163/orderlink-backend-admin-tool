@@ -13,6 +13,7 @@ import { transformResponse } from 'lib/utils/transform';
 import { PrismaService } from 'src/prisma.service';
 import { BusinessSector, Prisma } from 'generated/prisma/client';
 import { CustomerDto } from './dto/customer.dto';
+import { SortOrder } from 'src/common/enums/sort-order.enum';
 
 @Injectable()
 export class CustomersRepository {
@@ -71,7 +72,9 @@ export class CustomersRepository {
   async getCustomers(
     limit?: number,
     page?: number,
-    query?: string | undefined,
+    sort?: string,
+    order?: SortOrder,
+    search?: string | undefined,
     businessSector?: BusinessSector,
   ): Promise<CustomerPagingResultDto> {
     console.log('businessSector', businessSector);
@@ -79,13 +82,16 @@ export class CustomersRepository {
       .paginate({
         where: {
           ...(businessSector && { businessSector }),
-          ...(query && {
+          ...(search && {
             OR: [
-              { firstName: { contains: query, mode: 'insensitive' } },
-              { lastName: { contains: query, mode: 'insensitive' } },
-              { email: { contains: query, mode: 'insensitive' } },
+              { firstName: { contains: search, mode: 'insensitive' } },
+              { lastName: { contains: search, mode: 'insensitive' } },
+              { email: { contains: search, mode: 'insensitive' } },
             ],
           }),
+        },
+        orderBy: {
+          [sort || 'signedUp']: order,
         },
       })
       .withPages({

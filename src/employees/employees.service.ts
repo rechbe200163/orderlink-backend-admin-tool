@@ -5,6 +5,7 @@ import { UpdateEmployeesDto } from 'prisma/src/generated/dto/update-employees.dt
 import { transformResponse } from 'lib/utils/transform';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
 import { EmployeesDto } from './dto/employees.dto';
+import { SortOrder } from 'src/common/enums/sort-order.enum';
 
 @Injectable()
 export class EmployeesService {
@@ -33,6 +34,8 @@ export class EmployeesService {
     page: number = 1,
     limit: number = 10,
     includeRole: boolean,
+    sort?: string,
+    order?: SortOrder,
     search?: string,
     exludeEmployeeId?: string,
   ) {
@@ -40,6 +43,8 @@ export class EmployeesService {
       page,
       limit,
       includeRole,
+      sort,
+      order,
       search,
       exludeEmployeeId,
     );

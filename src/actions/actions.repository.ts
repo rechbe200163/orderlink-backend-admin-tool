@@ -9,6 +9,7 @@ import { PrismaService } from 'src/prisma.service';
 import { CreateActionDto } from './dto/create-action.dto';
 import { ActionEntity } from './entities/action.entity';
 import { UpdateActionDto } from './dto/update-action.dto';
+import { SortOrder } from 'src/common/enums/sort-order.enum';
 
 @Injectable()
 export class ActionsRepository {
@@ -49,7 +50,13 @@ export class ActionsRepository {
     return roles.map((role) => role.key);
   }
 
-  async findAll(limit: number = 10, page: number = 1, search: string = '') {
+  async findAll(
+    limit: number = 10,
+    page: number = 1,
+    search: string = '',
+    sort?: string,
+    order?: SortOrder,
+  ) {
     const [actions, meta] = await this.prisma.db.action
       .paginate({
         where: {
@@ -59,6 +66,11 @@ export class ActionsRepository {
             mode: 'insensitive',
           },
         },
+        orderBy: sort
+          ? {
+              [sort]: order || 'asc',
+            }
+          : undefined,
       })
       .withPages({
         limit: limit,

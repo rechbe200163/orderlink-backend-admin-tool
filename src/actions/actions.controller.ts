@@ -8,6 +8,7 @@ import {
   Delete,
   UseInterceptors,
   UseGuards,
+  Query,
 } from '@nestjs/common';
 import { ActionsService } from './actions.service';
 import { CreateActionDto } from './dto/create-action.dto';
@@ -24,6 +25,7 @@ import {
   ApiInternalServerErrorResponse,
   ApiOkResponse,
 } from '@nestjs/swagger';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Controller('actions')
 @UseInterceptors(CacheInterceptor)
@@ -61,11 +63,12 @@ export class ActionsController {
     description: 'Returns all actions',
   })
   findAll(
-    @Param('limit') limit: number = 10,
-    @Param('page') page: number = 1,
+    @Query() query: PaginationQueryDto,
+
     @Param('search') search: string = '',
   ) {
-    return this.actionsService.findAll(limit, page, search);
+    const { page, limit, sort, order } = query;
+    return this.actionsService.findAll(limit, page, search, sort, order);
   }
 
   @Get(':id')

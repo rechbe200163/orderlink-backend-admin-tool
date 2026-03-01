@@ -6,6 +6,7 @@ import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { OrderDto } from './dto/order.dto';
 import { OrderState } from 'generated/prisma/client';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
+import { SortOrder } from 'src/common/enums/sort-order.enum';
 
 @Injectable()
 export class OrdersService {
@@ -27,6 +28,8 @@ export class OrdersService {
   findAll(
     limit = 10,
     page = 1,
+    sort?: string,
+    order?: SortOrder,
     orderState?: OrderState,
     startDate?: Date,
     endDate?: Date,

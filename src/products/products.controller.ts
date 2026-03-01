@@ -8,7 +8,6 @@ import {
   UseInterceptors,
   UploadedFile,
   ParseUUIDPipe,
-  ParseIntPipe,
   Query,
   Req,
 } from '@nestjs/common';
@@ -30,10 +29,10 @@ import { CreateProductDto } from 'src/products/dto/create-product.dto';
 import { UpdateProductDto } from 'src/products/dto/update-product.dto';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { ProductDto } from './dto/product.dto';
-import { MAX_PAGE_SIZE } from 'lib/constants';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileSizeValidationPipe } from 'lib/pipes/file-size-validation-pipe';
 import { FileTypeValidationPipe } from 'lib/pipes/file-name-validation-pipe.ts';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Controller('products')
 @UseInterceptors(CacheInterceptor)
@@ -42,6 +41,7 @@ import { FileTypeValidationPipe } from 'lib/pipes/file-name-validation-pipe.ts';
   description: 'Internal server error',
 })
 @ApiBearerAuth()
+// @UseGuards(JwtAuthGuard, PermissionsGuard)
 @ApiForbiddenResponse({
   description:
     'Role does not have the permissions to perform this action on the requeseted resource',
@@ -64,23 +64,6 @@ export class ProductsController {
 
   @Get()
   @ApiQuery({
-    name: 'page',
-    description: 'Page number to return',
-    type: Number,
-    default: 1,
-    required: true,
-    example: 1,
-  })
-  @ApiQuery({
-    name: 'limit',
-    description: 'Number of products to return per page',
-    type: Number,
-    default: 10,
-    required: true,
-    maximum: MAX_PAGE_SIZE,
-    example: 10,
-  })
-  @ApiQuery({
     name: 'search',
     description: 'Search term to filter products by name or description',
     required: false,
@@ -101,12 +84,19 @@ export class ProductsController {
     type: PagingResultDto<ProductDto>,
   })
   findAll(
+    @Query() query: PaginationQueryDto,
     @Query('search') search?: string,
     @Query('categoryId') categoryId?: string,
-    @Query('page', ParseIntPipe) page: number = 1,
-    @Query('limit', ParseIntPipe) limit: number = 10,
   ) {
-    return this.productsService.findAll(limit, page, search, categoryId);
+    const { page, limit, sort, order } = query;
+    return this.productsService.findAll(
+      page,
+      limit,
+      sort,
+      order,
+      search,
+      categoryId,
+    );
   }
 
   @Get(':productId')

@@ -34,6 +34,7 @@ import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { CategoryDto } from './dto/category.dto';
 import { MAX_PAGE_SIZE } from 'lib/constants';
 import { UpdateCategoryDto } from './dto/update-category.dto';
+import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Controller('categories')
 @UseInterceptors(CacheInterceptor)
@@ -72,23 +73,6 @@ export class CategoriesController {
     type: PagingResultDto<CategoryDto>,
   })
   @ApiQuery({
-    name: 'limit',
-    description: 'Number of customers to return per page',
-    type: Number,
-    default: 10,
-    required: true,
-    maximum: MAX_PAGE_SIZE,
-    example: 10,
-  })
-  @ApiQuery({
-    name: 'page',
-    description: 'Page number to return',
-    type: Number,
-    default: 1,
-    required: true,
-    example: 1,
-  })
-  @ApiQuery({
     name: 'search',
     description: 'Search term to filter categories by name',
     type: String,
@@ -96,15 +80,12 @@ export class CategoriesController {
     example: 'electronics',
   })
   findAll(
-    @Query('limit', ParseIntPipe) limit: number = 10,
-    @Query('page', ParseIntPipe) page: number = 1,
+    @Query() query: PaginationQueryDto,
+
     @Query('search') search?: string,
   ) {
-    const maxLimit = MAX_PAGE_SIZE; // Define a maximum limit for pagination
-    if (limit > maxLimit) {
-      throw new BadRequestException(`Limit cannot exceed ${maxLimit}`);
-    }
-    return this.categoriesService.findAll(limit, page, search);
+    const { limit, page, sort, order } = query;
+    return this.categoriesService.findAll(limit, page, search, sort, order);
   }
 
   @Get(':categoryId')

@@ -10,6 +10,7 @@ import { ProductDto } from './dto/product.dto';
 import { transformResponse } from 'lib/utils/transform';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PrismaService } from 'src/prisma.service';
+import { SortOrder } from 'src/common/enums/sort-order.enum';
 
 @Injectable()
 export class ProductsRepository {
@@ -60,11 +61,12 @@ export class ProductsRepository {
   // }
 
   async findAll(
-    limit: number = 10,
     page: number = 1,
+    limit: number = 10,
+    sort?: string,
+    order?: SortOrder,
     search?: string,
     categoryId?: string,
-    includeStock?: boolean,
   ): Promise<PagingResultDto<ProductDto>> {
     const [products, meta] = await this.prisma.db.product
       .paginate({
@@ -84,7 +86,7 @@ export class ProductsRepository {
           },
         },
         orderBy: {
-          createdAt: 'desc',
+          [sort || 'createdAt']: order,
         },
       })
       .withPages({
