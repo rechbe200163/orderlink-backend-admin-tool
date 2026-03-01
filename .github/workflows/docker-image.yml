@@ -31,3 +31,8 @@ jobs:
           push: true
           platforms: linux/arm64, linux/amd64
           tags: rechbe200163/orderlink-admintool-backend:latest
+
+      - name: Trigger Coolify Deployment
+        run: |
+          curl --request GET "${{ secrets.COOLIFY_WEBHOOK }}" \
+            --header "Authorization: Bearer ${{ secrets.COOLIFY_TOKEN }}"
