@@ -85,7 +85,7 @@ export class CategoriesController {
     @Query('search') search?: string,
   ) {
     const { limit, page, sort, order } = query;
-    return this.categoriesService.findAll(limit, page, search, sort, order);
+    return this.categoriesService.findAll(limit, page, sort, order, search);
   }
 
   @Get(':categoryId')

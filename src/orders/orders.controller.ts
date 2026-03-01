@@ -32,7 +32,6 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { OrderDto } from './dto/order.dto';
-import { MAX_PAGE_SIZE } from 'lib/constants';
 import { OrderState } from 'generated/prisma/client';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 

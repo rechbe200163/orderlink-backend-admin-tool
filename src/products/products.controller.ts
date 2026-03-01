@@ -49,7 +49,6 @@ import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
   description:
     'Role does not have the permissions to perform this action on the requeseted resource',
 })
-// @UseGuards(JwtAuthGuard, PermissionsGuard)
 export class ProductsController {
   constructor(private readonly productsService: ProductsService) {}
 
@@ -92,6 +91,7 @@ export class ProductsController {
     @Query('categoryId') categoryId?: string,
   ) {
     const { page, limit, sort, order } = query;
+    console.log(query);
     return this.productsService.findAll(
       page,
       limit,

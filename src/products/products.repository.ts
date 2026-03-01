@@ -85,9 +85,7 @@ export class ProductsRepository {
               : undefined,
           },
         },
-        orderBy: {
-          [sort || 'createdAt']: order,
-        },
+        orderBy: sort ? { [sort]: order ? order : 'asc' } : undefined,
       })
       .withPages({
         limit,

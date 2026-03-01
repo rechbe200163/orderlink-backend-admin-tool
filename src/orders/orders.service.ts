@@ -48,6 +48,8 @@ export class OrdersService {
     return this.ordersRepository.findAll(
       limit,
       page,
+      sort,
+      order,
       orderState,
       startDate,
       endDate,

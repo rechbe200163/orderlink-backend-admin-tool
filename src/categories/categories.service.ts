@@ -4,6 +4,7 @@ import { UpdateCategoryDto } from './dto/update-category.dto';
 import { CategoriesRepository } from './categories.repository';
 import { CategoryDto } from './dto/category.dto';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
+import { SortOrder } from 'src/common/enums/sort-order.enum';
 
 @Injectable()
 export class CategoriesService {
@@ -19,7 +20,7 @@ export class CategoriesService {
     limit: number = 10,
     page: number = 1,
     sort?: string,
-    order?: string,
+    order?: SortOrder,
     search?: string,
   ): Promise<PagingResultDto<CategoryDto>> {
     return this.categoriesRepository.findAll(limit, page, sort, order, search);

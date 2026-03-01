@@ -10,6 +10,7 @@ import { CreateCategoryDto } from './dto/create-category.dto';
 import { isNoChange } from 'lib/utils/isNoChange';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PrismaService } from 'src/prisma.service';
+import { SortOrder } from 'src/common/enums/sort-order.enum';
 
 @Injectable()
 export class CategoriesRepository {
@@ -22,7 +23,7 @@ export class CategoriesRepository {
     limit: number = 10,
     page: number = 1,
     sort?: string,
-    order?: string,
+    order?: SortOrder,
     search?: string,
   ): Promise<PagingResultDto<CategoryDto>> {
     const [categories, meta] = await this.prisma.db.category
@@ -31,7 +32,7 @@ export class CategoriesRepository {
           name: search ? { contains: search } : undefined,
         },
         orderBy: {
-          [sort || 'createdAt']: order,
+          [sort!]: order || 'desc',
         },
       })
       .withPages({

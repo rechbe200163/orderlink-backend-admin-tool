@@ -14,6 +14,7 @@ import { isNoChange } from 'lib/utils/isNoChange';
 import { OrderState } from 'generated/prisma/client';
 import { ProductDto } from 'src/products/dto/product.dto';
 import { PrismaService } from 'src/prisma.service';
+import { SortOrder } from 'src/common/enums/sort-order.enum';
 
 @Injectable()
 export class OrdersRepository {
@@ -39,6 +40,8 @@ export class OrdersRepository {
   async findAll(
     limit = 10,
     page = 1,
+    sort?: string,
+    order?: SortOrder,
     orderState?: OrderState,
     startDate?: Date,
     endDate?: Date,
@@ -93,7 +96,11 @@ export class OrdersRepository {
           },
         },
 
-        orderBy: { orderDate: 'desc' },
+        orderBy: sort
+          ? {
+              [sort]: order ? order : 'asc',
+            }
+          : undefined,
       })
       .withPages({
         limit,
