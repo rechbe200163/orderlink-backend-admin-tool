@@ -65,12 +65,20 @@ export class DataAnalysisController {
       'Whether to include days with zero orders in the analysis (only applies if last_days is set)',
     example: false,
   })
+  @ApiQuery({
+    name: 'percentage',
+    required: false,
+    description:
+      'Whether to return the order amounts as percentages of the total (only applies if last_days is set)',
+    example: false,
+  })
   async get_order_amount(
     @Request() req,
     @Query('last_days') last_days: number = 0,
     @Query('month') month: boolean = false,
     @Query('year') year: boolean = false,
     @Query('show_zeros') show_zeros: boolean = false,
+    @Query('percentage') percentage: boolean = false,
   ) {
     const { email } = req.user;
     const token = await this.tokenService.getToken(email);
@@ -80,6 +88,7 @@ export class DataAnalysisController {
       month,
       year,
       show_zeros,
+      percentage,
     );
   }
 
@@ -134,45 +143,27 @@ export class DataAnalysisController {
   @ApiServiceUnavailableResponse({
     description: 'Data analysis service temporarily unavailable',
   })
-  @ApiQuery({
-    name: 'one_day',
-    required: true,
-    description: 'Whether to include the previous day in the analysis',
-    example: true,
-  })
-  @ApiQuery({
-    name: 'seven_days',
-    required: true,
-    description: 'Whether to include the last 7 days in the analysis',
-    example: true,
-  })
-  @ApiQuery({
-    name: 'month',
-    required: false,
-    description: 'Whether to include the current month in the analysis',
-    example: true,
-  })
-  @ApiQuery({
-    name: 'year',
-    required: false,
-    description: 'Whether to include the current year in the analysis',
-    example: true,
-  })
   async get_customers_growth(
     @Request() req,
-    @Query('one_day') one_day: boolean = false,
-    @Query('seven_days') seven_days: boolean = false,
-    @Query('month') month: boolean = false,
-    @Query('year') year: boolean = false,
   ) {
     const { email } = req.user;
     const token = await this.tokenService.getToken(email);
     return this.dataAnalysisService.get_customers_growth(
-      token,
-      one_day,
-      seven_days,
-      month,
-      year,
+      token
+    );
+  }
+
+  @Get('customers-growth-month')
+  @ApiServiceUnavailableResponse({
+    description: 'Data analysis service temporarily unavailable',
+  })
+  async get_customers_growth_month(
+    @Request() req,
+  ) {
+    const { email } = req.user;
+    const token = await this.tokenService.getToken(email);
+    return this.dataAnalysisService.get_customers_growth_month(
+      token
     );
   }
 
@@ -180,45 +171,27 @@ export class DataAnalysisController {
   @ApiServiceUnavailableResponse({
     description: 'Data analysis service temporarily unavailable',
   })
-  @ApiQuery({
-    name: 'one_day',
-    required: true,
-    description: 'Whether to include the previous day in the analysis',
-    example: true,
-  })
-  @ApiQuery({
-    name: 'seven_days',
-    required: true,
-    description: 'Whether to include the last 7 days in the analysis',
-    example: true,
-  })
-  @ApiQuery({
-    name: 'month',
-    required: false,
-    description: 'Whether to include the current month in the analysis',
-    example: true,
-  })
-  @ApiQuery({
-    name: 'year',
-    required: false,
-    description: 'Whether to include the current year in the analysis',
-    example: true,
-  })
   async get_orders_growth(
-    @Request() req,
-    @Query('one_day') one_day: boolean = false,
-    @Query('seven_days') seven_days: boolean = false,
-    @Query('month') month: boolean = false,
-    @Query('year') year: boolean = false,
+    @Request() req
   ) {
     const { email } = req.user;
     const token = await this.tokenService.getToken(email);
     return this.dataAnalysisService.get_orders_growth(
-      token,
-      one_day,
-      seven_days,
-      month,
-      year,
+      token
+    );
+  }
+
+  @Get('orders-growth-month')
+  @ApiServiceUnavailableResponse({
+    description: 'Data analysis service temporarily unavailable',
+  })
+  async get_orders_growth_month(
+    @Request() req
+  ) {
+    const { email } = req.user;
+    const token = await this.tokenService.getToken(email);
+    return this.dataAnalysisService.get_orders_growth_month(
+      token
     );
   }
 

@@ -44,10 +44,11 @@ export class DataAnalysisService {
     month = false,
     year = false,
     show_zeros = false,
+    percentage = false,
   ) {
     return this.get(
       '/descriptive/orders-amount/',
-      { last_days, month, year, showzeros: show_zeros, token },
+      { last_days, month, year, showzeros: show_zeros, percentage, token },
       'Failed to fetch order amount',
     );
   }
@@ -68,29 +69,37 @@ export class DataAnalysisService {
 
   get_customers_growth(
     token: string,
-    one_day = false,
-    seven_days = false,
-    month = false,
-    year = false,
   ) {
     return this.get(
       '/predictive/customers-growth/',
-      { one_day, seven_days, month, year, token },
+      { token },
       'Failed to fetch customers growth',
     );
   }
 
+  get_customers_growth_month(token: string) {
+    return this.get(
+      '/predictive/customers-growth/month',
+      { token },
+      'Failed to fetch customers growth month',
+    );
+  }
+
   get_orders_growth(
-    token: string,
-    one_day = false,
-    seven_days = false,
-    month = false,
-    year = false,
+    token: string
   ) {
     return this.get(
       '/predictive/orders-growth/',
-      { one_day, seven_days, month, year, token },
+      { token },
       'Failed to fetch orders growth',
+    );
+  }
+
+  get_orders_growth_month(token: string) {
+    return this.get(
+      '/predictive/orders-growth/month',
+      { token },
+      'Failed to fetch orders growth month',
     );
   }
 
