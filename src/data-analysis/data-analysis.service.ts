@@ -123,4 +123,19 @@ export class DataAnalysisService {
       'Failed to fetch products amount',
     );
   }
+
+  get_customers_signup(
+    token: string,
+    last_days = 0,
+    month = false,
+    year = false,
+    show_zeros = false,
+    percentage = false,
+  ) {
+    return this.get(
+      '/descriptive/customers-signup/',
+      { last_days, month, year, show_zeros, percentage, token },
+      'Failed to fetch customers signup',
+    );
+  }
 }

@@ -245,4 +245,59 @@ export class DataAnalysisController {
 
   }
 
+  @Get('customers-signup')
+  @ApiServiceUnavailableResponse({
+    description: 'Data analysis service temporarily unavailable',
+  })
+  @ApiQuery({
+    name: 'last_days',
+    required: false,
+    description: 'Number of last days to include in the analysis',
+    example: 0,
+  })
+  @ApiQuery({
+    name: 'month',
+    required: false,
+    description: 'Whether to include the current month in the analysis',
+    example: true,
+  })
+  @ApiQuery({
+    name: 'year',
+    required: false,
+    description: 'Whether to include the current year in the analysis',
+    example: true,
+  })
+  @ApiQuery({
+    name: 'show_zeros',
+    required: false,
+    description:
+      'Whether to include days with zero signups in the analysis (only applies if last_days is set)',
+    example: false,
+  })
+  @ApiQuery({
+    name: 'percentage',
+    required: false,
+    description:
+      'Whether to return the signup counts as percentages of the total (only applies if last_days is set)',
+    example: false,
+  })
+  async get_customers_signup(
+    @Request() req,
+    @Query('last_days') last_days: number = 0,
+    @Query('month') month: boolean = true,
+    @Query('year') year: boolean = true,
+    @Query('show_zeros') show_zeros: boolean = false,
+    @Query('percentage') percentage: boolean = false,
+  ) {
+    const { email } = req.user;
+    const token = await this.tokenService.getToken(email);
+    return this.dataAnalysisService.get_customers_signup(
+      token,
+      last_days,
+      month,
+      year,
+      show_zeros,
+      percentage,
+    );
+  }
 }
