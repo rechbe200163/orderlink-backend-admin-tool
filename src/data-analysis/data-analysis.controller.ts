@@ -59,7 +59,7 @@ export class DataAnalysisController {
     example: true,
   })
   @ApiQuery({
-    name: 'show_zeros',
+    name: 'showzeros',
     required: false,
     description:
       'Whether to include days with zero orders in the analysis (only applies if last_days is set)',
@@ -77,7 +77,7 @@ export class DataAnalysisController {
     @Query('last_days') last_days: number = 0,
     @Query('month') month: boolean = false,
     @Query('year') year: boolean = false,
-    @Query('show_zeros') show_zeros: boolean = false,
+    @Query('showzeros') showzeros: boolean = false,
     @Query('percentage') percentage: boolean = false,
   ) {
     const { email } = req.user;
@@ -87,7 +87,7 @@ export class DataAnalysisController {
       last_days,
       month,
       year,
-      show_zeros,
+      showzeros,
       percentage,
     );
   }
@@ -268,7 +268,7 @@ export class DataAnalysisController {
     example: true,
   })
   @ApiQuery({
-    name: 'show_zeros',
+    name: 'showzeros',
     required: false,
     description:
       'Whether to include days with zero signups in the analysis (only applies if last_days is set)',
@@ -286,7 +286,7 @@ export class DataAnalysisController {
     @Query('last_days') last_days: number = 0,
     @Query('month') month: boolean = true,
     @Query('year') year: boolean = true,
-    @Query('show_zeros') show_zeros: boolean = false,
+    @Query('showzeros') showzeros: boolean = false,
     @Query('percentage') percentage: boolean = false,
   ) {
     const { email } = req.user;
@@ -296,7 +296,7 @@ export class DataAnalysisController {
       last_days,
       month,
       year,
-      show_zeros,
+      showzeros,
       percentage,
     );
   }
@@ -324,7 +324,7 @@ export class DataAnalysisController {
     example: true,
   })
   @ApiQuery({
-    name: 'show_zeros',
+    name: 'showzeros',
     required: false,
     description:
       'Whether to include days with zero invoice amounts in the analysis (only applies if last_days is set)',
@@ -342,7 +342,7 @@ export class DataAnalysisController {
     @Query('last_days') last_days: number = 0,
     @Query('month') month: boolean = true,
     @Query('year') year: boolean = true,
-    @Query('show_zeros') show_zeros: boolean = false,
+    @Query('showzeros') showzeros: boolean = false,
     @Query('percentage') percentage: boolean = false,
   ) {
     const { email } = req.user;
@@ -352,7 +352,7 @@ export class DataAnalysisController {
       last_days,
       month,
       year,
-      show_zeros,
+      showzeros,
       percentage,
     );
   }

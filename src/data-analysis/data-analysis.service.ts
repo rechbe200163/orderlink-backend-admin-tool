@@ -43,12 +43,12 @@ export class DataAnalysisService {
     last_days = 0,
     month = false,
     year = false,
-    show_zeros = false,
+    showzeros = false,
     percentage = false,
   ) {
     return this.get(
       '/descriptive/orders-amount/',
-      { last_days, month, year, showzeros: show_zeros, percentage, token },
+      { last_days, month, year, showzeros, percentage, token },
       'Failed to fetch order amount',
     );
   }
@@ -129,12 +129,12 @@ export class DataAnalysisService {
     last_days = 0,
     month = false,
     year = false,
-    show_zeros = false,
+    showzeros = false,
     percentage = false,
   ) {
     return this.get(
       '/descriptive/customers-signup/',
-      { last_days, month, year, show_zeros, percentage, token },
+      { last_days, month, year, showzeros, percentage, token },
       'Failed to fetch customers signup',
     );
   }
@@ -144,12 +144,12 @@ export class DataAnalysisService {
     last_days = 0,
     month = false,
     year = false,
-    show_zeros = false,
+    showzeros = false,
     percentage = false,
   ) {
     return this.get(
       '/descriptive/invoices-amount/',
-      { last_days, month, year, show_zeros, percentage, token },
+      { last_days, month, year, showzeros, percentage, token },
       'Failed to fetch invoices amount',
     );
   }
