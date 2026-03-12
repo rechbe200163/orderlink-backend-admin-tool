@@ -138,4 +138,19 @@ export class DataAnalysisService {
       'Failed to fetch customers signup',
     );
   }
+
+  get_invoices_amount(
+    token: string,
+    last_days = 0,
+    month = false,
+    year = false,
+    show_zeros = false,
+    percentage = false,
+  ) {
+    return this.get(
+      '/descriptive/invoices-amount/',
+      { last_days, month, year, show_zeros, percentage, token },
+      'Failed to fetch invoices amount',
+    );
+  }
 }
