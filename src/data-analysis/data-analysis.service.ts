@@ -1,4 +1,11 @@
-import { Injectable } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  InternalServerErrorException,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import axios, { AxiosInstance } from 'axios';
 
@@ -33,8 +40,24 @@ export class DataAnalysisService {
       const res = await this.http.get<T>(path, { params });
       return res.data;
     } catch (err) {
-      console.error(errorMessage, err);
-      throw new Error(errorMessage);
+      if (axios.isAxiosError(err) && err.response) {
+        const status = err.response.status;
+
+        switch (status) {
+          case 400:
+            throw new BadRequestException(err.response.data);
+          case 401:
+            throw new UnauthorizedException();
+          case 403:
+            throw new ForbiddenException();
+          case 404:
+            throw new NotFoundException();
+          case 500:
+            throw new InternalServerErrorException();
+        }
+      }
+
+      throw new InternalServerErrorException(errorMessage);
     }
   }
 
@@ -52,18 +75,26 @@ export class DataAnalysisService {
     );
   }
 
-  get_products_mostly_bought(
+  async get_products_mostly_bought(
     token: string,
     last_days = 0,
     month = false,
     year = false,
     limit = 5,
   ) {
-    return this.get(
+    console.log('get_products_mostly_bought called with:', {
+      token,
+      last_days,
+      month,
+      year,
+      limit,
+    });
+    const data = await this.get(
       '/descriptive/products-mostly-bought/',
       { last_days, month, year, limit, token },
       'Failed to fetch mostly bought products',
     );
+    return data;
   }
 
   get_customers_growth(
