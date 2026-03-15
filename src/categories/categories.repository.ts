@@ -31,9 +31,7 @@ export class CategoriesRepository {
         where: {
           name: search ? { contains: search } : undefined,
         },
-        orderBy: {
-          [sort!]: order || 'desc',
-        },
+        orderBy: sort ? { [sort]: order ? order : 'asc' } : undefined,
       })
       .withPages({
         limit,

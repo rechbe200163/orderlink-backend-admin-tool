@@ -9,7 +9,6 @@ import {
   UploadedFile,
   ParseUUIDPipe,
   Query,
-  Req,
   UseGuards,
 } from '@nestjs/common';
 import { ProductsService } from './products.service';
@@ -54,13 +53,14 @@ export class ProductsController {
 
   @ApiConsumes('multipart/form-data')
   @Post()
-  @UseInterceptors(FileInterceptor('productImage'))
   async create(
-    @Req() req: Request,
-    @UploadedFile(new FileSizeValidationPipe(), new FileTypeValidationPipe())
     productImage: Express.Multer.File,
     @Body() createProductDto: CreateProductDto,
   ) {
+    console.log(
+      'Received request to create product with data:',
+      createProductDto,
+    );
     return this.productsService.create(createProductDto, productImage);
   }
 
