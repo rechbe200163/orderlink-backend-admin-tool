@@ -61,6 +61,9 @@ export class ProductsController {
     productImage: Express.Multer.File,
     @Body() createProductDto: CreateProductDto,
   ) {
+    console.log('DTO:', createProductDto);
+    console.log('FILE:', productImage);
+
     return this.productsService.create(createProductDto, productImage);
   }
 

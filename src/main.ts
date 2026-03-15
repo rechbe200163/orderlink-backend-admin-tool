@@ -5,13 +5,17 @@ import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';
 import { apiReference } from '@scalar/nestjs-api-reference';
 import type { Request, Response } from 'express';
+import morgan from 'morgan';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   // CORS Configuration
   app.enableCors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || ['http://localhost:3000', 'http://localhost:5173'],
+    origin: process.env.ALLOWED_ORIGINS?.split(',') || [
+      'http://localhost:3000',
+      'http://localhost:5173',
+    ],
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
     allowedHeaders: ['Content-Type', 'Authorization', 'Accept'],
@@ -44,6 +48,9 @@ async function bootstrap() {
       theme: 'default', // 'default' | 'moon' | 'purple' | 'solarized' | 'alternate'
     }),
   );
+
+  //log every request to the console
+  app.use(morgan('dev'));
 
   await app.listen(
     process.env.PORT ? Number(process.env.PORT) : 3001,

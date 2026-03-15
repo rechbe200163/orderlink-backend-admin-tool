@@ -1,21 +1,22 @@
-import {
-  PipeTransform,
-  Injectable,
-  ArgumentMetadata,
-  BadRequestException,
-} from '@nestjs/common';
+import { PipeTransform, Injectable, BadRequestException } from '@nestjs/common';
 
 @Injectable()
 export class FileTypeValidationPipe implements PipeTransform {
-  transform(value: any, metadata: ArgumentMetadata) {
-    // "value" is an object containing the file's attributes and metadata
-    const supportedMimeTypes = ['image/jpeg', 'image/png', 'image/jpg'];
+  transform(value: Express.Multer.File) {
+    if (!value) {
+      throw new BadRequestException('File is required');
+    }
+
+    const supportedMimeTypes = ['image/jpeg', 'image/png', 'image/webp'];
 
     const isValid = supportedMimeTypes.includes(value.mimetype);
 
     if (!isValid) {
-      throw new BadRequestException('Invalid file type');
+      throw new BadRequestException(
+        'Invalid file type. Only JPEG, PNG and WEBP are allowed.',
+      );
     }
+
     return value;
   }
 }
