@@ -110,7 +110,7 @@ export class DataAnalysisService {
 
   get_customers_growth_month(token: string) {
     return this.get(
-      '/predictive/customers-growth/month',
+      '/predictive/customers-growth/month/',
       { token },
       'Failed to fetch customers growth month',
     );
@@ -128,7 +128,7 @@ export class DataAnalysisService {
 
   get_orders_growth_month(token: string) {
     return this.get(
-      '/predictive/orders-growth/month',
+      '/predictive/orders-growth/month/',
       { token },
       'Failed to fetch orders growth month',
     );
