@@ -28,7 +28,7 @@ export class PaginationQueryDto {
 
   // bewusst generisch: Feature muss whitelisten
   @ApiPropertyOptional({
-    example: 'name',
+    example: 'lastName',
     description: 'Sort field (feature-specific)',
   })
   @IsString()

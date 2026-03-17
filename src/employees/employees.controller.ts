@@ -5,15 +5,13 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
   UseInterceptors,
   UseGuards,
   ParseUUIDPipe,
   Query,
-  BadRequestException,
   Request,
   ParseBoolPipe,
-  ParseIntPipe,
+  DefaultValuePipe,
 } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
 import { CacheInterceptor } from '@nestjs/cache-manager';
@@ -31,7 +29,6 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { CreateEmployeesDto } from 'prisma/src/generated/dto/create-employees.dto';
 import { UpdateEmployeesDto } from 'prisma/src/generated/dto/update-employees.dto';
-import { MAX_PAGE_SIZE } from 'lib/constants';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { MaxEmployeeGuard } from 'src/auth/guards/max-employee.guard';
 import { EmployeesDto } from './dto/employees.dto';
@@ -84,17 +81,6 @@ export class EmployeesController {
     example: 'john',
   })
   @ApiQuery({
-    name: 'permissions',
-    description: 'Permissions to filter employees by',
-    type: Object,
-    required: false,
-    example: {
-      resource: Resources.EMPLOYEE,
-      actionId: 'uuid-of-action',
-      allowed: true,
-    },
-  })
-  @ApiQuery({
     name: 'includeRole',
     description: 'Whether to include role information in the response',
     type: Boolean,
@@ -111,11 +97,12 @@ export class EmployeesController {
   findAll(
     @Request() req,
     @Query() query: PaginationQueryDto,
-    @Query('includeRole', ParseBoolPipe) includeRole: boolean = false,
-    @Query('search') search?: string,
+    @Query('includeRole', new DefaultValuePipe(false), ParseBoolPipe)
+    includeRole: boolean = false,
+    @Query('search')
+    search?: string,
   ) {
     const { page, limit, sort, order } = query;
-    console.log('includeRole:', includeRole);
     const { employeeId } = req.user;
     return this.employeesService.findAll(
       page,

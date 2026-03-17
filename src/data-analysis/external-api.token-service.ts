@@ -35,8 +35,8 @@ export class DataAnalysisTokenServiceService {
 
     try {
       const response = await axios.get(url);
+      console.log('DTA API response for', email, ':', response.data);
 
-      // <- hier an deine echte Response anpassen
       const token =
         typeof response.data === 'string'
           ? response.data

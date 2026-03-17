@@ -34,7 +34,7 @@ export class RolesRepository {
 
   async findById(roleId: string) {
     const role = await this.prisma.db.role.findUnique({
-      where: { id: roleId },
+      where: { roleId },
     });
     if (!role) {
       throw new NotFoundException(`Role not found`);

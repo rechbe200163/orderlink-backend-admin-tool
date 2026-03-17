@@ -1,15 +1,300 @@
-// This is your Prisma schema file with @nestjsDto annotations for DTO generation
-
-// Prisma Client Generator
-
 generator client {
   provider      = "prisma-client-js"
+  output        = "../generated/prisma/client"
   binaryTargets = ["native", "debian-openssl-3.0.x", "linux-arm64-openssl-3.0.x"]
-  output = "../generated/prisma/client"
 }
 
 datasource db {
   provider = "postgresql"
+}
+
+model Customer {
+  customerId        String            @id @default(uuid()) @db.Uuid
+  customerReference Int               @unique
+  email             String            @unique
+  phoneNumber       String            @db.VarChar(15)
+  password          String            @db.VarChar(255)
+  firstName         String?           @db.VarChar(255)
+  lastName          String            @db.VarChar(255)
+  companyNumber     String?           @db.VarChar(255)
+  modifiedAt        DateTime?         @updatedAt
+  deleted           Boolean           @default(false)
+  signedUp          DateTime          @default(now())
+  avatarPath        String?           @db.VarChar(255)
+  addressId         String            @db.Uuid
+  businessSector    BusinessSector?
+  cart              Cart?
+  customerHistory   CustomerHistory[]
+  address           Address           @relation(fields: [addressId], references: [addressId])
+  orders            Order[]
+
+  @@map("customers")
+}
+
+model CustomerHistory {
+  historyId         String          @id @default(uuid()) @db.Uuid
+  customerReference Int
+  email             String
+  phoneNumber       String          @db.VarChar(15)
+  password          String          @db.VarChar(255)
+  firstName         String?         @db.VarChar(255)
+  lastName          String          @db.VarChar(255)
+  companyNumber     String?         @db.VarChar(255)
+  modifiedAt        DateTime?       @updatedAt
+  deleted           Boolean         @default(false)
+  signedUp          DateTime        @default(now())
+  avatarPath        String?         @db.VarChar(255)
+  addressId         String          @db.Uuid
+  businessSector    BusinessSector?
+  customer          Customer        @relation(fields: [customerReference], references: [customerReference])
+
+  @@map("customerHistory")
+}
+
+model Address {
+  addressId    String       @id @default(uuid()) @db.Uuid
+  city         String       @db.VarChar(100)
+  country      String       @db.VarChar(40)
+  postCode     String       @db.VarChar(10)
+  state        String       @db.VarChar(40)
+  streetName   String       @db.VarChar(255)
+  streetNumber String       @db.VarChar(30)
+  modifiedAt   DateTime?    @updatedAt
+  deleted      Boolean      @default(false)
+  customers    Customer[]
+  siteConfig   SiteConfig[]
+
+  @@map("addresses")
+}
+
+model Cart {
+  cartId            String           @id @default(uuid()) @db.Uuid
+  customerReference Int?             @unique
+  customer          Customer?        @relation(fields: [customerReference], references: [customerReference])
+  products          CartOnProducts[]
+
+  @@map("carts")
+}
+
+model Product {
+  productId   String                 @id @default(uuid()) @db.Uuid
+  name        String                 @db.VarChar(255)
+  price       Int
+  description String                 @db.VarChar(255)
+  stock       Int
+  imagePath   String?                @db.VarChar(255)
+  createdAt   DateTime               @default(now())
+  modifiedAt  DateTime?              @updatedAt
+  deleted     Boolean                @default(false)
+  carts       CartOnProducts[]
+  categories  CategoriesOnProducts[]
+  orders      OrderOnProducts[]
+
+  @@map("products")
+}
+
+model Category {
+  categoryId String                 @id @default(uuid()) @db.Uuid
+  name       String                 @unique @db.VarChar(255)
+  imagePath  String?                @db.VarChar(255)
+  deleted    Boolean                @default(false)
+  products   CategoriesOnProducts[]
+
+  @@map("categories")
+}
+
+model Order {
+  orderId           String            @id @default(uuid()) @db.Uuid
+  customerReference Int
+  orderDate         DateTime          @default(now())
+  deliveryDate      DateTime?
+  deleted           Boolean           @default(false)
+  orderState        OrderState        @default(ORDER_PLACED)
+  selfCollect       Boolean           @default(false)
+  invoice           Invoice?
+  customer          Customer          @relation(fields: [customerReference], references: [customerReference])
+  products          OrderOnProducts[]
+  route             RoutesOnOrders[]
+
+  @@map("orders")
+}
+
+model Invoice {
+  invoiceId     String    @id @default(uuid()) @db.Uuid
+  orderId       String    @unique @db.Uuid
+  invoiceAmount Int
+  paymentDate   DateTime? @default(now())
+  pdfUrl        String    @db.VarChar(255)
+  deleted       Boolean   @default(false)
+  order         Order     @relation(fields: [orderId], references: [orderId])
+
+  @@map("invoices")
+}
+
+model Route {
+  routeId String           @id @default(uuid()) @db.Uuid
+  name    String           @db.VarChar(255)
+  deleted Boolean          @default(false)
+  order   RoutesOnOrders[]
+
+  @@map("routes")
+}
+
+model Employees {
+  employeeId String  @id @default(uuid()) @db.Uuid
+  email      String  @unique @db.VarChar(255)
+  password   String  @db.VarChar(255)
+  firstName  String  @db.VarChar(255)
+  lastName   String  @db.VarChar(255)
+  deleted    Boolean @default(false)
+  superAdmin Boolean @default(false)
+  roleId     String  @db.Uuid
+  otp        Otp[]
+  role       Role    @relation(fields: [roleId], references: [roleId])
+
+  @@index([email], map: "employee_email_index")
+  @@index([lastName], map: "employee_last_name_index")
+  @@map("employees")
+}
+
+model SiteConfig {
+  siteConfigId     String    @id @default(uuid()) @db.Uuid
+  companyName      String    @db.VarChar(255)
+  logoPath         String    @db.VarChar(255)
+  email            String    @unique @db.VarChar(255)
+  phoneNumber      String    @db.VarChar(15)
+  iban             String    @db.VarChar(40)
+  companyNumber    String    @db.VarChar(255)
+  addressId        String    @db.Uuid
+  modifiedAt       DateTime? @updatedAt
+  isPremium        Boolean   @default(false)
+  deleted          Boolean   @default(false)
+  stripeCustomerId String?   @db.VarChar(255)
+  stripeAccountId  String?   @db.VarChar(255)
+  stripeConfigured Boolean   @default(false)
+  address          Address   @relation(fields: [addressId], references: [addressId])
+
+  @@map("siteConfigs")
+}
+
+model CategoriesOnProducts {
+  productId  String   @db.Uuid
+  categoryId String   @db.Uuid
+  category   Category @relation(fields: [categoryId], references: [categoryId])
+  product    Product  @relation(fields: [productId], references: [productId])
+
+  @@id([productId, categoryId])
+  @@map("categoriesProducts")
+}
+
+model CartOnProducts {
+  cartId    String  @db.Uuid
+  productId String  @db.Uuid
+  quantity  Int     @default(1) @map("productAmount")
+  cart      Cart    @relation(fields: [cartId], references: [cartId])
+  product   Product @relation(fields: [productId], references: [productId])
+
+  @@id([cartId, productId])
+  @@map("cartsProducts")
+}
+
+model OrderOnProducts {
+  orderId       String   @db.Uuid
+  productId     String   @db.Uuid
+  orderDate     DateTime @default(now())
+  productAmount Int      @default(1)
+  order         Order    @relation(fields: [orderId], references: [orderId])
+  product       Product  @relation(fields: [productId], references: [productId])
+
+  @@id([orderId, productId])
+  @@map("ordersProducts")
+}
+
+model RoutesOnOrders {
+  routeId String @db.Uuid
+  orderId String @db.Uuid
+  order   Order  @relation(fields: [orderId], references: [orderId])
+  route   Route  @relation(fields: [routeId], references: [routeId])
+
+  @@id([routeId, orderId])
+  @@map("routesOrders")
+}
+
+model EnabledModule {
+  id         String     @id @default(uuid()) @db.Uuid
+  moduleName ModuleEnum @unique
+  enabledAt  DateTime   @default(now()) @db.Timestamptz(6)
+  Module     Module     @relation(fields: [moduleName], references: [name], onDelete: Cascade)
+}
+
+model Module {
+  name          ModuleEnum     @id
+  description   String?
+  priceCents    Int            @default(0)
+  createdAt     DateTime       @default(now()) @db.Timestamptz(6)
+  modifiedAt    DateTime       @updatedAt @db.Timestamptz(6)
+  EnabledModule EnabledModule?
+}
+
+model Otp {
+  id         String    @id @default(uuid()) @db.Uuid
+  code       Int       @unique
+  employeeId String    @db.Uuid
+  expiresAt  DateTime
+  used       Boolean   @default(false)
+  createdAt  DateTime  @default(now())
+  employees  Employees @relation(fields: [employeeId], references: [employeeId])
+
+  @@index([code, employeeId])
+}
+
+model Role {
+  roleId      String       @id @db.Uuid @default(uuid())
+  name        String       @unique @db.VarChar(255)
+  description String?      @db.VarChar(255)
+  deleted     Boolean      @default(false)
+  employees   Employees[]
+  permissions Permission[]
+
+  @@map("roles")
+}
+
+model Resource {
+  id          String       @id @default(uuid()) @db.Uuid
+  key         String       @unique @db.VarChar(255)
+  description String?      @db.VarChar(255)
+  deleted     Boolean      @default(false)
+  permissions Permission[]
+
+  @@map("resources")
+}
+
+model Action {
+  id          String       @id @default(uuid()) @db.Uuid
+  key         String       @unique @db.VarChar(50)
+  description String?      @db.VarChar(255)
+  deleted     Boolean      @default(false)
+  permissions Permission[]
+
+  @@map("actions")
+}
+
+model Permission {
+  id         String   @id @default(uuid()) @db.Uuid
+  roleId     String   @db.Uuid
+  resourceId String   @db.Uuid
+  actionId   String   @db.Uuid
+  allowed    Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  action     Action   @relation(fields: [actionId], references: [id], onDelete: Cascade)
+  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
+  role       Role     @relation(fields: [roleId], references: [roleId], onDelete: Cascade)
+
+  @@unique([roleId, resourceId, actionId])
+  @@index([roleId])
+  @@index([resourceId])
+  @@index([actionId])
+  @@map("permissions")
 }
 
 enum OrderState {
@@ -36,319 +321,39 @@ enum BusinessSector {
   TRANSPORTATION
 }
 
-model Customer {
-  customerId        String    @id @default(uuid()) @db.Uuid
-  customerReference Int       @unique() 
-  email             String    @unique
-  phoneNumber       String    @db.VarChar(15)
-  password          String    @db.VarChar(255)
-  firstName         String?   @db.VarChar(255)
-  lastName          String    @db.VarChar(255)
-  companyNumber     String?   @db.VarChar(255)
-  modifiedAt        DateTime? @default(dbgenerated("null")) @updatedAt
-  deleted           Boolean   @default(false)
-  signedUp          DateTime  @default(now())
-  avatarPath        String?   @db.VarChar(255)
-  addressId         String    @db.Uuid
-
-  businessSector BusinessSector?
-  address        Address           @relation(fields: [addressId], references: [addressId])
-  cart           Cart?
-  orders         Order[]
-  customerHistory        CustomerHistory[]
-
-  @@map("customers")
-}
-
-model CustomerHistory {
-  historyId         String    @id @default(uuid()) @db.Uuid
-  customerReference Int        
-  email             String
-  phoneNumber       String    @db.VarChar(15)
-  password          String    @db.VarChar(255)
-  firstName         String?   @db.VarChar(255)
-  lastName          String    @db.VarChar(255)
-  companyNumber     String?   @db.VarChar(255)
-  modifiedAt        DateTime? @default(dbgenerated("null")) @updatedAt
-  deleted           Boolean   @default(false)
-  signedUp          DateTime  @default(now())
-  avatarPath        String?   @db.VarChar(255)
-  addressId         String    @db.Uuid
-
-  businessSector BusinessSector?
-  customer       Customer        @relation(fields: [customerReference], references: [customerReference])
-
-  @@map("customerHistory")
-}
-
-model Address {
-  addressId    String    @id @default(uuid()) @db.Uuid // Unique ID for easier referencing
-  city         String    @db.VarChar(100)
-  country      String    @db.VarChar(40)
-  postCode     String    @db.VarChar(10)
-  state        String    @db.VarChar(40)
-  streetName   String    @db.VarChar(255)
-  streetNumber String    @db.VarChar(30)
-  modifiedAt   DateTime? @default(dbgenerated("null")) @updatedAt
-  deleted      Boolean   @default(false)
-
-  customers       Customer[]
-  siteConfig      SiteConfig[]
-
-  @@map("addresses") // Removed unique constraint
-}
-
-model Cart {
-  cartId            String           @id @default(uuid()) @db.Uuid
-  customerReference Int?             @unique
-  customer          Customer?        @relation(fields: [customerReference], references: [customerReference])
-  products          CartOnProducts[]
-
-  @@map("carts")
-}
-
-model Product {
-  productId   String    @id @default(uuid()) @db.Uuid
-  name        String    @db.VarChar(255)
-  price       Int //price in cents 
-  description String    @db.VarChar(255)
-  stock       Int //amount in stock 
-  imagePath   String?   @db.VarChar(255)
-  createdAt   DateTime  @default(now())
-  modifiedAt  DateTime? @default(dbgenerated("null")) @updatedAt
-  deleted     Boolean   @default(false)
-
-  categories CategoriesOnProducts[]
-  carts      CartOnProducts[]
-  orders     OrderOnProducts[]
-
-  @@map("products")
-}
-
-model Category {
-  categoryId String  @id @default(uuid()) @db.Uuid
-  name       String  @unique @db.VarChar(255)
-  imagePath  String? @db.VarChar(255) // probably should be paths for multiple images
-  deleted    Boolean @default(false)
-
-  products CategoriesOnProducts[]
-
-  @@map("categories")
-}
-
-model Order {
-  orderId           String     @id @default(uuid()) @db.Uuid
-  customerReference Int        
-  orderDate         DateTime   @default(now())
-  deliveryDate      DateTime?
-  deleted           Boolean    @default(false)
-  orderState        OrderState @default(ORDER_PLACED)
-  selfCollect       Boolean    @default(false)
-
-  customer Customer          @relation(fields: [customerReference], references: [customerReference])
-  products OrderOnProducts[]
-  invoice  Invoice?
-  route    RoutesOnOrders[]
-  // history  RouteOrderHistory[]
-
-  @@map("orders")
-}
-
-model Invoice {
-  invoiceId     String    @id @default(uuid()) @db.Uuid
-  orderId       String    @unique @db.Uuid
-  invoiceAmount Int //price in cents
-  paymentDate   DateTime? @default(now())
-  pdfUrl        String    @db.VarChar(255)
-  deleted       Boolean   @default(false)
-
-  order Order @relation(fields: [orderId], references: [orderId])
-
-  @@map("invoices")
-}
-
-model Route {
-  routeId String           @id @default(uuid()) @db.Uuid
-  name    String           @db.VarChar(255)
-  deleted Boolean          @default(false)
-  order   RoutesOnOrders[]
-  // history RouteOrderHistory[]
-
-  @@map("routes")
-}
-
-model Employees {
-  employeeId  String @id @default(uuid()) @db.Uuid
-  email       String @unique @db.VarChar(255)
-  password    String @db.VarChar(255)
-  firstName   String @db.VarChar(255)
-  lastName    String @db.VarChar(255)
-  deleted     Boolean @default(false)
-  superAdmin  Boolean @default(false)
-
-  roleId      String  @db.Uuid
-  role        Role    @relation(fields: [roleId], references: [id])
-
-  otp         Otp[]
-
-  @@map("employees")
-  @@index([email], map: "employee_email_index")
-  @@index([lastName], map: "employee_last_name_index")
-}
-
-//* model for the site configuration
-model SiteConfig {
-  siteConfigId String @id @default(uuid()) @db.Uuid
-  companyName  String @db.VarChar(255)
-  //? should probably also have a slogan or a short description field
-  //? should probalby also have a relation to a socialMedia model with links to social media
-
-  logoPath         String    @db.VarChar(255)
-  email            String    @unique @db.VarChar(255)
-  phoneNumber      String    @db.VarChar(15)
-  iban             String    @db.VarChar(40)
-  companyNumber    String    @db.VarChar(255)
-  addressId        String    @db.Uuid
-  modifiedAt       DateTime? @default(dbgenerated("null")) @updatedAt
-  isPremium        Boolean   @default(false)
-  deleted          Boolean   @default(false)
-  stripeCustomerId String?   @db.VarChar(255)
-  stripeAccountId  String?   @db.VarChar(255)
-  stripeConfigured Boolean   @default(false)
-  address          Address   @relation(fields: [addressId], references: [addressId])
-
-  @@map("siteConfigs")
-}
-
-// realtion models
-model CategoriesOnProducts {
-  productId  String   @db.Uuid
-  product    Product  @relation(fields: [productId], references: [productId])
-  categoryId String   @db.Uuid
-  category   Category @relation(fields: [categoryId], references: [categoryId])
-
-  @@id([productId, categoryId])
-  @@map("categoriesProducts")
-}
-
-model CartOnProducts {
-  cartId    String  @db.Uuid
-  cart      Cart    @relation(fields: [cartId], references: [cartId])
-  productId String  @db.Uuid
-  product   Product @relation(fields: [productId], references: [productId])
-  quantity  Int     @default(1) @map("productAmount")
-
-  @@id([cartId, productId])
-  @@map("cartsProducts")
-}
-
-model OrderOnProducts {
-  orderId       String  @db.Uuid
-  order         Order   @relation(fields: [orderId], references: [orderId])
-  productId     String  @db.Uuid
-  product       Product @relation(fields: [productId], references: [productId])
-  orderDate     DateTime @default(now())
-  productAmount Int     @default(1)
-
-  @@id([orderId, productId])
-  @@map("ordersProducts")
-}
-
-model RoutesOnOrders {
-  routeId String @db.Uuid
-  route   Route  @relation(fields: [routeId], references: [routeId])
-  orderId String @db.Uuid
-  order   Order  @relation(fields: [orderId], references: [orderId])
-
-  @@id([routeId, orderId])
-  @@map("routesOrders")
-}
-
-model EnabledModule {
-  id         String     @id @default(uuid()) @db.Uuid
-  moduleName ModuleEnum @unique
-  enabledAt  DateTime   @default(now()) @db.Timestamptz(6)
-  Module     Module     @relation(fields: [moduleName], references: [name], onDelete: Cascade)
-}
-
-model Module {
-  name          ModuleEnum     @id
-  description   String?
-  priceCents    Int            @default(0)
-  createdAt     DateTime       @default(now()) @db.Timestamptz(6)
-  modifiedAt     DateTime       @db.Timestamptz(6) @default(dbgenerated("null")) @updatedAt
-  EnabledModule EnabledModule?
-}
-
-model Otp {
-  id         String    @id @default(uuid()) @db.Uuid
-  code       Int       @unique
-  employeeId String
-  expiresAt  DateTime
-  used       Boolean   @default(false)
-  createdAt  DateTime  @default(now())
-  employees  Employees @relation(fields: [employeeId], references: [employeeId])
-
-  @@index([code, employeeId])
-}
-
-model Role {
-  id          String       @id @default(uuid()) @db.Uuid
-  name        String       @unique @db.VarChar(255) // z.B. "ADMIN", "USER", "MANAGER"
-  description String?      @db.VarChar(255)
-  deleted     Boolean      @default(false)
-
-  employees   Employees[]
-  permissions Permission[]
-
-  @@map("roles")
-}
-
-model Resource {
-  id          String       @id @default(uuid()) @db.Uuid
-  key         String       @unique @db.VarChar(255) // z.B. "ORDER", "PRODUCT"
-  description String?      @db.VarChar(255)
-  deleted     Boolean      @default(false)
-
-  permissions Permission[]
-
-  @@map("resources")
-}
-
-model Action {
-  id          String       @id @default(uuid()) @db.Uuid
-  key         String       @unique @db.VarChar(50) // "READ" | "CREATE" | ...
-  description String?      @db.VarChar(255)
-  deleted     Boolean      @default(false)
-
-  permissions Permission[]
-
-  @@map("actions")
-}
-
-model Permission {
-  id         String   @id @default(uuid()) @db.Uuid
-  roleId     String   @db.Uuid
-  resourceId String   @db.Uuid
-  actionId   String   @db.Uuid
-  allowed    Boolean  @default(false)
-  createdAt  DateTime @default(now())
-
-  role       Role     @relation(fields: [roleId], references: [id], onDelete: Cascade)
-  resource   Resource @relation(fields: [resourceId], references: [id], onDelete: Cascade)
-  action     Action   @relation(fields: [actionId], references: [id], onDelete: Cascade)
-
-  @@unique([roleId, resourceId, actionId])
-  @@index([roleId])
-  @@index([resourceId])
-  @@index([actionId])
-
-  @@map("permissions")
-}
-
-
 enum ModuleEnum {
   CUSTOM_ROLES
   STATISTICS
   NAVIGATION
+}
+
+enum orderstate {
+  ORDER_PLACED
+  ORDER_COLLECTED
+  IN_PROGRESS
+  DISPATCHED
+  DELIVERED
+}
+
+enum role {
+  ADMIN
+  CUSTOMER
+  EMPLOYEE
+  SUPPLIER
+}
+
+enum sector {
+  AGRICULTURE
+  CONSTRUCTION
+  EDUCATION
+  FINANCE
+  HEALTH
+  HOSPITALITY
+  IT
+  MANUFACTURING
+  OTHER
+  RETAIL
+  TECHONOLOGY
+  TOURISM
+  TRANSPORTATION
 }
