@@ -12,7 +12,9 @@ import axios from 'axios';
 
 @Injectable()
 export class DataAnalysisTokenServiceService {
-  dtaApiUrl: string;
+  // Map to store inflight token requests to prevent multiple requests for the same email
+  private readonly inflightTokens = new Map<string, Promise<string>>();
+  private readonly dtaApiUrl: string;
 
   constructor(
     @Inject(CACHE_MANAGER) private cache: Cache,
@@ -23,35 +25,59 @@ export class DataAnalysisTokenServiceService {
   }
 
   async getToken(email: string): Promise<string> {
-    const employee = await this.employeeService.findByEmail(email);
+    const cacheKey = `token:${email}`;
 
-    const cached = await this.cache.get<string>(`token:${email}`);
+    const cached = await this.cache.get<string>(cacheKey);
     if (cached) return cached;
 
-    const password = employee.password;
+    // query for exisitong promise to prevent multiple token requests for the same email
+    const inflight = this.inflightTokens.get(email);
+    // return existing promise if there is one, otherwise create a new one and store it in the map
+    if (inflight) return inflight;
 
-    const queryParams = new URLSearchParams({ email, password }).toString();
-    const url = `${this.dtaApiUrl}/authenticate?${queryParams}`;
+    const promise = this.fetchAndCacheToken(email, cacheKey);
+    this.inflightTokens.set(email, promise);
 
     try {
-      const response = await axios.get(url);
-      console.log('DTA API response for', email, ':', response.data);
+      return await promise;
+    } finally {
+      this.inflightTokens.delete(email);
+    }
+  }
 
+  private async fetchAndCacheToken(
+    email: string,
+    cacheKey: string,
+  ): Promise<string> {
+    const employee = await this.employeeService.findByEmail(email);
+    const password = employee.password;
+
+    try {
+      const queryParams = new URLSearchParams({ email, password }).toString();
+      const url = `${this.dtaApiUrl}/authenticate?${queryParams}`;
+      console.log(`Requesting token from DTA API with URL: ${url}`);
+      const response = await axios.get(url);
+      console.log(
+        `Received response from DTA API: ${JSON.stringify(response.data)}`,
+      );
       const token =
         typeof response.data === 'string'
           ? response.data
           : (response.data?.token as string | undefined);
 
       if (!token) {
+        console.log(
+          `Token not found in DTA API response: ${JSON.stringify(response.data)}`,
+        );
         throw new InternalServerErrorException(
           'Token not found in DTA API response',
         );
       }
 
-      await this.cache.set(`token:${email}`, token, 1000 * 60 * 20); // 20 min in ms
+      await this.cache.set(cacheKey, token, 1000 * 60 * 20);
       return token;
     } catch (error) {
-      console.error('Error authenticating with DTA API:', error);
+      console.log(`Error occurred while fetching token from DTA API: ${error}`);
       throw new ServiceUnavailableException(
         'Data analysis service temporarily unavailable',
       );

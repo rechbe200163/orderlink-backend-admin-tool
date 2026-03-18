@@ -81,9 +81,9 @@ export class DataAnalysisController {
     @Query('percentage') percentage: boolean = false,
   ) {
     const { email } = req.user;
-    const token = await this.tokenService.getToken(email);
+
     return this.dataAnalysisService.get_orders_amount(
-      token,
+      email,
       last_days,
       month,
       year,
@@ -128,9 +128,8 @@ export class DataAnalysisController {
     @Query('limit') limit: number = 5,
   ) {
     const { email } = req.user;
-    const token = await this.tokenService.getToken(email);
     return this.dataAnalysisService.get_products_mostly_bought(
-      token,
+      email,
       last_days,
       month,
       year,
@@ -138,61 +137,40 @@ export class DataAnalysisController {
     );
   }
 
-
   @Get('customers-growth')
   @ApiServiceUnavailableResponse({
     description: 'Data analysis service temporarily unavailable',
   })
-  async get_customers_growth(
-    @Request() req,
-  ) {
+  async get_customers_growth(@Request() req) {
     const { email } = req.user;
-    const token = await this.tokenService.getToken(email);
-    return this.dataAnalysisService.get_customers_growth(
-      token
-    );
+    return this.dataAnalysisService.get_customers_growth(email);
   }
 
   @Get('customers-growth-month')
   @ApiServiceUnavailableResponse({
     description: 'Data analysis service temporarily unavailable',
   })
-  async get_customers_growth_month(
-    @Request() req,
-  ) {
+  async get_customers_growth_month(@Request() req) {
     const { email } = req.user;
-    const token = await this.tokenService.getToken(email);
-    return this.dataAnalysisService.get_customers_growth_month(
-      token
-    );
+    return this.dataAnalysisService.get_customers_growth_month(email);
   }
 
   @Get('orders-growth')
   @ApiServiceUnavailableResponse({
     description: 'Data analysis service temporarily unavailable',
   })
-  async get_orders_growth(
-    @Request() req
-  ) {
+  async get_orders_growth(@Request() req) {
     const { email } = req.user;
-    const token = await this.tokenService.getToken(email);
-    return this.dataAnalysisService.get_orders_growth(
-      token
-    );
+    return this.dataAnalysisService.get_orders_growth(email);
   }
 
   @Get('orders-growth-month')
   @ApiServiceUnavailableResponse({
     description: 'Data analysis service temporarily unavailable',
   })
-  async get_orders_growth_month(
-    @Request() req
-  ) {
+  async get_orders_growth_month(@Request() req) {
     const { email } = req.user;
-    const token = await this.tokenService.getToken(email);
-    return this.dataAnalysisService.get_orders_growth_month(
-      token
-    );
+    return this.dataAnalysisService.get_orders_growth_month(email);
   }
 
   @Get('products-amount')
@@ -202,13 +180,15 @@ export class DataAnalysisController {
   @ApiQuery({
     name: 'well_stocked',
     required: false,
-    description: 'Whether to include only well-stocked products in the analysis',
+    description:
+      'Whether to include only well-stocked products in the analysis',
     example: true,
   })
   @ApiQuery({
     name: 'out_of_stock',
     required: false,
-    description: 'Whether to include only out-of-stock products in the analysis',
+    description:
+      'Whether to include only out-of-stock products in the analysis',
     example: false,
   })
   @ApiQuery({
@@ -224,15 +204,13 @@ export class DataAnalysisController {
     @Query('limit') limit: number = 5,
   ) {
     const { email } = req.user;
-    const token = await this.tokenService.getToken(email);
     return this.dataAnalysisService.get_products_amount(
-      token,
+      email,
       well_stocked,
       out_of_stock,
       limit,
     );
   }
-
 
   @Get('products-orders-correlation')
   @ApiServiceUnavailableResponse({
@@ -240,9 +218,7 @@ export class DataAnalysisController {
   })
   async get_products_orders_correlation(@Request() req) {
     const { email } = req.user;
-    const token = await this.tokenService.getToken(email);
-    return this.dataAnalysisService.get_products_orders_correlation(token);
-
+    return this.dataAnalysisService.get_products_orders_correlation(email);
   }
 
   @Get('customers-signup')
@@ -290,9 +266,8 @@ export class DataAnalysisController {
     @Query('percentage') percentage: boolean = false,
   ) {
     const { email } = req.user;
-    const token = await this.tokenService.getToken(email);
     return this.dataAnalysisService.get_customers_signup(
-      token,
+      email,
       last_days,
       month,
       year,
@@ -346,9 +321,8 @@ export class DataAnalysisController {
     @Query('percentage') percentage: boolean = false,
   ) {
     const { email } = req.user;
-    const token = await this.tokenService.getToken(email);
     return this.dataAnalysisService.get_invoices_amount(
-      token,
+      email,
       last_days,
       month,
       year,
@@ -356,5 +330,4 @@ export class DataAnalysisController {
       percentage,
     );
   }
-
 }
