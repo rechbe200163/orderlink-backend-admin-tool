@@ -59,6 +59,8 @@ model Address {
   state        String       @db.VarChar(40)
   streetName   String       @db.VarChar(255)
   streetNumber String       @db.VarChar(30)
+  latitude     Float?
+  longitude    Float?
   modifiedAt   DateTime?    @updatedAt
   deleted      Boolean      @default(false)
   customers    Customer[]
