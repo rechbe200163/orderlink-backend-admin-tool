@@ -4,28 +4,17 @@ import { CreateAddressDto } from 'prisma/src/generated/dto/create-address.dto';
 import { UpdateAddressDto } from 'prisma/src/generated/dto/update-address.dto';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { AddressDto } from 'prisma/src/generated/dto/address.dto';
-
-const geocoding = require('@aashari/nodejs-geocoding');
+import { getCoordinatesFromAddress } from './helpers/coordinatesFromAddress';
 
 @Injectable()
 export class AddressesService {
   constructor(private readonly addressesRepository: AddressesRepository) {}
 
   async create(createAddressDto: CreateAddressDto): Promise<AddressDto> {
-    let latitude_db: number | null = null;
-    let longitude_db: number | null = null;
-    
     const fullAddress = `${createAddressDto.streetNumber} ${createAddressDto.streetName}, ${createAddressDto.city}, ${createAddressDto.state}, ${createAddressDto.postCode}, ${createAddressDto.country}`;
-    try {
-      const location = (await geocoding.encode(fullAddress)) as Array<{ latitude: number; longitude: number }>;
-      if (location && location.length > 0) {
-        const { latitude, longitude } = location[0];
-        latitude_db = latitude;
-        longitude_db = longitude;
-      }
-    } catch (err: unknown) {
-      console.error('Geocoding error:', err);
-    }
+
+    const { latitude, longitude } = await getCoordinatesFromAddress(fullAddress);
+
     const dbAddress = {
       city: createAddressDto.city,
       country: createAddressDto.country,
@@ -33,10 +22,9 @@ export class AddressesService {
       state: createAddressDto.state,
       streetName: createAddressDto.streetName,
       streetNumber: createAddressDto.streetNumber,
-      latitude: latitude_db,
-      longitude: longitude_db
+      latitude: latitude,
+      longitude: longitude
     };
-    console.log('Creating address with data:', dbAddress);
     return await this.addressesRepository.create(dbAddress);
   }
 
