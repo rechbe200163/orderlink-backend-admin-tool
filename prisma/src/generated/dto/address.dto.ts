@@ -16,6 +16,10 @@ export class AddressDto {
   @Expose()
   streetNumber: string;
   @Expose()
+  latitude: number;
+  @Expose()
+  longitude: number;
+  @Expose()
   modifiedAt: Date | null;
   @Expose()
   deleted: boolean;

@@ -27,6 +27,7 @@
     "seed": "ts-node prisma/seed.ts"
   },
   "dependencies": {
+    "@aashari/nodejs-geocoding": "^2.7.2",
     "@fastify/multipart": "^9.0.3",
     "@fastify/static": "^8.2.0",
     "@fastify/swagger": "9.5.1",
