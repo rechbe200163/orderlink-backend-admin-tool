@@ -11,16 +11,16 @@ import { OtpModule } from 'src/otp/otp.module';
   imports: [
     MailerModule.forRoot({
       transport: {
-        host: process.env.EMAIL_HOST,
-        port: Number(process.env.EMAIL_PORT),
+        host: process.env.RESEND_SMTP_HOST,
+        port: Number(process.env.RESEND_SMTP_PORT),
         secure: false,
         auth: {
-          user: process.env.EMAIL_USER,
-          pass: process.env.EMAIL_PASSWORD,
+          user: process.env.RESEND_SMTP_USERNAME,
+          pass: process.env.RESEND_API_KEY,
         },
       },
       defaults: {
-        from: process.env.EMAIL_USER,
+        from: process.env.RESEND_FROM_EMAIL,
       },
       template: {
         dir: join(__dirname, '../../email/templates'),
