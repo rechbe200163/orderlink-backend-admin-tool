@@ -59,8 +59,6 @@ model Address {
   state        String       @db.VarChar(40)
   streetName   String       @db.VarChar(255)
   streetNumber String       @db.VarChar(30)
-  latitude     Float?
-  longitude    Float?
   modifiedAt   DateTime?    @updatedAt
   deleted      Boolean      @default(false)
   customers    Customer[]
@@ -251,7 +249,7 @@ model Otp {
 }
 
 model Role {
-  roleId      String       @id @db.Uuid @default(uuid())
+  roleId      String       @id @default(uuid()) @db.Uuid
   name        String       @unique @db.VarChar(255)
   description String?      @db.VarChar(255)
   deleted     Boolean      @default(false)

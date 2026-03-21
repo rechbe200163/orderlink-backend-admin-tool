@@ -49,6 +49,7 @@ export class EmailService {
     await this.mailerService.sendMail({
       to: email,
       template: './employee-created',
+      subject: 'Welcome to the team! Please verify your email',
       context: {
         firstName,
         lastName,
