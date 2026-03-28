@@ -1,25 +1,25 @@
-import { FastifyRequest } from 'fastify';
-import { Customer, Employees } from 'generated/prisma/client';
+import { Request } from 'express';
+import { Employees } from 'generated/prisma/client';
 
-export type AuthResultCustomer = {
-  token: string;
-  user: SanitizedCustomer;
+export type Token = {
+  accessToken: string;
+  issuedAt: number;
+  expiresAt: number;
 };
-
-export type AuthResultEmployee = {
-  token: string;
-  user: SanitizedEmployee;
-};
-
-export type SanitizedCustomer = Pick<
-  Customer,
-  'email' | 'customerReference' | 'avatarPath' | 'firstName' | 'lastName'
->;
 
 export type SanitizedEmployee = Pick<
   Employees,
   'email' | 'firstName' | 'lastName' | 'employeeId' | 'roleId' | 'superAdmin'
 >;
+
+export type JwtPayload = SanitizedEmployee & {
+  tenantId: string;
+};
+
+export type AuthResult = {
+  token: Token;
+  user: SanitizedEmployee;
+};
 
 export type PagingData<T> = [
   data: T[],
@@ -34,6 +34,7 @@ export type PagingData<T> = [
   },
 ];
 
-export interface FastifyUserRequest extends FastifyRequest {
-  user: SanitizedEmployee;
+export interface UserRequest extends Request {
+  user?: JwtPayload;
+  tenantId?: string;
 }

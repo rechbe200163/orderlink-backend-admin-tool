@@ -1,25 +1,26 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { transformResponse } from 'lib/utils/transform';
 import { RoleDto } from 'prisma/src/generated/dto/role.dto';
-import { PrismaService } from 'src/prisma.service';
 import { CreateActionDto } from './dto/create-action.dto';
 import { ActionEntity } from './entities/action.entity';
 import { UpdateActionDto } from './dto/update-action.dto';
 import { SortOrder } from 'src/common/enums/sort-order.enum';
+import { TenantDbContext } from 'lib/tenant-db-context';
 
 @Injectable()
 export class ActionsRepository {
   constructor(
     // ✅ use `ExtendedPrismaClient` type for correct type-safety of your extended PrismaClient
-    private readonly prisma: PrismaService,
+    private readonly db: TenantDbContext,
   ) {}
 
   async create(roleData: CreateActionDto) {
-    const existingRole = await this.prisma.db.action.findUnique({
+    const existingRole = await this.db.prisma.action.findUnique({
       where: { key: roleData.key },
     });
     if (existingRole) {
@@ -27,14 +28,14 @@ export class ActionsRepository {
         `Action with key ${roleData.key} already exists`,
       );
     }
-    const createdRole = await this.prisma.db.action.create({
+    const createdRole = await this.db.prisma.action.create({
       data: roleData,
     });
     return transformResponse(RoleDto, createdRole);
   }
 
   async findById(roleId: string) {
-    const role = await this.prisma.db.action.findUnique({
+    const role = await this.db.prisma.action.findUnique({
       where: { id: roleId },
     });
     if (!role) {
@@ -44,7 +45,7 @@ export class ActionsRepository {
   }
 
   async findAllRoleNames() {
-    const roles = await this.prisma.db.action.findMany({
+    const roles = await this.db.prisma.action.findMany({
       select: { key: true },
     });
     return roles.map((role) => role.key);
@@ -57,7 +58,7 @@ export class ActionsRepository {
     sort?: string,
     order?: SortOrder,
   ) {
-    const [actions, meta] = await this.prisma.db.action
+    const [actions, meta] = await this.db.prisma.action
       .paginate({
         where: {
           deleted: false,
@@ -85,13 +86,13 @@ export class ActionsRepository {
   }
 
   async update(key: string, actionData: UpdateActionDto) {
-    const existingRole = await this.prisma.db.action.findUnique({
+    const existingRole = await this.db.prisma.action.findUnique({
       where: { key },
     });
     if (!existingRole) {
       throw new NotFoundException(`Action not found`);
     }
-    const updatedRole = await this.prisma.db.action.update({
+    const updatedRole = await this.db.prisma.action.update({
       where: { key },
       data: actionData,
     });

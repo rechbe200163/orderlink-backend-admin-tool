@@ -13,7 +13,7 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { AddressesService } from './addresses.service';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+import { HttpCacheInterceptor } from 'lib/interceptors/custom.cache-intercaptor';
 import { Resources } from '../rbac/resources.enum';
 import { Resource } from 'lib/decorators/resource.decorator';
 import {
@@ -34,7 +34,7 @@ import { CreateAddressDto } from 'prisma/src/generated/dto/create-address.dto';
 import { UpdateAddressDto } from 'prisma/src/generated/dto/update-address.dto';
 
 @Controller('addresses')
-@UseInterceptors(CacheInterceptor)
+@UseInterceptors(HttpCacheInterceptor)
 @Resource(Resources.ADDRESS)
 @ApiInternalServerErrorResponse({ description: 'Internal server error' })
 @ApiBearerAuth()

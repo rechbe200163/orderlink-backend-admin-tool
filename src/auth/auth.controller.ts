@@ -11,23 +11,23 @@ import {
   Request,
   UseGuards,
 } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { JwtAuthGuard } from './guards/jwt.guard';
 import { ThrottlerGuard } from '@nestjs/throttler';
 import {
   ApiBearerAuth,
   ApiBody,
   ApiOkResponse,
   ApiParam,
-  ApiQuery,
   ApiUnauthorizedResponse,
 } from '@nestjs/swagger';
+import type { SanitizedEmployee, UserRequest } from 'lib/types';
 import { AuthInputDto } from './dto/auth-input.dto';
 import { AuthResultDto } from './dto/auth-result.dto';
+import { AuthService } from './auth.service';
+import { JwtAuthGuard } from './guards/jwt.guard';
 
 @Controller('auth')
 export class AuthController {
-  constructor(private authService: AuthService) {}
+  constructor(private readonly authService: AuthService) {}
 
   @Post('signIn')
   @UseGuards(ThrottlerGuard)
@@ -42,22 +42,38 @@ export class AuthController {
   }
 
   @Get('renew')
+  @UseGuards(JwtAuthGuard, ThrottlerGuard)
   @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
   @ApiOkResponse({ type: AuthResultDto })
   @ApiUnauthorizedResponse({
     description: 'Invalid credentials',
   })
-  @UseGuards(JwtAuthGuard, ThrottlerGuard)
-  @ApiBearerAuth()
-  renewToken(@Request() request) {
+  renewToken(@Request() request: UserRequest) {
     if (!request.user) {
       throw new NotImplementedException('User not found in request');
     }
-    return this.authService.signIn(request.user);
+
+    const user: SanitizedEmployee = {
+      employeeId: request.user.employeeId,
+      email: request.user.email,
+      firstName: request.user.firstName,
+      lastName: request.user.lastName,
+      roleId: request.user.roleId,
+      superAdmin: request.user.superAdmin,
+    };
+
+    return this.authService.signIn(user);
   }
-  @ApiBearerAuth()
+
+  @Get('profile')
   @UseGuards(JwtAuthGuard, ThrottlerGuard)
-  getProfile(@Request() request) {
+  @ApiBearerAuth()
+  getProfile(@Request() request: UserRequest) {
+    if (!request.user) {
+      throw new NotImplementedException('User not found in request');
+    }
+
     return request.user;
   }
 
@@ -74,22 +90,32 @@ export class AuthController {
     type: String,
     description: 'One-time password for validation',
   })
-  async validateOtp(@Param('otp', ParseIntPipe) otp: number) {
+  validateOtp(@Param('otp', ParseIntPipe) otp: number) {
     return this.authService.signInWithOtp(otp);
   }
 
-  ///renewSession
   @Post('renewSession')
+  @UseGuards(JwtAuthGuard, ThrottlerGuard)
   @HttpCode(HttpStatus.OK)
+  @ApiBearerAuth()
   @ApiOkResponse({ type: AuthResultDto })
   @ApiUnauthorizedResponse({
     description: 'Invalid credentials',
   })
-  @UseGuards(JwtAuthGuard, ThrottlerGuard)
-  renewSession(@Request() request) {
+  renewSession(@Request() request: UserRequest) {
     if (!request.user) {
       throw new NotImplementedException('User not found in request');
     }
-    return this.authService.renewSession(request.user);
+
+    const user: SanitizedEmployee = {
+      employeeId: request.user.employeeId,
+      email: request.user.email,
+      firstName: request.user.firstName,
+      lastName: request.user.lastName,
+      roleId: request.user.roleId,
+      superAdmin: request.user.superAdmin,
+    };
+
+    return this.authService.renewSession(user);
   }
 }

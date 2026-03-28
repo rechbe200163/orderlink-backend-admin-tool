@@ -3,31 +3,34 @@ import { CreateEmployeesDto } from 'prisma/src/generated/dto/create-employees.dt
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { RolesRepository } from './../roles/roles.repository';
 import { transformResponse } from 'lib/utils/transform';
-import { PrismaService } from 'src/prisma.service';
+import { PRISMA_CLIENT } from 'lib/providers/prisma-client.provider';
 import { isNoChange } from 'lib/utils/isNoChange';
-import { Otp } from 'generated/prisma/client';
+import { Otp, PrismaClient } from 'generated/prisma/client';
 import { customAlphabet } from 'nanoid';
 import { hash } from 'bcryptjs';
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { EmployeesDto } from './dto/employees.dto';
 import { SortOrder } from 'src/common/enums/sort-order.enum';
+import type { ExtendedPrismaClient } from 'src/tenant-prisma.service';
+import { TenantDbContext } from 'lib/tenant-db-context';
 
 @Injectable()
 export class EmployeesRepository {
   constructor(
     // ✅ use `ExtendedPrismaClient` type for correct type-safety of your extended PrismaClient
-    private readonly prisma: PrismaService,
+    private readonly db: TenantDbContext,
     private readonly rolesRepository: RolesRepository,
   ) {}
 
   async create(createEmployeeDto: CreateEmployeesDto): Promise<{
     employee: EmployeesDto;
   }> {
-    const existingEmployee = await this.prisma.db.employees.findUnique({
+    const existingEmployee = await this.db.prisma.employees.findUnique({
       where: { email: createEmployeeDto.email },
     });
     if (existingEmployee) {
@@ -42,7 +45,7 @@ export class EmployeesRepository {
       );
     }
 
-    const createdEmployee = await this.prisma.db.employees.create({
+    const createdEmployee = await this.db.prisma.employees.create({
       data: {
         ...createEmployeeDto,
         password: '',
@@ -62,7 +65,7 @@ export class EmployeesRepository {
     search?: string,
     exludeEmployeeId?: string,
   ): Promise<PagingResultDto<EmployeesDto>> {
-    const [employees, meta] = await this.prisma.db.employees
+    const [employees, meta] = await this.db.prisma.employees
       .paginate({
         where: {
           employeeId: exludeEmployeeId ? { not: exludeEmployeeId } : undefined,
@@ -101,7 +104,7 @@ export class EmployeesRepository {
   }
 
   async findById(employeeId: string, includeOtp = false) {
-    const employee = (await this.prisma.db.employees.findUnique({
+    const employee = (await this.db.prisma.employees.findUnique({
       where: { employeeId },
       ...(includeOtp && { include: { otp: true } }),
     })) as EmployeesDto & { Otp?: Otp };
@@ -115,12 +118,12 @@ export class EmployeesRepository {
   //   if (!existingRole) {
   //     throw new NotFoundException(`Role ${role} does not exist`);
   //   }
-  //   const employees = await this.prisma.db.employees.findByRole(role);
+  //   const employees = await this.db.prisma.employees.findByRole(role);
   //   return transformResponse(EmployeesDto, employees);
   // }
 
   async findByEmail(email: string) {
-    const employee = await this.prisma.db.employees.findUnique({
+    const employee = await this.db.prisma.employees.findUnique({
       where: { email },
     });
     if (!employee) {
@@ -148,7 +151,7 @@ export class EmployeesRepository {
         `No changes detected for employee ${employeeId}`,
       );
     }
-    const updatedEmployee = await this.prisma.db.employees.update({
+    const updatedEmployee = await this.db.prisma.employees.update({
       where: { employeeId },
       data: updateEmployee,
     });
@@ -156,7 +159,7 @@ export class EmployeesRepository {
   }
 
   async findAdminEmails(): Promise<string[]> {
-    const admins = await this.prisma.db.employees.findMany({
+    const admins = await this.db.prisma.employees.findMany({
       where: {
         role: {
           name: 'ADMIN',

@@ -2,10 +2,11 @@ import { Module } from '@nestjs/common';
 import { ResourcesService } from './resources.service';
 import { ResourcesController } from './resources.controller';
 import { ResourceRepository } from './resources.repository';
-import { PrismaService } from 'src/prisma.service';
+import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
+  imports: [DatabaseModule],
   controllers: [ResourcesController],
-  providers: [ResourcesService, ResourceRepository, PrismaService],
+  providers: [ResourcesService, ResourceRepository],
 })
 export class ResourcesModule {}

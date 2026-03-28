@@ -14,7 +14,7 @@ import { ActionsService } from './actions.service';
 import { CreateActionDto } from './dto/create-action.dto';
 import { UpdateActionDto } from './dto/update-action.dto';
 import { Resource } from 'lib/decorators/resource.decorator';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+import { HttpCacheInterceptor } from 'lib/interceptors/custom.cache-intercaptor';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import {
@@ -28,7 +28,7 @@ import {
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Controller('actions')
-@UseInterceptors(CacheInterceptor)
+@UseInterceptors(HttpCacheInterceptor)
 @Resource('ACTIONS')
 @ApiInternalServerErrorResponse({
   description: 'Internal server error',

@@ -6,17 +6,15 @@ import { pagination } from 'prisma-extension-pagination';
 
 function createPrisma(databaseUrl: string) {
   const adapter = new PrismaPg({ connectionString: databaseUrl });
-  return new PrismaClient({ adapter }).$extends(pagination());
+  return new PrismaClient({ adapter });
 }
-
-type PrismaWithPagination = ReturnType<typeof createPrisma>;
 
 @Injectable()
 export class PrismaService implements OnModuleInit, OnModuleDestroy {
-  public readonly db: PrismaWithPagination;
+  public readonly db: PrismaClient;
 
   constructor(config: ConfigService) {
-    const databaseUrl = config.getOrThrow<string>('DATABASE_URL');
+    const databaseUrl = config.getOrThrow<string>('MASTER_DATABASE_URL');
     this.db = createPrisma(databaseUrl);
   }
 

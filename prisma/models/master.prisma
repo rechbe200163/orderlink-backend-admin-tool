@@ -1,0 +1,10 @@
+model Tenant {
+  tenantId    String   @id @default(nanoid())
+  name        String
+  subdomain    String   @unique
+  dbUrl       String
+  companyName String?
+  description String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}

@@ -14,7 +14,7 @@ import {
   Module,
 } from '@nestjs/common';
 import { RoutesService } from './routes.service';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+import { HttpCacheInterceptor } from 'lib/interceptors/custom.cache-intercaptor';
 import { Resources } from '../rbac/resources.enum';
 import { Resource } from 'lib/decorators/resource.decorator';
 import {
@@ -38,7 +38,7 @@ import { ModuleTag } from 'lib/decorators/module.decorators';
 import { ModuleEnum } from 'src/site-config/dto/modules-entity.dto';
 
 @Controller('routes')
-@UseInterceptors(CacheInterceptor)
+@UseInterceptors(HttpCacheInterceptor)
 @ModuleTag(ModuleEnum.NAVIGATION)
 @Resource(Resources.ROUTES)
 @ApiInternalServerErrorResponse({ description: 'Internal server error' })

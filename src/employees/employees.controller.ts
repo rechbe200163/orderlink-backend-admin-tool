@@ -14,7 +14,7 @@ import {
   DefaultValuePipe,
 } from '@nestjs/common';
 import { EmployeesService } from './employees.service';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+import { HttpCacheInterceptor } from 'lib/interceptors/custom.cache-intercaptor';
 import { Resources } from '../rbac/resources.enum';
 import { Resource } from 'lib/decorators/resource.decorator';
 import {
@@ -35,7 +35,7 @@ import { EmployeesDto } from './dto/employees.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Controller('employees')
-@UseInterceptors(CacheInterceptor)
+@UseInterceptors(HttpCacheInterceptor)
 @Resource(Resources.EMPLOYEE)
 @ApiInternalServerErrorResponse({
   description: 'Internal server error',

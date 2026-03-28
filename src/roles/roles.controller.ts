@@ -15,7 +15,7 @@ import {
 import { RolesService } from './roles.service';
 import { Resource } from 'lib/decorators/resource.decorator';
 import { Resources } from '../rbac/resources.enum';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+import { HttpCacheInterceptor } from 'lib/interceptors/custom.cache-intercaptor';
 import {
   ApiBadRequestResponse,
   ApiBearerAuth,
@@ -36,7 +36,7 @@ import { RoleDto } from 'prisma/src/generated/dto/role.dto';
 import { RolePagingResultDto } from './dto/role-paging';
 
 @Controller('roles')
-@UseInterceptors(CacheInterceptor)
+@UseInterceptors(HttpCacheInterceptor)
 @Resource(Resources.ROLE)
 @ApiInternalServerErrorResponse({
   description: 'Internal server error',
