@@ -1,19 +1,21 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { PermissionPagingResultDto } from './dto/permissions-paging';
 import { transformResponse } from 'lib/utils/transform';
 import { PermissionDto } from 'prisma/src/generated/dto/permission.dto';
 import { Resources } from '../rbac/resources.enum';
 import { RolesRepository } from 'src/roles/roles.repository';
-import { PrismaService } from 'src/prisma.service';
+import { PRISMA_CLIENT } from 'lib/providers/prisma-client.provider';
 import { CreatePermissionsDto } from './dto/create-permision.dto';
 import { UpdatePermissionDto } from './dto/update-permision.dto';
 import { ActionsRepository } from 'src/actions/actions.repository';
+import type { ExtendedPrismaClient } from 'src/tenant-prisma.service';
+import { TenantDbContext } from 'lib/tenant-db-context';
 
 @Injectable()
 export class PermissionsRepository {
   constructor(
     // ✅ use `ExtendedPrismaClient` type for correct type-safety of your extended PrismaClient
-    private readonly prisma: PrismaService,
+    private readonly db: TenantDbContext,
     private readonly rolesRepository: RolesRepository,
     private readonly actionsRepository: ActionsRepository,
     private readonly rolesRepo: RolesRepository,
@@ -24,7 +26,7 @@ export class PermissionsRepository {
     page?: number,
     role?: string,
   ): Promise<PermissionPagingResultDto> {
-    const [permissions, meta] = await this.prisma.db.permission
+    const [permissions, meta] = await this.db.prisma.permission
       .paginate({
         where: {
           roleId: role ? role : undefined,
@@ -45,7 +47,7 @@ export class PermissionsRepository {
   }
 
   async findAllPermissions(role?: string): Promise<PermissionDto[]> {
-    const permissions = await this.prisma.db.permission.findMany({
+    const permissions = await this.db.prisma.permission.findMany({
       where: {
         roleId: role ? role : undefined,
       },
@@ -57,7 +59,7 @@ export class PermissionsRepository {
   }
 
   async findById(permissionId: string): Promise<PermissionDto> {
-    const permission = await this.prisma.db.permission.findUnique({
+    const permission = await this.db.prisma.permission.findUnique({
       where: {
         id: permissionId,
       },
@@ -76,7 +78,7 @@ export class PermissionsRepository {
       );
     }
 
-    const existingPermission = await this.prisma.db.permission.findFirst({
+    const existingPermission = await this.db.prisma.permission.findFirst({
       where: {
         actionId: dto.actionId,
         resourceId: dto.resourceId,
@@ -90,7 +92,7 @@ export class PermissionsRepository {
       );
     }
 
-    const createdPermission = await this.prisma.db.permission.create({
+    const createdPermission = await this.db.prisma.permission.create({
       data: {
         roleId: dto.roleId,
         resourceId: dto.resourceId,
@@ -105,7 +107,7 @@ export class PermissionsRepository {
     permissionId: string,
     permissionData: Partial<UpdatePermissionDto>,
   ): Promise<PermissionDto> {
-    const updatedPermission = await this.prisma.db.permission.update({
+    const updatedPermission = await this.db.prisma.permission.update({
       where: { id: permissionId },
       data: permissionData,
     });

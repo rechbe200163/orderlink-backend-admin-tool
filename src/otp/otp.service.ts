@@ -4,13 +4,13 @@ import { Otp } from 'generated/prisma/client';
 import { customAlphabet } from 'nanoid';
 
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
-import { PrismaService } from 'src/prisma.service';
+import { TenantDbContext } from 'lib/tenant-db-context';
 
 @Injectable()
 export class OtpService {
   constructor(
     // ✅ use `ExtendedPrismaClient` type for correct type-safety of your extended PrismaClient
-    private readonly prisma: PrismaService,
+    private readonly db: TenantDbContext,
     private readonly eventEmitter: TypedEventEmitter, // Assuming you have a TypedEventEmitter for event handling
   ) {}
 
@@ -18,7 +18,7 @@ export class OtpService {
     const nanoidNumbers = customAlphabet('0123456789', 8);
     const OTP = Number(nanoidNumbers());
     const expiresAt = new Date(Date.now() + 10 * 60 * 1000); // OTP valid for 10 minutes
-    return await this.prisma.db.otp.create({
+    return await this.db.prisma.otp.create({
       data: {
         code: OTP,
         expiresAt,
@@ -28,11 +28,11 @@ export class OtpService {
   }
 
   async markOtpAsUsed(otp: number) {
-    const otpRecord = await this.prisma.db.otp.findUnique({
+    const otpRecord = await this.db.prisma.otp.findUnique({
       where: { code: otp },
     });
     if (otpRecord) {
-      await this.prisma.db.otp.update({
+      await this.db.prisma.otp.update({
         where: { code: otp },
         data: { used: true },
       });
@@ -40,7 +40,7 @@ export class OtpService {
   }
 
   async validateOTP(code: number): Promise<Otp | null> {
-    const otp = await this.prisma.db.otp.findUnique({
+    const otp = await this.db.prisma.otp.findUnique({
       where: { code, used: false },
     });
     if (!otp) {

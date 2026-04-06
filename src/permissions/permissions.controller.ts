@@ -16,7 +16,7 @@ import {
 } from '@nestjs/common';
 import { PermissionsService } from './permissions.service';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+import { HttpCacheInterceptor } from 'lib/interceptors/custom.cache-intercaptor';
 import { Resource } from 'lib/decorators/resource.decorator';
 import { Resources } from '../rbac/resources.enum';
 import {
@@ -41,7 +41,7 @@ import { CreatePermissionsDto } from './dto/create-permision.dto';
 import { UpdatePermissionDto } from './dto/update-permision.dto';
 
 @Controller('permissions')
-@UseInterceptors(CacheInterceptor)
+@UseInterceptors(HttpCacheInterceptor)
 @ModuleTag(ModuleEnum.CUSTOM_ROLES)
 @Resource(Resources.PERMISSION)
 @ApiInternalServerErrorResponse({

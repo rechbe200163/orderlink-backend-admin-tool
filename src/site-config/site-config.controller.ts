@@ -31,9 +31,10 @@ import { SiteConfigDto } from 'prisma/src/generated/dto/siteConfig.dto';
 import { FileSizeValidationPipe } from 'lib/pipes/file-size-validation-pipe';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { FileTypeValidationPipe } from 'lib/pipes/file-name-validation-pipe.ts';
+import { HttpCacheInterceptor } from 'lib/interceptors/custom.cache-intercaptor';
 
 @Controller('site-config')
-@UseInterceptors(CacheInterceptor)
+@UseInterceptors(HttpCacheInterceptor)
 @Resource(Resources.SITE_CONFIG)
 @CacheTTL(60 * 60 * 1000) // Cache for 1 hour
 @ApiInternalServerErrorResponse({ description: 'Internal server error' })

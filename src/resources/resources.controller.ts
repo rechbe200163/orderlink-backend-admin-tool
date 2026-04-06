@@ -3,7 +3,7 @@ import { UpdateResourceDto } from './dto/update-resource.dto';
 import { Resource } from 'lib/decorators/resource.decorator';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+import { HttpCacheInterceptor } from 'lib/interceptors/custom.cache-intercaptor';
 import { ResourcesService } from './resources.service';
 import {
   Controller,
@@ -22,7 +22,7 @@ import {
 } from '@nestjs/swagger';
 
 @Controller('resources')
-@UseInterceptors(CacheInterceptor)
+@UseInterceptors(HttpCacheInterceptor)
 @Resource('RESOURCES')
 @ApiInternalServerErrorResponse({
   description: 'Internal server error',

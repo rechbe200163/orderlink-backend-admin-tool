@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -10,20 +11,22 @@ import { hash } from 'bcryptjs';
 import { UpdateCustomerDto } from 'src/customers/dto/update-customer.dto';
 import { isNoChange } from 'lib/utils/isNoChange';
 import { transformResponse } from 'lib/utils/transform';
-import { PrismaService } from 'src/prisma.service';
+import { PRISMA_CLIENT } from 'lib/providers/prisma-client.provider';
 import { BusinessSector, Prisma } from 'generated/prisma/client';
+import type { ExtendedPrismaClient } from 'src/tenant-prisma.service';
 import { CustomerDto } from './dto/customer.dto';
 import { SortOrder } from 'src/common/enums/sort-order.enum';
+import { TenantDbContext } from 'lib/tenant-db-context';
 
 @Injectable()
 export class CustomersRepository {
   constructor(
     // ✅ use `ExtendedPrismaClient` type for correct type-safety of your extended PrismaClient
-    private readonly prisma: PrismaService,
+    private readonly db: TenantDbContext,
   ) {}
 
   async findCustomerByEmail(email: string): Promise<CustomerDto> {
-    const customer = await this.prisma.db.customer.findUnique({
+    const customer = await this.db.prisma.customer.findUnique({
       where: { email },
     });
     if (!customer) {
@@ -45,7 +48,7 @@ export class CustomersRepository {
       ];
     }
 
-    const customers = await this.prisma.db.customer.findMany({
+    const customers = await this.db.prisma.customer.findMany({
       where,
       orderBy: { signedUp: 'desc' },
     });
@@ -58,7 +61,7 @@ export class CustomersRepository {
   async findCustomerByReference(
     customerReference: number,
   ): Promise<CustomerDto> {
-    const customer = await this.prisma.db.customer.findUnique({
+    const customer = await this.db.prisma.customer.findUnique({
       where: { customerReference },
     });
     if (!customer) {
@@ -78,7 +81,7 @@ export class CustomersRepository {
     businessSector?: BusinessSector,
   ): Promise<CustomerPagingResultDto> {
     console.log('businessSector', businessSector);
-    const [users, meta] = await this.prisma.db.customer
+    const [users, meta] = await this.db.prisma.customer
       .paginate({
         where: {
           ...(businessSector && { businessSector }),
@@ -132,7 +135,7 @@ export class CustomersRepository {
       },
     };
 
-    const customer = await this.prisma.db.customer.create({
+    const customer = await this.db.prisma.customer.create({
       data: customerEntity,
     });
     return {
@@ -145,7 +148,7 @@ export class CustomersRepository {
     customerReference: number,
     customerData: UpdateCustomerDto,
   ): Promise<CustomerDto> {
-    const originalCustomer = await this.prisma.db.customer.findUnique({
+    const originalCustomer = await this.db.prisma.customer.findUnique({
       where: { customerReference },
     });
 
@@ -160,11 +163,11 @@ export class CustomersRepository {
     // Exclude customerId from history entry
     const { customerId, ...customerHistoryData } = originalCustomer;
 
-    const [, updatedCustomer] = await this.prisma.db.$transaction([
-      this.prisma.db.customerHistory.create({
+    const [, updatedCustomer] = await this.db.prisma.$transaction([
+      this.db.prisma.customerHistory.create({
         data: customerHistoryData,
       }),
-      this.prisma.db.customer.update({
+      this.db.prisma.customer.update({
         where: { customerReference },
         data: customerData,
       }),

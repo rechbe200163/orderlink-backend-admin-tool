@@ -16,7 +16,7 @@ import { CustomersService } from './customers.service';
 import { Resource } from 'lib/decorators/resource.decorator';
 import { BusinessSector } from 'generated/prisma/client';
 import { Resources } from '../rbac/resources.enum';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+
 import {
   ApiBearerAuth,
   ApiBody,
@@ -36,9 +36,10 @@ import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { UpdateCustomerDto } from 'src/customers/dto/update-customer.dto';
 import { CustomerDto } from './dto/customer.dto';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
+import { HttpCacheInterceptor } from 'lib/interceptors/custom.cache-intercaptor';
 
 @Controller('customers')
-@UseInterceptors(CacheInterceptor)
+@UseInterceptors(HttpCacheInterceptor)
 @Resource(Resources.CUSTOMER)
 @ApiInternalServerErrorResponse({
   description: 'Internal server error',

@@ -8,7 +8,7 @@
 //   constructor(private readonly prisma: PrismaService) {}
 
 //   async create(data: EventPayloads['product.updated']) {
-//     await this.prisma.db.productHistory.create({
+//     await this.db.prisma..productHistory.create({
 //       data,
 //     });
 //   }

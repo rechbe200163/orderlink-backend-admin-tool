@@ -13,15 +13,17 @@ import { OrderDto } from './dto/order.dto';
 import { isNoChange } from 'lib/utils/isNoChange';
 import { OrderState } from 'generated/prisma/client';
 import { ProductDto } from 'src/products/dto/product.dto';
-import { PrismaService } from 'src/prisma.service';
+import { PRISMA_CLIENT } from 'lib/providers/prisma-client.provider';
 import { SortOrder } from 'src/common/enums/sort-order.enum';
+import type { ExtendedPrismaClient } from 'src/tenant-prisma.service';
+import { TenantDbContext } from 'lib/tenant-db-context';
 
 @Injectable()
 export class OrdersRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly db: TenantDbContext) {}
 
   async create(createOrderDto: CreateOrderDto): Promise<OrderDto> {
-    const order = await this.prisma.db.order.create({
+    const order = await this.db.prisma.order.create({
       data: {
         customerReference: createOrderDto.customerReference,
         deliveryDate: createOrderDto.deliveryDate,
@@ -61,7 +63,7 @@ export class OrdersRepository {
       }
     >
   > {
-    const [orders, meta] = await this.prisma.db.order
+    const [orders, meta] = await this.db.prisma.order
       .paginate({
         where: {
           deleted: false,
@@ -135,7 +137,7 @@ export class OrdersRepository {
   }
 
   findAllOrders(): Promise<any> {
-    return this.prisma.db.order.findMany({
+    return this.db.prisma.order.findMany({
       // with address of customer
       include: {
         customer: {
@@ -150,7 +152,7 @@ export class OrdersRepository {
   }
 
   async findById(orderId: string): Promise<OrderDto> {
-    const order = await this.prisma.db.order.findUnique({
+    const order = await this.db.prisma.order.findUnique({
       where: { orderId },
     });
     if (!order) {
@@ -163,7 +165,7 @@ export class OrdersRepository {
     orderId: string,
     updateOrderDto: UpdateOrderDto,
   ): Promise<OrderDto> {
-    const existing = await this.prisma.db.order.findUnique({
+    const existing = await this.db.prisma.order.findUnique({
       where: { orderId },
     });
     if (!existing) {
@@ -173,7 +175,7 @@ export class OrdersRepository {
       throw new BadRequestException(`No changes detected for order ${orderId}`);
     }
     const { products, ...rest } = updateOrderDto;
-    const order = await this.prisma.db.order.update({
+    const order = await this.db.prisma.order.update({
       where: { orderId },
       data: {
         ...rest,

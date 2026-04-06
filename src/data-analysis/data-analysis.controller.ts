@@ -19,9 +19,10 @@ import {
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { DataAnalysisTokenServiceService } from './external-api.token-service';
+import { HttpCacheInterceptor } from 'lib/interceptors/custom.cache-intercaptor';
 
 @Controller('data-analysis')
-@UseInterceptors(CacheInterceptor)
+@UseInterceptors(HttpCacheInterceptor)
 @Resource(Resources.STATISTICS)
 @CacheTTL(60 * 60 * 1000) // Cache for 1 hour
 @ApiBearerAuth()

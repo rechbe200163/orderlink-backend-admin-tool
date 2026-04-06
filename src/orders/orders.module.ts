@@ -3,11 +3,11 @@ import { OrdersService } from './orders.service';
 import { OrdersController } from './orders.controller';
 import { OrdersRepository } from './orders.repository';
 import { TypedEventEmitterModule } from 'src/event-emitter/event-emitter.module';
-import { PrismaService } from 'src/prisma.service';
+import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
-  imports: [TypedEventEmitterModule],
+  imports: [TypedEventEmitterModule, DatabaseModule],
   controllers: [OrdersController],
-  providers: [OrdersService, OrdersRepository, PrismaService],
+  providers: [OrdersService, OrdersRepository],
 })
 export class OrdersModule {}

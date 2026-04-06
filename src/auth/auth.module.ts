@@ -7,11 +7,14 @@ import { JwtStrategy } from './strategy/jwt.strategy';
 import { EmployeesModule } from 'src/employees/employees.module';
 import { TypedEventEmitterModule } from 'src/event-emitter/event-emitter.module';
 import { OtpModule } from 'src/otp/otp.module';
-import { PrismaService } from 'src/prisma.service';
+import { DatabaseModule } from 'src/database/database.module';
+import { TenantModule } from 'src/tenant/tenant.module';
+
 @Module({
-  providers: [AuthService, JwtStrategy, PrismaService],
+  providers: [AuthService, JwtStrategy],
   controllers: [AuthController],
   imports: [
+    DatabaseModule,
     TypedEventEmitterModule,
     EmployeesModule,
     JwtModule.register({
@@ -21,8 +24,9 @@ import { PrismaService } from 'src/prisma.service';
         : 'your_jwt_secret_here',
       signOptions: { expiresIn: '1h' },
     }),
-    PassportModule,
     OtpModule,
+    TenantModule,
+    PassportModule,
     EmployeesModule,
   ],
 })

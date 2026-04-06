@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -9,14 +10,16 @@ import { CreateProductDto } from 'src/products/dto/create-product.dto';
 import { ProductDto } from './dto/product.dto';
 import { transformResponse } from 'lib/utils/transform';
 import { UpdateProductDto } from './dto/update-product.dto';
-import { PrismaService } from 'src/prisma.service';
+import { PRISMA_CLIENT } from 'lib/providers/prisma-client.provider';
 import { SortOrder } from 'src/common/enums/sort-order.enum';
+import type { ExtendedPrismaClient } from 'src/tenant-prisma.service';
+import { TenantDbContext } from 'lib/tenant-db-context';
 
 @Injectable()
 export class ProductsRepository {
   constructor(
     // ✅ use `ExtendedPrismaClient` type for correct type-safety of your extended PrismaClient
-    private readonly prisma: PrismaService,
+    private readonly db: TenantDbContext,
   ) {}
 
   // products.repository.ts
@@ -27,7 +30,7 @@ export class ProductsRepository {
       throw new BadRequestException('Category ID is required');
     }
 
-    const product = await this.prisma.db.product.create({
+    const product = await this.db.prisma.product.create({
       data: {
         name: createProductDto.name,
         price: createProductDto.price,
@@ -37,7 +40,7 @@ export class ProductsRepository {
       },
     });
 
-    await this.prisma.db.categoriesOnProducts.create({
+    await this.db.prisma.categoriesOnProducts.create({
       data: {
         productId: product.productId,
         categoryId: createProductDto.categoryId,
@@ -48,7 +51,7 @@ export class ProductsRepository {
   }
 
   // async getHistory(productId: string): Promise<ProductHistoryDto[]> {
-  //   const product = await this.prisma.db.productHistory.findMany({
+  //   const product = await this.db.prisma.productHistory.findMany({
   //     where: { productId },
   //     orderBy: { version: 'desc' },
   //   });
@@ -68,7 +71,7 @@ export class ProductsRepository {
     search?: string,
     categoryId?: string,
   ): Promise<PagingResultDto<ProductDto>> {
-    const [products, meta] = await this.prisma.db.product
+    const [products, meta] = await this.db.prisma.product
       .paginate({
         where: {
           ...(search && {
@@ -100,7 +103,7 @@ export class ProductsRepository {
   }
 
   async findById(productId: string): Promise<ProductDto> {
-    const product = await this.prisma.db.product.findUnique({
+    const product = await this.db.prisma.product.findUnique({
       where: { productId },
     });
     if (!product) {
@@ -114,7 +117,7 @@ export class ProductsRepository {
     updateProductDto: UpdateProductDto,
     imageName?: string,
   ): Promise<ProductDto> {
-    const product = await this.prisma.db.product.update({
+    const product = await this.db.prisma.product.update({
       where: { productId },
       data: {
         name: updateProductDto.name,
@@ -141,7 +144,7 @@ export class ProductsRepository {
   }
 
   async findOriginalProductById(productId: string) {
-    const product = await this.prisma.db.product.findUnique({
+    const product = await this.db.prisma.product.findUnique({
       where: { productId },
     });
     if (!product) {
@@ -151,7 +154,7 @@ export class ProductsRepository {
   }
 
   async findProductByIds(productIds: string[]): Promise<ProductDto[]> {
-    const products = await this.prisma.db.product.findMany({
+    const products = await this.db.prisma.product.findMany({
       where: {
         productId: { in: productIds },
       },

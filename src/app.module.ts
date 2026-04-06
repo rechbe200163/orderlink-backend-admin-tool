@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { ThrottlerModule } from '@nestjs/throttler';
@@ -28,9 +28,22 @@ import { z } from 'zod';
 import { ActionsModule } from './actions/actions.module';
 import { ResourcesModule } from './resources/resources.module';
 import { DataAnalysisModule } from './data-analysis/data-analysis.module';
+import { TenantService } from './tenant/tenant.service';
+import { TenantMiddleware } from './middlewares/tenant.middleware';
+import { DatabaseModule } from './database/database.module';
+import { TenantModule } from './tenant/tenant.module';
 
 const envSchema = z.object({
-  DATABASE_URL: z.string().min(1), // url() kann bei prisma strings manchmal nerven
+  MASTER_DATABASE_URL: z.string().min(1), // url() kann bei prisma strings manchmal nerven
+
+  DATABASE_HOST: z.string().min(1),
+  DATABASE_PORT: z.string().min(1),
+  DATABASE_NAME: z.string().min(1),
+  DATABASE_PASSWORD: z.string().min(1),
+
+  DATABASE_SSLMODE: z.string().min(1),
+  DATABASE_CHANNEL_BINDING: z.string().min(1),
+
   JWT_SECRET: z.string().min(1),
 
   REDIS_URL: z.string().optional(),
@@ -100,8 +113,14 @@ const envSchema = z.object({
     ActionsModule,
     ResourcesModule,
     DataAnalysisModule,
+    DatabaseModule,
+    TenantModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, TenantService],
 })
-export class AppModule {}
+export class AppModule implements NestModule {
+  configure(consumer: MiddlewareConsumer) {
+    consumer.apply(TenantMiddleware).forRoutes('*');
+  }
+}

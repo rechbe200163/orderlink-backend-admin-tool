@@ -1,5 +1,5 @@
 import { Controller, Get, UseInterceptors, UseGuards } from '@nestjs/common';
-import { CacheInterceptor } from '@nestjs/cache-manager';
+import { HttpCacheInterceptor } from 'lib/interceptors/custom.cache-intercaptor';
 import { StatisticsService } from './statistics.service';
 import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import {
@@ -22,7 +22,7 @@ import { Resources } from 'src/rbac/resources.enum';
 import { Resource } from 'lib/decorators/resource.decorator';
 
 @Controller('statistics')
-@UseInterceptors(CacheInterceptor)
+@UseInterceptors(HttpCacheInterceptor)
 @ApiInternalServerErrorResponse({ description: 'Internal server error' })
 @ApiBearerAuth()
 @ModuleTag(ModuleEnum.STATISTICS)

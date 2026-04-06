@@ -3,12 +3,13 @@ import { CustomersService } from './customers.service';
 import { CustomersController } from './customers.controller';
 import { CustomersRepository } from './customer.repository';
 import { TypedEventEmitterModule } from 'src/event-emitter/event-emitter.module';
-import { PrismaService } from 'src/prisma.service';
+import { PRISMA_CLIENT } from 'lib/providers/prisma-client.provider';
+import { DatabaseModule } from 'src/database/database.module';
 
 @Module({
-  imports: [TypedEventEmitterModule],
+  imports: [TypedEventEmitterModule, DatabaseModule],
   controllers: [CustomersController],
-  providers: [CustomersService, CustomersRepository, PrismaService],
+  providers: [CustomersService, CustomersRepository],
   exports: [CustomersService],
 })
 export class CustomersModule {}

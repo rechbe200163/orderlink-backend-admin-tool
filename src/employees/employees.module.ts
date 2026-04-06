@@ -4,11 +4,11 @@ import { EmployeesController } from './employees.controller';
 import { EmployeesRepository } from './employees.repository';
 import { RolesModule } from 'src/roles/roles.module';
 import { TypedEventEmitterModule } from 'src/event-emitter/event-emitter.module';
-import { PrismaService } from 'src/prisma.service';
+import { DatabaseModule } from 'src/database/database.module';
 @Module({
-  imports: [RolesModule, TypedEventEmitterModule],
+  imports: [RolesModule, TypedEventEmitterModule, DatabaseModule],
   controllers: [EmployeesController],
-  providers: [EmployeesService, EmployeesRepository, PrismaService],
+  providers: [EmployeesService, EmployeesRepository],
   exports: [EmployeesService, EmployeesRepository],
 })
 export class EmployeesModule {}

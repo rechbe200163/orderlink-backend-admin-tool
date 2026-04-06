@@ -11,14 +11,14 @@ import { RouteDto } from 'prisma/src/generated/dto/route.dto';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { transformResponse } from 'lib/utils/transform';
 import { isNoChange } from 'lib/utils/isNoChange';
-import { PrismaService } from 'src/prisma.service';
+import { TenantDbContext } from 'lib/tenant-db-context';
 
 @Injectable()
 export class RoutesRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly db: TenantDbContext) {}
 
   async create(data: CreateRouteDto): Promise<RouteDto> {
-    const existing = await this.prisma.db.route.findFirst({
+    const existing = await this.db.prisma.route.findFirst({
       where: { name: data.name },
     });
     if (existing) {
@@ -26,7 +26,7 @@ export class RoutesRepository {
         `Route with name ${data.name} already exists`,
       );
     }
-    const route = await this.prisma.db.route.create({ data });
+    const route = await this.db.prisma.route.create({ data });
     return transformResponse(RouteDto, route);
   }
 
@@ -35,7 +35,7 @@ export class RoutesRepository {
     page = 1,
     search?: string,
   ): Promise<PagingResultDto<RouteDto & { ordersCount: number }>> {
-    const [routes, meta] = await this.prisma.db.route
+    const [routes, meta] = await this.db.prisma.route
       .paginate({
         where: {
           deleted: false,
@@ -63,7 +63,7 @@ export class RoutesRepository {
   }
 
   async findById(routeId: string): Promise<RouteDto> {
-    const route = await this.prisma.db.route.findUnique({
+    const route = await this.db.prisma.route.findUnique({
       where: { routeId },
     });
     if (!route) {
@@ -73,7 +73,7 @@ export class RoutesRepository {
   }
 
   async update(routeId: string, data: UpdateRouteDto): Promise<RouteDto> {
-    const existing = await this.prisma.db.route.findUnique({
+    const existing = await this.db.prisma.route.findUnique({
       where: { routeId },
     });
     if (!existing) {
@@ -82,7 +82,7 @@ export class RoutesRepository {
     if (isNoChange<UpdateRouteDto>(data, existing)) {
       throw new BadRequestException(`No changes detected for route ${routeId}`);
     }
-    const route = await this.prisma.db.route.update({
+    const route = await this.db.prisma.route.update({
       where: { routeId },
       data,
     });

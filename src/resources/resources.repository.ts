@@ -1,24 +1,27 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
 import { transformResponse } from 'lib/utils/transform';
-import { PrismaService } from 'src/prisma.service';
+import { PRISMA_CLIENT } from 'lib/providers/prisma-client.provider';
 import { CreateResourceDto } from './dto/create-resource.dto';
 import { ResourceEntity } from './entities/resource.entity';
 import { UpdateResourceDto } from './dto/update-resource.dto';
+import type { ExtendedPrismaClient } from 'src/tenant-prisma.service';
+import { TenantDbContext } from 'lib/tenant-db-context';
 
 @Injectable()
 export class ResourceRepository {
   constructor(
     // ✅ use `ExtendedPrismaClient` type for correct type-safety of your extended PrismaClient
-    private readonly prisma: PrismaService,
+    private readonly db: TenantDbContext,
   ) {}
 
   async create(resourceData: CreateResourceDto) {
     console.log('Creating resource with data:', resourceData);
-    const existingResource = await this.prisma.db.resource.findUnique({
+    const existingResource = await this.db.prisma.resource.findUnique({
       where: { key: resourceData.key },
     });
     if (existingResource) {
@@ -26,7 +29,7 @@ export class ResourceRepository {
         `Resource with key ${resourceData.key} already exists`,
       );
     }
-    const createdResource = await this.prisma.db.resource.create({
+    const createdResource = await this.db.prisma.resource.create({
       data: {
         key: resourceData.key,
         description: resourceData.description,
@@ -36,7 +39,7 @@ export class ResourceRepository {
   }
 
   async findById(resourceId: string) {
-    const resource = await this.prisma.db.resource.findUnique({
+    const resource = await this.db.prisma.resource.findUnique({
       where: { id: resourceId },
     });
     if (!resource) {
@@ -46,14 +49,14 @@ export class ResourceRepository {
   }
 
   async findAllRoleNames() {
-    const roles = await this.prisma.db.resource.findMany({
+    const roles = await this.db.prisma.resource.findMany({
       select: { key: true },
     });
     return roles.map((role) => role.key);
   }
 
   async findAll(limit: number = 10, page: number = 1, search: string = '') {
-    const [resources, meta] = await this.prisma.db.resource
+    const [resources, meta] = await this.db.prisma.resource
       .paginate({
         where: {
           deleted: false,
@@ -78,13 +81,13 @@ export class ResourceRepository {
   }
 
   async update(key: string, resourceData: UpdateResourceDto) {
-    const existingResource = await this.prisma.db.resource.findUnique({
+    const existingResource = await this.db.prisma.resource.findUnique({
       where: { key },
     });
     if (!existingResource) {
       throw new NotFoundException(`Resource not found`);
     }
-    const updatedResource = await this.prisma.db.resource.update({
+    const updatedResource = await this.db.prisma.resource.update({
       where: { key },
       data: resourceData,
     });

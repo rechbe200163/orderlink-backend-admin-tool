@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  Inject,
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
@@ -8,14 +9,14 @@ import { SiteConfigDto } from 'prisma/src/generated/dto/siteConfig.dto';
 import { UpdateSiteConfigDto } from 'prisma/src/generated/dto/update-siteConfig.dto';
 import { transformResponse } from 'lib/utils/transform';
 import { isNoChange } from 'lib/utils/isNoChange';
-import { PrismaService } from 'src/prisma.service';
+import { TenantDbContext } from 'lib/tenant-db-context';
 
 @Injectable()
 export class SiteConfigRepository {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(private readonly db: TenantDbContext) {}
 
   async create(data: CreateSiteConfigDto): Promise<SiteConfigDto> {
-    const siteConfig = await this.prisma.db.siteConfig.create({
+    const siteConfig = await this.db.prisma.siteConfig.create({
       data: {
         ...data,
       },
@@ -24,7 +25,7 @@ export class SiteConfigRepository {
   }
 
   async findFirst(): Promise<SiteConfigDto> {
-    const siteConfig = await this.prisma.db.siteConfig.findFirst({
+    const siteConfig = await this.db.prisma.siteConfig.findFirst({
       include: {
         address: true, // Include address if needed
       },
@@ -33,7 +34,7 @@ export class SiteConfigRepository {
   }
 
   async findById(siteConfigId: string): Promise<SiteConfigDto> {
-    const config = await this.prisma.db.siteConfig.findUnique({
+    const config = await this.db.prisma.siteConfig.findUnique({
       where: { siteConfigId },
     });
     if (!config) {
@@ -48,7 +49,7 @@ export class SiteConfigRepository {
     siteConfigId: string,
     data: UpdateSiteConfigDto,
   ): Promise<SiteConfigDto> {
-    const existing = await this.prisma.db.siteConfig.findUnique({
+    const existing = await this.db.prisma.siteConfig.findUnique({
       where: { siteConfigId },
     });
     if (!existing) {
@@ -72,7 +73,7 @@ export class SiteConfigRepository {
     const cleanData = Object.fromEntries(
       Object.entries(data).filter(([, value]) => value !== null),
     );
-    const config = await this.prisma.db.siteConfig.update({
+    const config = await this.db.prisma.siteConfig.update({
       where: { siteConfigId },
       data: cleanData,
     });

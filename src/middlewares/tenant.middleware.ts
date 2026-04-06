@@ -1,0 +1,93 @@
+import {
+  BadRequestException,
+  Inject,
+  Injectable,
+  NestMiddleware,
+  NotFoundException,
+} from '@nestjs/common';
+import { Request, Response, NextFunction } from 'express';
+import { CACHE_MANAGER } from '@nestjs/cache-manager';
+import type { Cache } from 'cache-manager';
+import { TenantRepository } from 'src/tenant/tenant.repository';
+
+export interface TenantRequest extends Request {
+  tenantId?: string;
+  tenantDbUrl?: string;
+  subdomain?: string | null;
+}
+
+type CachedTenant = {
+  tenantId: string;
+  subdomain: string;
+  dbUrl: string;
+};
+
+@Injectable()
+export class TenantMiddleware implements NestMiddleware {
+  constructor(
+    @Inject(CACHE_MANAGER) private readonly cache: Cache,
+    private readonly tenantRepository: TenantRepository,
+  ) {}
+
+  async use(req: TenantRequest, res: Response, next: NextFunction) {
+    try {
+      const host = req.headers.host?.split(':')[0] ?? '';
+
+      let subdomain: string | null = null;
+
+      if (host.endsWith('.localhost')) {
+        subdomain = host.replace('.localhost', '');
+      } else {
+        const parts = host.split('.');
+        if (parts.length >= 3) {
+          subdomain = parts[0];
+        }
+      }
+
+      console.log(`Incoming request: ${req.method} ${req.originalUrl}`);
+      console.log(`Host: ${host}`);
+      console.log(`Resolved subdomain: ${subdomain}`);
+
+      if (!subdomain) {
+        throw new BadRequestException('Missing tenant subdomain');
+      }
+
+      if (!/^[a-zA-Z0-9_-]{3,50}$/.test(subdomain)) {
+        throw new BadRequestException('Invalid tenant subdomain');
+      }
+
+      const cacheKey = `tenant:subdomain:${subdomain}`;
+
+      let tenant = await this.cache.get<CachedTenant>(cacheKey);
+
+      if (!tenant) {
+        const dbTenant = await this.tenantRepository.getBySubdomain(subdomain);
+
+        if (!dbTenant) {
+          throw new NotFoundException(
+            `Tenant not found for subdomain: ${subdomain}`,
+          );
+        }
+
+        tenant = {
+          tenantId: dbTenant.tenantId,
+          subdomain: dbTenant.subdomain,
+          dbUrl: dbTenant.dbUrl,
+        };
+
+        await this.cache.set(cacheKey, tenant, 60 * 60 * 1000);
+      }
+
+      req.subdomain = tenant.subdomain;
+      req.tenantId = tenant.tenantId;
+      req.tenantDbUrl = tenant.dbUrl;
+
+      console.log(`Resolved tenantId: ${req.tenantId}`);
+      console.log(`Resolved tenantDbUrl: ${req.tenantDbUrl}`);
+
+      next();
+    } catch (error) {
+      next(error);
+    }
+  }
+}

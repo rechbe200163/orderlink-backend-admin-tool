@@ -1,32 +1,27 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  Scope,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { REQUEST } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { compare } from 'bcryptjs';
-import { SanitizedEmployee } from 'lib/types';
+import { AuthResult, JwtPayload, SanitizedEmployee } from 'lib/types';
+import { TenantDbContext } from 'lib/tenant-db-context';
 import { OtpService } from 'src/otp/otp.service';
-import { PrismaService } from 'src/prisma.service';
+import type { TenantRequest } from 'src/middlewares/tenant.middleware';
 
-type AuthInput = {
+export type AuthInput = {
   email: string;
   password: string;
 };
 
-export type Token = {
-  accessToken: string;
-  issuedAt: number;
-  expiresAt: number;
-};
-
-type AuthResult = {
-  token: Token;
-  user: SanitizedEmployee;
-};
-
-export type JwtPayload = SanitizedEmployee;
-
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class AuthService {
   constructor(
-    private readonly prisma: PrismaService,
+    @Inject(REQUEST) private readonly req: TenantRequest,
+    private readonly db: TenantDbContext,
     private readonly otpService: OtpService,
     private readonly jwtService: JwtService,
   ) {}
@@ -35,47 +30,69 @@ export class AuthService {
     if (!input.email || !input.password || input.password.trim() === '') {
       throw new UnauthorizedException('Invalid credentials');
     }
+
     const user = await this.validateUser(input);
+
     if (!user) {
       throw new UnauthorizedException('Invalid credentials');
     }
+
     return this.signIn(user);
   }
 
   async validateUser(authInput: AuthInput): Promise<SanitizedEmployee | null> {
-    const user = await this.prisma.db.employees.findUnique({
+    const user = await this.db.prisma.employees.findUnique({
       where: { email: authInput.email },
     });
 
-    if (user && (await compare(authInput.password, user.password))) {
-      const { password, ...result } = user;
-      return result;
+    if (!user) {
+      return null;
     }
-    return null;
+
+    const isPasswordValid = await compare(authInput.password, user.password);
+
+    if (!isPasswordValid) {
+      return null;
+    }
+
+    const { password, ...sanitizedUser } = user;
+    return sanitizedUser;
   }
 
   async signIn(user: SanitizedEmployee): Promise<AuthResult> {
-    const tokenPayload = {
+    const tenantId = this.req.tenantId;
+
+    if (!tenantId) {
+      throw new UnauthorizedException('Tenant not resolved');
+    }
+
+    const tokenPayload: JwtPayload = {
       employeeId: user.employeeId,
       email: user.email,
       firstName: user.firstName,
       lastName: user.lastName,
       roleId: user.roleId,
       superAdmin: user.superAdmin,
+      tenantId,
     };
-    const accessToken = this.jwtService.sign(tokenPayload);
-    const { ...sanitized } = tokenPayload;
 
-    // Decode JWT to get actual issued and expiry times
-    const decoded = this.jwtService.decode(accessToken) as any;
+    const accessToken = await this.jwtService.signAsync(tokenPayload);
+    const decoded = this.jwtService.decode(accessToken) as {
+      iat: number;
+      exp: number;
+    } | null;
+
+    if (!decoded?.iat || !decoded?.exp) {
+      throw new UnauthorizedException('Could not decode access token');
+    }
 
     return {
       token: {
         accessToken,
-        issuedAt: decoded.iat * 1000, // Convert to milliseconds
-        expiresAt: decoded.exp * 1000, // Convert to milliseconds
+        issuedAt: decoded.iat * 1000,
+        expiresAt: decoded.exp * 1000,
       },
-      user: sanitized as SanitizedEmployee,
+      user,
     };
   }
 
@@ -85,16 +102,22 @@ export class AuthService {
 
   async signInWithOtp(code: number): Promise<AuthResult> {
     const otp = await this.otpService.validateOTP(code);
+
     if (!otp) {
       throw new UnauthorizedException('Invalid or expired OTP');
     }
-    const employee = await this.prisma.db.employees.findUnique({
+
+    const employee = await this.db.prisma.employees.findUnique({
       where: { employeeId: otp.employeeId },
     });
+
     if (!employee) {
       throw new UnauthorizedException('Invalid or expired OTP');
     }
+
     await this.otpService.markOtpAsUsed(code);
-    return this.signIn(employee);
+
+    const { password, ...sanitizedEmployee } = employee;
+    return this.signIn(sanitizedEmployee);
   }
 }
