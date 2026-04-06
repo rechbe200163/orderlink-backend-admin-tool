@@ -1,12 +1,13 @@
 // prisma/seed.ts
 /* eslint-disable no-console */
 
-import { PrismaPg } from '@prisma/adapter-pg';
 import {
-  PrismaClient,
-  OrderState,
   BusinessSector,
-} from '../generated/prisma/client'; // ggf. Pfad anpassen
+  OrderState,
+  PrismaClient,
+} from '@generated/tenant/client';
+import { PrismaPg } from '@prisma/adapter-pg';
+
 import { randomUUID } from 'crypto';
 
 const adapter = new PrismaPg({

@@ -11,7 +11,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { OrderDto } from './dto/order.dto';
 import { isNoChange } from 'lib/utils/isNoChange';
-import { OrderState } from 'generated/prisma/client';
+import { OrderState } from '@generated/tenant/client';
 import { ProductDto } from 'src/products/dto/product.dto';
 import { PRISMA_CLIENT } from 'lib/providers/prisma-client.provider';
 import { SortOrder } from 'src/common/enums/sort-order.enum';

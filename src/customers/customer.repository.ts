@@ -12,7 +12,7 @@ import { UpdateCustomerDto } from 'src/customers/dto/update-customer.dto';
 import { isNoChange } from 'lib/utils/isNoChange';
 import { transformResponse } from 'lib/utils/transform';
 import { PRISMA_CLIENT } from 'lib/providers/prisma-client.provider';
-import { BusinessSector, Prisma } from 'generated/prisma/client';
+import { BusinessSector, Prisma } from '@generated/tenant/client';
 import type { ExtendedPrismaClient } from 'src/tenant-prisma.service';
 import { CustomerDto } from './dto/customer.dto';
 import { SortOrder } from 'src/common/enums/sort-order.enum';

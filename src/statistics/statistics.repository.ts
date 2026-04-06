@@ -5,11 +5,12 @@ import { RevenueStatsDto } from './dto/revenue-stats.dto';
 import { SalesStatsDto } from './dto/sales-stats.dto';
 import { AverageOrderValueStatsDto } from './dto/average-order-value-stats.dto';
 import { CustomerStatsDto } from './dto/customer-stats.dto';
-import { BusinessSector, OrderState } from 'generated/prisma/client';
+
 import { PRISMA_CLIENT } from 'lib/providers/prisma-client.provider';
 import { Inject, Injectable } from '@nestjs/common';
 import type { ExtendedPrismaClient } from 'src/tenant-prisma.service';
 import { TenantDbContext } from 'lib/tenant-db-context';
+import { BusinessSector, OrderState } from '@generated/tenant/client';
 
 @Injectable()
 export class StatisticsRepository {

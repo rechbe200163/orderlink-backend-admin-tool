@@ -1,6 +1,6 @@
+import { OrderState } from '@generated/tenant/client';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsInt } from 'class-validator';
-import { OrderState } from 'generated/prisma/client';
 
 export class OrderStateCountDto {
   @ApiProperty({ enum: OrderState })

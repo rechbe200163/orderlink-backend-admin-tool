@@ -1,4 +1,4 @@
-import { BusinessSector } from 'generated/prisma/client';
+import { BusinessSector } from '@generated/tenant/client';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class UpdateCustomerHistoryDto {

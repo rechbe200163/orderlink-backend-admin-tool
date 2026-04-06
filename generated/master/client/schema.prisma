@@ -1,3 +1,12 @@
+generator masterClient {
+  provider = "prisma-client-js"
+  output   = "../generated/master/client"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
 model Tenant {
   tenantId     String   @id @default(nanoid())
   companyName  String
@@ -16,21 +25,20 @@ model Tenant {
 }
 
 model Address {
-  addressId    String    @id @default(uuid())
-  city         String    @db.VarChar(100)
-  country      String    @db.VarChar(40)
-  postCode     String    @db.VarChar(10)
-  state        String    @db.VarChar(40)
-  streetName   String    @db.VarChar(255)
-  streetNumber String    @db.VarChar(30)
+  addressId    String   @id @default(uuid())
+  city         String   @db.VarChar(100)
+  country      String   @db.VarChar(40)
+  postCode     String   @db.VarChar(10)
+  state        String   @db.VarChar(40)
+  streetName   String   @db.VarChar(255)
+  streetNumber String   @db.VarChar(30)
   modifiedAt   DateTime @updatedAt
-  deleted      Boolean   @default(false)
+  deleted      Boolean  @default(false)
   longitude    Float?
   latitude     Float?
   tenants      Tenant[]
 
   @@unique([streetName, streetNumber, city, postCode, state, country])
   @@index([streetName, streetNumber, city, postCode, state, country])
-
   @@map("addresses")
 }

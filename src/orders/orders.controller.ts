@@ -32,7 +32,7 @@ import { JwtAuthGuard } from 'src/auth/guards/jwt.guard';
 import { PermissionsGuard } from 'src/auth/guards/RBACGuard';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { OrderDto } from './dto/order.dto';
-import { OrderState } from 'generated/prisma/client';
+import { OrderState } from '@generated/tenant/client';
 import { PaginationQueryDto } from 'src/common/dto/pagination-query.dto';
 
 @Controller('orders')

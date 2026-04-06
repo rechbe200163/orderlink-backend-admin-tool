@@ -1,4 +1,4 @@
-import { BusinessSector } from 'generated/prisma/client';
+import { BusinessSector } from '@generated/tenant/client';
 import { ApiProperty, getSchemaPath } from '@nestjs/swagger';
 import {
   IsEmail,

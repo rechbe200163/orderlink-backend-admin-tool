@@ -10,7 +10,7 @@ import { Resources } from '../../rbac/resources.enum';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
 
 import { PRISMA_CLIENT } from 'lib/providers/prisma-client.provider';
-import { Action } from 'generated/prisma/client';
+import { Action } from '@generated/tenant/client';
 import type { ExtendedPrismaClient } from 'src/tenant-prisma.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';

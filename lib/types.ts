@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { Employees } from 'generated/prisma/client';
+import { Employees } from '@generated/tenant/client';
 
 export type Token = {
   accessToken: string;

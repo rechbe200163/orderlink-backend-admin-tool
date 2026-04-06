@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { BusinessSector } from 'generated/prisma/client';
+import { BusinessSector } from '@generated/tenant/client';
 
 export class CustomerHistoryDto {
   historyId: string;

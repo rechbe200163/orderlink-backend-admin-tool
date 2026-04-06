@@ -5,7 +5,7 @@ import { RolesRepository } from './../roles/roles.repository';
 import { transformResponse } from 'lib/utils/transform';
 import { PRISMA_CLIENT } from 'lib/providers/prisma-client.provider';
 import { isNoChange } from 'lib/utils/isNoChange';
-import { Otp, PrismaClient } from 'generated/prisma/client';
+import { Otp, PrismaClient } from '@generated/tenant/client';
 import { customAlphabet } from 'nanoid';
 import { hash } from 'bcryptjs';
 import {
