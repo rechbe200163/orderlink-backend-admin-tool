@@ -14,12 +14,11 @@ import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { TenantRepository } from 'src/tenant/tenant.repository';
 
-export interface TenantRequest extends ExpressRequest {
+export type TenantRequest = ExpressRequest & {
   tenantId?: string;
   tenantDbUrl?: string;
   subdomain?: string | null;
-  originalUrl: string;
-}
+};
 
 type CachedTenant = {
   tenantId: string;
