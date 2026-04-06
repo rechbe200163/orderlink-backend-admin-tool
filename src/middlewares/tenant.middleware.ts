@@ -5,15 +5,20 @@ import {
   NestMiddleware,
   NotFoundException,
 } from '@nestjs/common';
-import { Request, Response, NextFunction } from 'express';
+import type {
+  Request as ExpressRequest,
+  Response,
+  NextFunction,
+} from 'express';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { TenantRepository } from 'src/tenant/tenant.repository';
 
-export interface TenantRequest extends Request {
+export interface TenantRequest extends ExpressRequest {
   tenantId?: string;
   tenantDbUrl?: string;
   subdomain?: string | null;
+  originalUrl: string;
 }
 
 type CachedTenant = {

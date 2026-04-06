@@ -9,13 +9,12 @@ import { Reflector } from '@nestjs/core';
 import { Resources } from '../../rbac/resources.enum';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
 
-import { PRISMA_CLIENT } from 'lib/providers/prisma-client.provider';
 import { Action } from '@generated/tenant/client';
-import type { ExtendedPrismaClient } from 'src/tenant-prisma.service';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
 import { TenantDbContext } from 'lib/tenant-db-context';
 import { JwtPayload, UserRequest } from 'lib/types';
+import type { Request as ExpressRequest } from 'express';
 
 const ACTIONS_KEY = 'rbac:actions:v1';
 const ROLE_PERMS_KEY = (roleId: string) => `rbac:perms:role:${roleId}:v1`;
@@ -32,7 +31,8 @@ export class PermissionsGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const req = context.switchToHttp().getRequest<UserRequest>();
+    const req =
+      context.switchToHttp().getRequest<UserRequest & ExpressRequest>();
     const employee = req.user as JwtPayload;
 
     if (!employee) {
