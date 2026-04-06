@@ -1,10 +1,36 @@
 model Tenant {
-  tenantId    String   @id @default(nanoid())
-  name        String
+  tenantId     String   @id @default(nanoid())
+  companyName  String
   subdomain    String   @unique
-  dbUrl       String
-  companyName String?
-  description String?
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  dbUrl        String
+  description  String?
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  deleted      Boolean  @default(false)
+  isConfigured Boolean  @default(false)
+  addressId    String
+  address      Address  @relation(fields: [addressId], references: [addressId])
+
+  @@index([companyName, subdomain])
+  @@map("tenants")
+}
+
+model Address {
+  addressId    String    @id @default(uuid())
+  city         String    @db.VarChar(100)
+  country      String    @db.VarChar(40)
+  postCode     String    @db.VarChar(10)
+  state        String    @db.VarChar(40)
+  streetName   String    @db.VarChar(255)
+  streetNumber String    @db.VarChar(30)
+  modifiedAt   DateTime @updatedAt
+  deleted      Boolean   @default(false)
+  longitude    Float?
+  latitude     Float?
+  tenants      Tenant[]
+
+  @@unique([streetName, streetNumber, city, postCode, state, country])
+  @@index([streetName, streetNumber, city, postCode, state, country])
+
+  @@map("addresses")
 }
