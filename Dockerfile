@@ -8,6 +8,10 @@ RUN corepack enable && corepack prepare pnpm@latest --activate
 
 COPY . .
 
+# Dummy ENV für Prisma generate im Build
+ENV MASTER_DATABASE_URL="postgresql://user:password@localhost:5432/master"
+ENV DATABASE_URL="postgresql://user:password@localhost:5432/tenant"
+
 # Optional: Falls du .npmrc brauchst (z. B. Registry oder pnpm settings)
 # COPY .npmrc .npmrc
 
