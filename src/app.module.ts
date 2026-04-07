@@ -36,14 +36,6 @@ import { TenantModule } from './tenant/tenant.module';
 const envSchema = z.object({
   MASTER_DATABASE_URL: z.string().min(1), // url() kann bei prisma strings manchmal nerven
 
-  DATABASE_HOST: z.string().min(1),
-  DATABASE_PORT: z.string().min(1),
-  DATABASE_NAME: z.string().min(1),
-  DATABASE_PASSWORD: z.string().min(1),
-
-  DATABASE_SSLMODE: z.string().min(1),
-  DATABASE_CHANNEL_BINDING: z.string().min(1),
-
   JWT_SECRET: z.string().min(1),
 
   REDIS_URL: z.string().optional(),
