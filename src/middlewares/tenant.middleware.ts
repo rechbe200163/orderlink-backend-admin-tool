@@ -26,6 +26,31 @@ type CachedTenant = {
   dbUrl: string;
 };
 
+function extractTenantSubdomainFromUrl(value?: string | string[]): string | null {
+  const input = Array.isArray(value) ? value[0] : value;
+
+  if (!input) return null;
+
+  try {
+    const url = new URL(input);
+    const host = url.hostname.toLowerCase();
+
+    if (host.endsWith('.localhost')) {
+      const subdomain = host.replace('.localhost', '');
+      return subdomain || null;
+    }
+
+    const parts = host.split('.');
+    if (parts.length >= 4) {
+      return parts[0] || null;
+    }
+
+    return null;
+  } catch {
+    return null;
+  }
+}
+
 @Injectable()
 export class TenantMiddleware implements NestMiddleware {
   constructor(
@@ -36,22 +61,39 @@ export class TenantMiddleware implements NestMiddleware {
   async use(req: TenantRequest, res: Response, next: NextFunction) {
     try {
       const host = req.headers.host?.split(':')[0] ?? '';
+      const forwardedTenant = req.headers['x-tenant-subdomain']
+        ?.toString()
+        .trim()
+        .toLowerCase();
+      const origin = req.headers.origin;
+      const referer = req.headers.referer;
 
       let subdomain: string | null = null;
 
-      if (host.endsWith('.localhost')) {
-        subdomain = host.replace('.localhost', '');
+      if (forwardedTenant) {
+        subdomain = forwardedTenant;
       } else {
-        const parts = host.split('.');
-        if (parts.length >= 3) {
-          subdomain = parts[0];
+        subdomain =
+          extractTenantSubdomainFromUrl(origin) ??
+          extractTenantSubdomainFromUrl(referer);
+
+        if (!subdomain) {
+          if (host.endsWith('.localhost')) {
+            subdomain = host.replace('.localhost', '');
+          } else {
+            const parts = host.split('.');
+            if (parts.length >= 4) {
+              subdomain = parts[0];
+            }
+          }
         }
       }
 
-      const origin = req.headers.origin ?? req.headers.referer ?? 'unknown';
       console.log(`Incoming request: ${req.method} ${req.originalUrl}`);
       console.log(`Host: ${host}`);
-      console.log(`Origin: ${origin}`);
+      console.log(`x-tenant-subdomain: ${forwardedTenant ?? 'missing'}`);
+      console.log(`Origin: ${origin ?? 'missing'}`);
+      console.log(`Referer: ${referer ?? 'missing'}`);
       console.log(`Resolved subdomain: ${subdomain}`);
 
       if (!subdomain) {
