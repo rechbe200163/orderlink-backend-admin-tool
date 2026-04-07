@@ -48,8 +48,10 @@ export class TenantMiddleware implements NestMiddleware {
         }
       }
 
+      const origin = req.headers.origin ?? req.headers.referer ?? 'unknown';
       console.log(`Incoming request: ${req.method} ${req.originalUrl}`);
       console.log(`Host: ${host}`);
+      console.log(`Origin: ${origin}`);
       console.log(`Resolved subdomain: ${subdomain}`);
 
       if (!subdomain) {
