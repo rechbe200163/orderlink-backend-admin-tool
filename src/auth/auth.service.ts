@@ -41,15 +41,23 @@ export class AuthService {
   }
 
   async validateUser(authInput: AuthInput): Promise<SanitizedEmployee | null> {
+    console.log('Login email:', JSON.stringify(authInput.email));
+
     const user = await this.db.prisma.employees.findUnique({
       where: { email: authInput.email },
     });
+
+    console.log('User found:', !!user);
 
     if (!user) {
       return null;
     }
 
+    console.log('Stored hash:', user.password);
+
     const isPasswordValid = await compare(authInput.password, user.password);
+
+    console.log('Password valid:', isPasswordValid);
 
     if (!isPasswordValid) {
       return null;
