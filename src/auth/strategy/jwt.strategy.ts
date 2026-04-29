@@ -17,14 +17,9 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
   }
 
   async validate(req: UserRequest, payload: JwtPayload) {
-    // 1. JWT must contain tenantId
-
-    // 2. Request must contain tenantId (set by TenantMiddleware)
-    if (!req.tenantId) {
-      throw new UnauthorizedException('Tenant not resolved');
+    if (!payload || !payload.employeeId || !payload.roleId) {
+      throw new UnauthorizedException('Invalid token');
     }
-
-    // 4. Attach tenantId to request for later use
     return payload;
   }
 }
