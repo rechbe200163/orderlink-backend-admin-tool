@@ -7,10 +7,7 @@ WORKDIR /usr/src/app
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 COPY . .
-
-# Dummy ENV für Prisma generate im Build
-ENV MASTER_DATABASE_URL="postgresql://user:password@localhost:5432/master"
-ENV DATABASE_URL="postgresql://user:password@localhost:5432/tenant"
+COPY .env.production .env
 
 # Optional: Falls du .npmrc brauchst (z. B. Registry oder pnpm settings)
 # COPY .npmrc .npmrc
@@ -18,14 +15,8 @@ ENV DATABASE_URL="postgresql://user:password@localhost:5432/tenant"
 # Installiere Dependencies mit pnpm
 RUN pnpm install --frozen-lockfile
 
-# Clean alte Artefakte
-RUN rm -rf generated dist
-
-# Prisma Clients generieren
-RUN pnpm prisma generate --schema=prisma/schema.master.prisma
-RUN pnpm prisma generate --schema=prisma/schema.tenant.prisma
-
-# Build
+RUN pnpm prisma generate
+# Baue dein Projekt (optional)
 RUN pnpm build
 
 EXPOSE 3001
