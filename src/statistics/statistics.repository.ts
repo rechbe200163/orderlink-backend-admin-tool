@@ -5,9 +5,7 @@ import { RevenueStatsDto } from './dto/revenue-stats.dto';
 import { SalesStatsDto } from './dto/sales-stats.dto';
 import { AverageOrderValueStatsDto } from './dto/average-order-value-stats.dto';
 import { CustomerStatsDto } from './dto/customer-stats.dto';
-
-import { PRISMA_CLIENT } from 'lib/providers/prisma-client.provider';
-import { Inject, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { TenantDbContext } from 'lib/tenant-db-context';
 import { BusinessSector, OrderState } from 'generated/client';
 

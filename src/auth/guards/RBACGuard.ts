@@ -79,7 +79,7 @@ export class PermissionsGuard implements CanActivate {
     // 1) Actions aus Cache, sonst DB -> Cache
     let actions = await this.cache.get<Action[]>(ACTIONS_KEY);
     if (!actions) {
-      actions = await this.db.action.findMany();
+      actions = await this.db.prisma.action.findMany();
       await this.cache.set(ACTIONS_KEY, actions, 60 * 60 * 24 * 1000); // 24h
     }
 
@@ -89,7 +89,7 @@ export class PermissionsGuard implements CanActivate {
     >(ROLE_PERMS_KEY(employee.roleId));
 
     if (!permissions) {
-      permissions = await this.db.permission.findMany({
+      permissions = await this.db.prisma.permission.findMany({
         where: { roleId: employee.roleId },
         select: { resourceId: true, actionId: true, allowed: true },
       });
