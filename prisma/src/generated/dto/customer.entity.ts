@@ -3,7 +3,7 @@ import { Cart } from './cart.entity';
 import { Order } from './order.entity';
 import { CustomerHistory } from './customerHistory.entity';
 import { Exclude, Expose } from 'class-transformer';
-import { BusinessSector } from '@generated/tenant/client';
+import { BusinessSector } from 'generated/client';
 
 export class CustomerEntity {
   @Exclude()

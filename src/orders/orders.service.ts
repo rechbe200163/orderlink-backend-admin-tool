@@ -4,7 +4,7 @@ import { CreateOrderDto } from './dto/create-order.dto';
 import { UpdateOrderDto } from './dto/update-order.dto';
 import { PagingResultDto } from 'lib/dto/genericPagingResultDto';
 import { OrderDto } from './dto/order.dto';
-import { OrderState } from '@generated/tenant/client';
+import { OrderState } from 'generated/client';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
 import { SortOrder } from 'src/common/enums/sort-order.enum';
 

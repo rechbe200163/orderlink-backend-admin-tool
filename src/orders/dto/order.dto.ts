@@ -1,6 +1,6 @@
 import { Exclude, Expose } from 'class-transformer';
 import { ApiProperty } from '@nestjs/swagger';
-import { OrderState } from '@generated/tenant/client';
+import { OrderState } from 'generated/client';
 import {
   IsBoolean,
   IsDateString,

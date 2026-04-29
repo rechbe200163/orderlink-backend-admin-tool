@@ -1,16 +1,9 @@
-import {
-  Inject,
-  Injectable,
-  Scope,
-  UnauthorizedException,
-} from '@nestjs/common';
-import { REQUEST } from '@nestjs/core';
+import { Injectable, Scope, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { compare } from 'bcryptjs';
 import { AuthResult, JwtPayload, SanitizedEmployee } from 'lib/types';
 import { TenantDbContext } from 'lib/tenant-db-context';
 import { OtpService } from 'src/otp/otp.service';
-import type { TenantRequest } from 'src/middlewares/tenant.middleware';
 
 export type AuthInput = {
   email: string;
@@ -20,7 +13,6 @@ export type AuthInput = {
 @Injectable({ scope: Scope.REQUEST })
 export class AuthService {
   constructor(
-    @Inject(REQUEST) private readonly req: TenantRequest,
     private readonly db: TenantDbContext,
     private readonly otpService: OtpService,
     private readonly jwtService: JwtService,
@@ -47,6 +39,8 @@ export class AuthService {
       where: { email: authInput.email },
     });
 
+    console.log('Database query completed', user);
+
     console.log('User found:', !!user);
 
     if (!user) {
@@ -68,12 +62,6 @@ export class AuthService {
   }
 
   async signIn(user: SanitizedEmployee): Promise<AuthResult> {
-    const tenantId = this.req.tenantId;
-
-    if (!tenantId) {
-      throw new UnauthorizedException('Tenant not resolved');
-    }
-
     const tokenPayload: JwtPayload = {
       employeeId: user.employeeId,
       email: user.email,
@@ -81,7 +69,6 @@ export class AuthService {
       lastName: user.lastName,
       roleId: user.roleId,
       superAdmin: user.superAdmin,
-      tenantId,
     };
 
     const accessToken = await this.jwtService.signAsync(tokenPayload);

@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { BusinessSector } from '@generated/tenant/client';
+import { BusinessSector } from 'generated/client';
 
 export class CustomerBusinessSectorDto {
   @ApiProperty()

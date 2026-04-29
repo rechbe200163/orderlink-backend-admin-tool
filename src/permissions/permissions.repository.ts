@@ -8,7 +8,6 @@ import { PRISMA_CLIENT } from 'lib/providers/prisma-client.provider';
 import { CreatePermissionsDto } from './dto/create-permision.dto';
 import { UpdatePermissionDto } from './dto/update-permision.dto';
 import { ActionsRepository } from 'src/actions/actions.repository';
-import type { ExtendedPrismaClient } from 'src/tenant-prisma.service';
 import { TenantDbContext } from 'lib/tenant-db-context';
 
 @Injectable()

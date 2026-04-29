@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { CustomersService } from './customers.service';
 import { Resource } from 'lib/decorators/resource.decorator';
-import { BusinessSector } from '@generated/tenant/client';
+import { BusinessSector } from 'generated/client';
 import { Resources } from '../rbac/resources.enum';
 
 import {

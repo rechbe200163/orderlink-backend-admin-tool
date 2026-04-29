@@ -1,4 +1,4 @@
-import { BusinessSector } from '@generated/tenant/client';
+import { BusinessSector } from 'generated/client';
 import { ApiProperty } from '@nestjs/swagger';
 import { CustomerEntity } from './customer.entity';
 

@@ -120,17 +120,38 @@ exports.Prisma.TransactionIsolationLevel = makeStrictEnum({
   Serializable: 'Serializable'
 });
 
-exports.Prisma.TenantScalarFieldEnum = {
-  tenantId: 'tenantId',
-  companyName: 'companyName',
-  subdomain: 'subdomain',
-  dbUrl: 'dbUrl',
-  description: 'description',
-  createdAt: 'createdAt',
-  updatedAt: 'updatedAt',
+exports.Prisma.CustomerScalarFieldEnum = {
+  customerId: 'customerId',
+  customerReference: 'customerReference',
+  email: 'email',
+  phoneNumber: 'phoneNumber',
+  password: 'password',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  companyNumber: 'companyNumber',
+  modifiedAt: 'modifiedAt',
   deleted: 'deleted',
-  isConfigured: 'isConfigured',
-  addressId: 'addressId'
+  signedUp: 'signedUp',
+  avatarPath: 'avatarPath',
+  addressId: 'addressId',
+  businessSector: 'businessSector'
+};
+
+exports.Prisma.CustomerHistoryScalarFieldEnum = {
+  historyId: 'historyId',
+  customerReference: 'customerReference',
+  email: 'email',
+  phoneNumber: 'phoneNumber',
+  password: 'password',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  companyNumber: 'companyNumber',
+  modifiedAt: 'modifiedAt',
+  deleted: 'deleted',
+  signedUp: 'signedUp',
+  avatarPath: 'avatarPath',
+  addressId: 'addressId',
+  businessSector: 'businessSector'
 };
 
 exports.Prisma.AddressScalarFieldEnum = {
@@ -147,6 +168,159 @@ exports.Prisma.AddressScalarFieldEnum = {
   latitude: 'latitude'
 };
 
+exports.Prisma.CartScalarFieldEnum = {
+  cartId: 'cartId',
+  customerReference: 'customerReference'
+};
+
+exports.Prisma.ProductScalarFieldEnum = {
+  productId: 'productId',
+  name: 'name',
+  price: 'price',
+  description: 'description',
+  stock: 'stock',
+  imagePath: 'imagePath',
+  createdAt: 'createdAt',
+  modifiedAt: 'modifiedAt',
+  deleted: 'deleted'
+};
+
+exports.Prisma.CategoryScalarFieldEnum = {
+  categoryId: 'categoryId',
+  name: 'name',
+  imagePath: 'imagePath',
+  deleted: 'deleted'
+};
+
+exports.Prisma.OrderScalarFieldEnum = {
+  orderId: 'orderId',
+  customerReference: 'customerReference',
+  orderDate: 'orderDate',
+  deliveryDate: 'deliveryDate',
+  deleted: 'deleted',
+  orderState: 'orderState',
+  selfCollect: 'selfCollect'
+};
+
+exports.Prisma.InvoiceScalarFieldEnum = {
+  invoiceId: 'invoiceId',
+  orderId: 'orderId',
+  invoiceAmount: 'invoiceAmount',
+  paymentDate: 'paymentDate',
+  pdfUrl: 'pdfUrl',
+  deleted: 'deleted'
+};
+
+exports.Prisma.RouteScalarFieldEnum = {
+  routeId: 'routeId',
+  name: 'name',
+  deleted: 'deleted'
+};
+
+exports.Prisma.EmployeesScalarFieldEnum = {
+  employeeId: 'employeeId',
+  email: 'email',
+  password: 'password',
+  firstName: 'firstName',
+  lastName: 'lastName',
+  deleted: 'deleted',
+  superAdmin: 'superAdmin',
+  roleId: 'roleId'
+};
+
+exports.Prisma.SiteConfigScalarFieldEnum = {
+  siteConfigId: 'siteConfigId',
+  companyName: 'companyName',
+  logoPath: 'logoPath',
+  email: 'email',
+  phoneNumber: 'phoneNumber',
+  iban: 'iban',
+  companyNumber: 'companyNumber',
+  addressId: 'addressId',
+  modifiedAt: 'modifiedAt',
+  isPremium: 'isPremium',
+  deleted: 'deleted',
+  stripeCustomerId: 'stripeCustomerId',
+  stripeAccountId: 'stripeAccountId',
+  stripeConfigured: 'stripeConfigured'
+};
+
+exports.Prisma.CategoriesOnProductsScalarFieldEnum = {
+  productId: 'productId',
+  categoryId: 'categoryId'
+};
+
+exports.Prisma.CartOnProductsScalarFieldEnum = {
+  cartId: 'cartId',
+  productId: 'productId',
+  quantity: 'quantity'
+};
+
+exports.Prisma.OrderOnProductsScalarFieldEnum = {
+  orderId: 'orderId',
+  productId: 'productId',
+  orderDate: 'orderDate',
+  productAmount: 'productAmount'
+};
+
+exports.Prisma.RoutesOnOrdersScalarFieldEnum = {
+  routeId: 'routeId',
+  orderId: 'orderId'
+};
+
+exports.Prisma.EnabledModuleScalarFieldEnum = {
+  id: 'id',
+  moduleName: 'moduleName',
+  enabledAt: 'enabledAt'
+};
+
+exports.Prisma.ModuleScalarFieldEnum = {
+  name: 'name',
+  description: 'description',
+  priceCents: 'priceCents',
+  createdAt: 'createdAt',
+  modifiedAt: 'modifiedAt'
+};
+
+exports.Prisma.OtpScalarFieldEnum = {
+  id: 'id',
+  code: 'code',
+  employeeId: 'employeeId',
+  expiresAt: 'expiresAt',
+  used: 'used',
+  createdAt: 'createdAt'
+};
+
+exports.Prisma.RoleScalarFieldEnum = {
+  roleId: 'roleId',
+  name: 'name',
+  description: 'description',
+  deleted: 'deleted'
+};
+
+exports.Prisma.ResourceScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  description: 'description',
+  deleted: 'deleted'
+};
+
+exports.Prisma.ActionScalarFieldEnum = {
+  id: 'id',
+  key: 'key',
+  description: 'description',
+  deleted: 'deleted'
+};
+
+exports.Prisma.PermissionScalarFieldEnum = {
+  id: 'id',
+  roleId: 'roleId',
+  resourceId: 'resourceId',
+  actionId: 'actionId',
+  allowed: 'allowed',
+  createdAt: 'createdAt'
+};
+
 exports.Prisma.SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -161,11 +335,59 @@ exports.Prisma.NullsOrder = {
   first: 'first',
   last: 'last'
 };
+exports.BusinessSector = exports.$Enums.BusinessSector = {
+  AGRICULTURE: 'AGRICULTURE',
+  CONSTRUCTION: 'CONSTRUCTION',
+  EDUCATION: 'EDUCATION',
+  FINANCE: 'FINANCE',
+  HEALTH: 'HEALTH',
+  HOSPITALITY: 'HOSPITALITY',
+  IT: 'IT',
+  MANUFACTURING: 'MANUFACTURING',
+  OTHER: 'OTHER',
+  RETAIL: 'RETAIL',
+  TECHNOLOGY: 'TECHNOLOGY',
+  TOURISM: 'TOURISM',
+  TRANSPORTATION: 'TRANSPORTATION'
+};
 
+exports.OrderState = exports.$Enums.OrderState = {
+  ORDER_PLACED: 'ORDER_PLACED',
+  IN_PROGRESS: 'IN_PROGRESS',
+  DISPATCHED: 'DISPATCHED',
+  DELIVERED: 'DELIVERED',
+  ORDER_COLLECTED: 'ORDER_COLLECTED'
+};
+
+exports.ModuleEnum = exports.$Enums.ModuleEnum = {
+  CUSTOM_ROLES: 'CUSTOM_ROLES',
+  STATISTICS: 'STATISTICS',
+  NAVIGATION: 'NAVIGATION'
+};
 
 exports.Prisma.ModelName = {
-  Tenant: 'Tenant',
-  Address: 'Address'
+  Customer: 'Customer',
+  CustomerHistory: 'CustomerHistory',
+  Address: 'Address',
+  Cart: 'Cart',
+  Product: 'Product',
+  Category: 'Category',
+  Order: 'Order',
+  Invoice: 'Invoice',
+  Route: 'Route',
+  Employees: 'Employees',
+  SiteConfig: 'SiteConfig',
+  CategoriesOnProducts: 'CategoriesOnProducts',
+  CartOnProducts: 'CartOnProducts',
+  OrderOnProducts: 'OrderOnProducts',
+  RoutesOnOrders: 'RoutesOnOrders',
+  EnabledModule: 'EnabledModule',
+  Module: 'Module',
+  Otp: 'Otp',
+  Role: 'Role',
+  Resource: 'Resource',
+  Action: 'Action',
+  Permission: 'Permission'
 };
 
 /**

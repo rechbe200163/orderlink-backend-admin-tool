@@ -1,11 +1,7 @@
 // prisma/seed.ts
 /* eslint-disable no-console */
 
-import {
-  BusinessSector,
-  OrderState,
-  PrismaClient,
-} from '@generated/tenant/client';
+import { BusinessSector, OrderState, PrismaClient } from 'generated/client';
 import { PrismaPg } from '@prisma/adapter-pg';
 
 import { randomUUID } from 'crypto';

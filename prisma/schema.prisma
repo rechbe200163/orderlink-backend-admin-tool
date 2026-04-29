@@ -1,6 +1,6 @@
 generator tenantClient {
   provider = "prisma-client-js"
-  output   = "../generated/tenant/client"
+  output   = "../generated/client"
 }
 
 datasource db {
@@ -60,6 +60,8 @@ model Address {
   streetNumber String       @db.VarChar(30)
   modifiedAt   DateTime?    @updatedAt
   deleted      Boolean      @default(false)
+  longitude    Float?
+  latitude     Float?
   customers    Customer[]
   siteConfig   SiteConfig[]
 

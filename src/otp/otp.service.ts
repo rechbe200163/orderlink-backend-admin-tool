@@ -1,5 +1,5 @@
 import { Inject, Injectable } from '@nestjs/common';
-import { Otp } from '@generated/tenant/client';
+import { Otp } from 'generated/client';
 
 import { customAlphabet } from 'nanoid';
 

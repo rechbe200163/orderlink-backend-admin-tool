@@ -8,7 +8,6 @@ import { EmployeesModule } from 'src/employees/employees.module';
 import { TypedEventEmitterModule } from 'src/event-emitter/event-emitter.module';
 import { OtpModule } from 'src/otp/otp.module';
 import { DatabaseModule } from 'src/database/database.module';
-import { TenantModule } from 'src/tenant/tenant.module';
 
 @Module({
   providers: [AuthService, JwtStrategy],
@@ -25,7 +24,6 @@ import { TenantModule } from 'src/tenant/tenant.module';
       signOptions: { expiresIn: '1h' },
     }),
     OtpModule,
-    TenantModule,
     PassportModule,
     EmployeesModule,
   ],

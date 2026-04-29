@@ -5,7 +5,7 @@ import { RolesRepository } from './../roles/roles.repository';
 import { transformResponse } from 'lib/utils/transform';
 import { PRISMA_CLIENT } from 'lib/providers/prisma-client.provider';
 import { isNoChange } from 'lib/utils/isNoChange';
-import { Otp, PrismaClient } from '@generated/tenant/client';
+import { Otp, PrismaClient } from 'generated/client';
 import { customAlphabet } from 'nanoid';
 import { hash } from 'bcryptjs';
 import {
@@ -16,7 +16,6 @@ import {
 } from '@nestjs/common';
 import { EmployeesDto } from './dto/employees.dto';
 import { SortOrder } from 'src/common/enums/sort-order.enum';
-import type { ExtendedPrismaClient } from 'src/tenant-prisma.service';
 import { TenantDbContext } from 'lib/tenant-db-context';
 
 @Injectable()

@@ -4,8 +4,6 @@ import {
   Inject,
   Injectable,
 } from '@nestjs/common';
-import type { ExtendedPrismaClient } from 'src/tenant-prisma.service';
-import { PRISMA_CLIENT } from 'lib/providers/prisma-client.provider';
 import { TenantDbContext } from 'lib/tenant-db-context';
 
 @Injectable()

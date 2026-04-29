@@ -12,7 +12,6 @@ import { transformResponse } from 'lib/utils/transform';
 import { UpdateProductDto } from './dto/update-product.dto';
 import { PRISMA_CLIENT } from 'lib/providers/prisma-client.provider';
 import { SortOrder } from 'src/common/enums/sort-order.enum';
-import type { ExtendedPrismaClient } from 'src/tenant-prisma.service';
 import { TenantDbContext } from 'lib/tenant-db-context';
 
 @Injectable()

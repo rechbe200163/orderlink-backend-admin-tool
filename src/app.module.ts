@@ -28,13 +28,10 @@ import { z } from 'zod';
 import { ActionsModule } from './actions/actions.module';
 import { ResourcesModule } from './resources/resources.module';
 import { DataAnalysisModule } from './data-analysis/data-analysis.module';
-import { TenantService } from './tenant/tenant.service';
-import { TenantMiddleware } from './middlewares/tenant.middleware';
 import { DatabaseModule } from './database/database.module';
-import { TenantModule } from './tenant/tenant.module';
 
 const envSchema = z.object({
-  MASTER_DATABASE_URL: z.string().min(1), // url() kann bei prisma strings manchmal nerven
+  DATABASE_URL: z.string().min(1), // url() kann bei prisma strings manchmal nerven
 
   JWT_SECRET: z.string().min(1),
 
@@ -106,13 +103,8 @@ const envSchema = z.object({
     ResourcesModule,
     DataAnalysisModule,
     DatabaseModule,
-    TenantModule,
   ],
   controllers: [AppController],
-  providers: [AppService, TenantService],
+  providers: [AppService],
 })
-export class AppModule implements NestModule {
-  configure(consumer: MiddlewareConsumer) {
-    consumer.apply(TenantMiddleware).forRoutes('*');
-  }
-}
+export class AppModule {}

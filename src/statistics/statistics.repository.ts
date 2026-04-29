@@ -8,9 +8,8 @@ import { CustomerStatsDto } from './dto/customer-stats.dto';
 
 import { PRISMA_CLIENT } from 'lib/providers/prisma-client.provider';
 import { Inject, Injectable } from '@nestjs/common';
-import type { ExtendedPrismaClient } from 'src/tenant-prisma.service';
 import { TenantDbContext } from 'lib/tenant-db-context';
-import { BusinessSector, OrderState } from '@generated/tenant/client';
+import { BusinessSector, OrderState } from 'generated/client';
 
 @Injectable()
 export class StatisticsRepository {

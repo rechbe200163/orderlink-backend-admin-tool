@@ -1,5 +1,5 @@
 import { ApiProperty, getSchemaPath } from '@nestjs/swagger';
-import { BusinessSector } from '@generated/tenant/client';
+import { BusinessSector } from 'generated/client';
 
 export class CreateCustomerHistoryDto {
   email: string;

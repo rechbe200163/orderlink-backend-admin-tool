@@ -1,5 +1,5 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { OrderState } from '@generated/tenant/client';
+import { OrderState } from 'generated/client';
 
 export class OrderDto {
   orderId: string;

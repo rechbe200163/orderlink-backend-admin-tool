@@ -1,9 +1,7 @@
-import { ExtendedPrismaClient } from 'src/tenant-prisma.service';
+import { Injectable } from '@nestjs/common';
+import { PrismaService } from 'src/prisma.service';
 
+@Injectable()
 export class TenantDbContext {
-  constructor(
-    public readonly tenantId: string,
-    public readonly dbUrl: string,
-    public readonly prisma: ExtendedPrismaClient,
-  ) {}
+  constructor(public readonly prisma: PrismaService) {}
 }

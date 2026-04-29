@@ -1,4 +1,4 @@
-import { OrderState } from '@generated/tenant/client';
+import { OrderState } from 'generated/client';
 import { ApiProperty } from '@nestjs/swagger';
 import { IsEnum, IsInt } from 'class-validator';
 

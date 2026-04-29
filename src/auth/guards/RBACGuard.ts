@@ -9,12 +9,12 @@ import { Reflector } from '@nestjs/core';
 import { Resources } from '../../rbac/resources.enum';
 import { TypedEventEmitter } from 'src/event-emitter/typed-event-emitter.class';
 
-import { Action } from '@generated/tenant/client';
+import { Action } from 'generated/client';
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import type { Cache } from 'cache-manager';
-import { TenantDbContext } from 'lib/tenant-db-context';
 import { JwtPayload, UserRequest } from 'lib/types';
 import type { Request as ExpressRequest } from 'express';
+import { PrismaService } from 'src/prisma.service';
 
 const ACTIONS_KEY = 'rbac:actions:v1';
 const ROLE_PERMS_KEY = (roleId: string) => `rbac:perms:role:${roleId}:v1`;
@@ -25,14 +25,15 @@ const RESOURCE_ID_KEY = (resourceKey: string) =>
 export class PermissionsGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
-    private readonly db: TenantDbContext,
+    private readonly db: PrismaService,
     private readonly eventEmitter: TypedEventEmitter,
     @Inject(CACHE_MANAGER) private cache: Cache,
   ) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
-    const req =
-      context.switchToHttp().getRequest<UserRequest & ExpressRequest>();
+    const req = context
+      .switchToHttp()
+      .getRequest<UserRequest & ExpressRequest>();
     const employee = req.user as JwtPayload;
 
     if (!employee) {
@@ -55,7 +56,7 @@ export class PermissionsGuard implements CanActivate {
     // 0) resourceId aus Cache, sonst DB -> Cache
     let resourceId = await this.cache.get<string>(RESOURCE_ID_KEY(resourceKey));
     if (!resourceId) {
-      const row = await this.db.prisma.resource.findUnique({
+      const row = await this.db.resource.findUnique({
         where: { key: resourceKey }, // <- deine Resource Tabelle hat "key" = "ROLE"/"CUSTOMER"/...
         select: { id: true },
       });
@@ -77,7 +78,7 @@ export class PermissionsGuard implements CanActivate {
     // 1) Actions aus Cache, sonst DB -> Cache
     let actions = await this.cache.get<Action[]>(ACTIONS_KEY);
     if (!actions) {
-      actions = await this.db.prisma.action.findMany();
+      actions = await this.db.action.findMany();
       await this.cache.set(ACTIONS_KEY, actions, 60 * 60 * 24 * 1000); // 24h
     }
 
@@ -87,7 +88,7 @@ export class PermissionsGuard implements CanActivate {
     >(ROLE_PERMS_KEY(employee.roleId));
 
     if (!permissions) {
-      permissions = await this.db.prisma.permission.findMany({
+      permissions = await this.db.permission.findMany({
         where: { roleId: employee.roleId },
         select: { resourceId: true, actionId: true, allowed: true },
       });

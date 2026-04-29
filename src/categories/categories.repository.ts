@@ -12,7 +12,6 @@ import { isNoChange } from 'lib/utils/isNoChange';
 import { UpdateCategoryDto } from './dto/update-category.dto';
 import { PRISMA_CLIENT } from 'lib/providers/prisma-client.provider';
 import { SortOrder } from 'src/common/enums/sort-order.enum';
-import type { ExtendedPrismaClient } from 'src/tenant-prisma.service';
 import { TenantDbContext } from 'lib/tenant-db-context';
 
 @Injectable()

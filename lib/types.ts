@@ -1,5 +1,5 @@
 import { Request } from 'express';
-import { Employees } from '@generated/tenant/client';
+import { Employees } from 'generated/client';
 
 export type Token = {
   accessToken: string;
@@ -12,9 +12,7 @@ export type SanitizedEmployee = Pick<
   'email' | 'firstName' | 'lastName' | 'employeeId' | 'roleId' | 'superAdmin'
 >;
 
-export type JwtPayload = SanitizedEmployee & {
-  tenantId: string;
-};
+export type JwtPayload = SanitizedEmployee;
 
 export type AuthResult = {
   token: Token;

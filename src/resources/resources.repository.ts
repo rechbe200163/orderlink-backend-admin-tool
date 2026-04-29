@@ -9,7 +9,6 @@ import { PRISMA_CLIENT } from 'lib/providers/prisma-client.provider';
 import { CreateResourceDto } from './dto/create-resource.dto';
 import { ResourceEntity } from './entities/resource.entity';
 import { UpdateResourceDto } from './dto/update-resource.dto';
-import type { ExtendedPrismaClient } from 'src/tenant-prisma.service';
 import { TenantDbContext } from 'lib/tenant-db-context';
 
 @Injectable()
