@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, OnModuleDestroy, OnModuleInit } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { PrismaPg } from '@prisma/adapter-pg';
 import { PrismaClient } from 'generated/client';
@@ -7,7 +7,6 @@ import { pagination } from 'prisma-extension-pagination';
 function createPrisma(databaseUrl: string) {
   const adapter = new PrismaPg({
     connectionString: databaseUrl,
-    // optional: näher an v6-Verhalten
     connectionTimeoutMillis: 5_000,
     idleTimeoutMillis: 300_000,
   });
@@ -18,16 +17,19 @@ function createPrisma(databaseUrl: string) {
 export type ExtendedPrismaClient = ReturnType<typeof createPrisma>;
 
 @Injectable()
-export class PrismaService extends PrismaClient {
+export class PrismaService implements OnModuleInit, OnModuleDestroy {
+  public readonly client: ExtendedPrismaClient;
+
   constructor(config: ConfigService) {
     const url = config.getOrThrow<string>('DATABASE_URL');
+    this.client = createPrisma(url);
+  }
 
-    const adapter = new PrismaPg({
-      connectionString: url,
-    });
+  async onModuleInit() {
+    await this.client.$connect();
+  }
 
-    super({ adapter });
-
-    this.$extends(pagination());
+  async onModuleDestroy() {
+    await this.client.$disconnect();
   }
 }

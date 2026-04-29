@@ -40,7 +40,6 @@ export class AuthService {
     });
 
     console.log('Database query completed', user);
-
     console.log('User found:', !!user);
 
     if (!user) {

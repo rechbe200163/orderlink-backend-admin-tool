@@ -31,7 +31,7 @@ export class ActionsRepository {
     const createdRole = await this.db.prisma.action.create({
       data: roleData,
     });
-    return transformResponse(RoleDto, createdRole);
+    return transformResponse(ActionEntity, createdRole);
   }
 
   async findById(roleId: string) {
@@ -41,7 +41,7 @@ export class ActionsRepository {
     if (!role) {
       throw new NotFoundException(`Action not found`);
     }
-    return transformResponse(RoleDto, role);
+    return transformResponse(ActionEntity, role);
   }
 
   async findAllRoleNames() {

@@ -15,6 +15,7 @@ import type { Cache } from 'cache-manager';
 import { JwtPayload, UserRequest } from 'lib/types';
 import type { Request as ExpressRequest } from 'express';
 import { PrismaService } from 'src/prisma.service';
+import { TenantDbContext } from 'lib/tenant-db-context';
 
 const ACTIONS_KEY = 'rbac:actions:v1';
 const ROLE_PERMS_KEY = (roleId: string) => `rbac:perms:role:${roleId}:v1`;
@@ -25,7 +26,7 @@ const RESOURCE_ID_KEY = (resourceKey: string) =>
 export class PermissionsGuard implements CanActivate {
   constructor(
     private reflector: Reflector,
-    private readonly db: PrismaService,
+    private readonly db: TenantDbContext,
     private readonly eventEmitter: TypedEventEmitter,
     @Inject(CACHE_MANAGER) private cache: Cache,
   ) {}
@@ -56,7 +57,7 @@ export class PermissionsGuard implements CanActivate {
     // 0) resourceId aus Cache, sonst DB -> Cache
     let resourceId = await this.cache.get<string>(RESOURCE_ID_KEY(resourceKey));
     if (!resourceId) {
-      const row = await this.db.resource.findUnique({
+      const row = await this.db.prisma.resource.findUnique({
         where: { key: resourceKey }, // <- deine Resource Tabelle hat "key" = "ROLE"/"CUSTOMER"/...
         select: { id: true },
       });
