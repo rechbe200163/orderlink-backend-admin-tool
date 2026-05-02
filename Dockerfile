@@ -7,6 +7,10 @@ WORKDIR /usr/src/app
 RUN corepack enable && corepack prepare pnpm@latest --activate
 
 COPY . .
+COPY .env.production .env
+
+# Optional: Falls du .npmrc brauchst (z. B. Registry oder pnpm settings)
+# COPY .npmrc .npmrc
 
 # Installiere Dependencies mit pnpm
 RUN pnpm install --frozen-lockfile
