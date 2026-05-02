@@ -1,10 +1,11 @@
 // prisma/seed.ts
 /* eslint-disable no-console */
 
-import { BusinessSector, OrderState, PrismaClient } from 'generated/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { hash } from 'bcryptjs';
 
 import { randomUUID } from 'crypto';
+import { BusinessSector, OrderState, PrismaClient } from '../generated/client';
 
 const adapter = new PrismaPg({
   connectionString:
@@ -12,12 +13,69 @@ const adapter = new PrismaPg({
 });
 const prisma = new PrismaClient({ adapter });
 
+const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL ?? 'admin@orderlink.at';
+const SUPER_ADMIN_PASSWORD = process.env.SUPER_ADMIN_PASSWORD ?? 'admin1234';
+const SUPER_ADMIN_FIRST_NAME = process.env.SUPER_ADMIN_FIRST_NAME ?? 'Super';
+const SUPER_ADMIN_LAST_NAME = process.env.SUPER_ADMIN_LAST_NAME ?? 'Admin';
+const DEFAULT_SUPER_ADMIN_HASH =
+  '$2b$10$X8pB7W/lKvrn.4otWDkmmewSTF2s60N9Rbx8jymPuVz.cCjZrPNkW'; // admin1234
+
+async function ensureSuperAdmin() {
+  const passwordHash =
+    SUPER_ADMIN_PASSWORD === 'admin1234'
+      ? DEFAULT_SUPER_ADMIN_HASH
+      : await hash(SUPER_ADMIN_PASSWORD, 10);
+
+  const adminRole = await prisma.role.upsert({
+    where: { name: 'ADMIN' },
+    update: {
+      deleted: false,
+    },
+    create: {
+      name: 'ADMIN',
+      deleted: false,
+    },
+  });
+
+  const existing = await prisma.employees.findUnique({
+    where: { email: SUPER_ADMIN_EMAIL },
+  });
+
+  if (existing) {
+    await prisma.employees.update({
+      where: { employeeId: existing.employeeId },
+      data: {
+        password: passwordHash,
+        firstName: SUPER_ADMIN_FIRST_NAME,
+        lastName: SUPER_ADMIN_LAST_NAME,
+        deleted: false,
+        roleId: adminRole.roleId,
+      },
+    });
+    console.log(`🔐 Super admin updated: ${SUPER_ADMIN_EMAIL}`);
+    return;
+  }
+
+  await prisma.employees.create({
+    data: {
+      email: SUPER_ADMIN_EMAIL,
+      password: passwordHash,
+      firstName: SUPER_ADMIN_FIRST_NAME,
+      lastName: SUPER_ADMIN_LAST_NAME,
+      deleted: false,
+      roleId: adminRole.roleId,
+    },
+  });
+
+  console.log(`🔐 Super admin created: ${SUPER_ADMIN_EMAIL}`);
+}
+
 /**
  * -------------------------
  * CLI PARSING (no deps)
  * -------------------------
  */
-type Mode = 'all' | 'customers-only' | 'orders-only';
+type Mode = 'all' | 'customers-only' | 'orders-only' | 'employee-only';
 
 type SeedArgs = {
   mode: Mode;
@@ -51,13 +109,17 @@ function parseArgs(argvRaw: string[]): SeedArgs {
   const argv = argvRaw.slice(2); // node, script, ...args
   const customersOnly = hasFlag(argv, '--customers-only');
   const ordersOnly = hasFlag(argv, '--orders-only');
+  const employeeOnly = hasFlag(argv, '--employee-only');
 
   let mode: Mode = 'all';
-  if (customersOnly && ordersOnly) {
+  const modeFlags = [customersOnly, ordersOnly, employeeOnly].filter(Boolean);
+
+  if (modeFlags.length > 1) {
     // widersprüchlich -> default all
     mode = 'all';
   } else if (customersOnly) mode = 'customers-only';
   else if (ordersOnly) mode = 'orders-only';
+  else if (employeeOnly) mode = 'employee-only';
 
   const customers = toInt(getArgValue(argv, '--customers'), 120);
   const maxOrdersPerCustomer = toInt(
@@ -617,6 +679,13 @@ async function main() {
   );
 
   await prisma.$connect();
+
+  await ensureSuperAdmin();
+
+  if (args.mode === 'employee-only') {
+    console.log('✅ Employee seed done.');
+    return;
+  }
 
   const products = await ensureProducts(
     args.ensureProducts,
