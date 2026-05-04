@@ -29,6 +29,7 @@ import { ActionsModule } from './actions/actions.module';
 import { ResourcesModule } from './resources/resources.module';
 import { DataAnalysisModule } from './data-analysis/data-analysis.module';
 import { DatabaseModule } from './database/database.module';
+import { RouteOrdersModule } from './route-orders/route-orders.module';
 
 const envSchema = z.object({
   DATABASE_URL: z.string().min(1), // url() kann bei prisma strings manchmal nerven
@@ -103,6 +104,7 @@ const envSchema = z.object({
     ResourcesModule,
     DataAnalysisModule,
     DatabaseModule,
+    RouteOrdersModule,
   ],
   controllers: [AppController],
   providers: [AppService],
