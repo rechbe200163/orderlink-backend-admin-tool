@@ -17,14 +17,9 @@ const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL ?? 'admin@orderlink.at';
 const SUPER_ADMIN_PASSWORD = process.env.SUPER_ADMIN_PASSWORD ?? 'admin1234';
 const SUPER_ADMIN_FIRST_NAME = process.env.SUPER_ADMIN_FIRST_NAME ?? 'Super';
 const SUPER_ADMIN_LAST_NAME = process.env.SUPER_ADMIN_LAST_NAME ?? 'Admin';
-const DEFAULT_SUPER_ADMIN_HASH =
-  '$2b$10$X8pB7W/lKvrn.4otWDkmmewSTF2s60N9Rbx8jymPuVz.cCjZrPNkW'; // admin1234
 
 async function ensureSuperAdmin() {
-  const passwordHash =
-    SUPER_ADMIN_PASSWORD === 'admin1234'
-      ? DEFAULT_SUPER_ADMIN_HASH
-      : await hash(SUPER_ADMIN_PASSWORD, 10);
+  const passwordHash = await hash(SUPER_ADMIN_PASSWORD, 10);
 
   const adminRole = await prisma.role.upsert({
     where: { name: 'ADMIN' },
