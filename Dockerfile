@@ -15,8 +15,13 @@ COPY .env.production .env
 # Installiere Dependencies mit pnpm
 RUN pnpm install --frozen-lockfile
 
+# Clean alte Artefakte
+RUN rm -rf generated dist
+
+# Prisma Clients generieren
 RUN pnpm prisma generate
-# Baue dein Projekt (optional)
+
+# Build
 RUN pnpm build
 
 EXPOSE 3001

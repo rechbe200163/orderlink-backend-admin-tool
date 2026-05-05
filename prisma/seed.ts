@@ -1,10 +1,11 @@
 // prisma/seed.ts
 /* eslint-disable no-console */
 
-import { BusinessSector, OrderState, PrismaClient } from 'generated/client';
 import { PrismaPg } from '@prisma/adapter-pg';
+import { hash } from 'bcryptjs';
 
 import { randomUUID } from 'crypto';
+import { BusinessSector, OrderState, PrismaClient } from '../generated/client';
 
 const adapter = new PrismaPg({
   connectionString:
@@ -12,12 +13,64 @@ const adapter = new PrismaPg({
 });
 const prisma = new PrismaClient({ adapter });
 
+const SUPER_ADMIN_EMAIL = process.env.SUPER_ADMIN_EMAIL ?? 'admin@orderlink.at';
+const SUPER_ADMIN_PASSWORD = process.env.SUPER_ADMIN_PASSWORD ?? 'admin1234';
+const SUPER_ADMIN_FIRST_NAME = process.env.SUPER_ADMIN_FIRST_NAME ?? 'Super';
+const SUPER_ADMIN_LAST_NAME = process.env.SUPER_ADMIN_LAST_NAME ?? 'Admin';
+
+async function ensureSuperAdmin() {
+  const passwordHash = await hash(SUPER_ADMIN_PASSWORD, 10);
+
+  const adminRole = await prisma.role.upsert({
+    where: { name: 'ADMIN' },
+    update: {
+      deleted: false,
+    },
+    create: {
+      name: 'ADMIN',
+      deleted: false,
+    },
+  });
+
+  const existing = await prisma.employees.findUnique({
+    where: { email: SUPER_ADMIN_EMAIL },
+  });
+
+  if (existing) {
+    await prisma.employees.update({
+      where: { employeeId: existing.employeeId },
+      data: {
+        password: passwordHash,
+        firstName: SUPER_ADMIN_FIRST_NAME,
+        lastName: SUPER_ADMIN_LAST_NAME,
+        deleted: false,
+        roleId: adminRole.roleId,
+      },
+    });
+    console.log(`🔐 Super admin updated: ${SUPER_ADMIN_EMAIL}`);
+    return;
+  }
+
+  await prisma.employees.create({
+    data: {
+      email: SUPER_ADMIN_EMAIL,
+      password: passwordHash,
+      firstName: SUPER_ADMIN_FIRST_NAME,
+      lastName: SUPER_ADMIN_LAST_NAME,
+      deleted: false,
+      roleId: adminRole.roleId,
+    },
+  });
+
+  console.log(`🔐 Super admin created: ${SUPER_ADMIN_EMAIL}`);
+}
+
 /**
  * -------------------------
  * CLI PARSING (no deps)
  * -------------------------
  */
-type Mode = 'all' | 'customers-only' | 'orders-only';
+type Mode = 'help' | 'all' | 'customers' | 'orders' | 'employee';
 
 type SeedArgs = {
   mode: Mode;
@@ -48,30 +101,53 @@ function toInt(v: string | null, fallback: number) {
 }
 
 function parseArgs(argvRaw: string[]): SeedArgs {
-  const argv = argvRaw.slice(2); // node, script, ...args
-  const customersOnly = hasFlag(argv, '--customers-only');
-  const ordersOnly = hasFlag(argv, '--orders-only');
+  const argv = argvRaw.slice(2); // node, script, command, ...args
+  const command = argv[0];
+  const optionArgs =
+    command && !command.startsWith('--') ? argv.slice(1) : argv;
 
-  let mode: Mode = 'all';
-  if (customersOnly && ordersOnly) {
-    // widersprüchlich -> default all
-    mode = 'all';
-  } else if (customersOnly) mode = 'customers-only';
-  else if (ordersOnly) mode = 'orders-only';
+  let mode: Mode = 'help';
 
-  const customers = toInt(getArgValue(argv, '--customers'), 120);
+  switch (command) {
+    case 'all':
+      mode = 'all';
+      break;
+    case 'customers':
+    case 'customers-only':
+      mode = 'customers';
+      break;
+    case 'orders':
+    case 'orders-only':
+      mode = 'orders';
+      break;
+    case 'employee':
+    case 'employee-only':
+      mode = 'employee';
+      break;
+    case 'help':
+    case '--help':
+    case '-h':
+    case undefined:
+      mode = 'help';
+      break;
+    default:
+      mode = 'help';
+      break;
+  }
+
+  const customers = toInt(getArgValue(optionArgs, '--customers'), 120);
   const maxOrdersPerCustomer = toInt(
-    getArgValue(argv, '--max-orders-per-customer'),
+    getArgValue(optionArgs, '--max-orders-per-customer'),
     18,
   );
 
-  const ordersTotalStr = getArgValue(argv, '--orders');
+  const ordersTotalStr = getArgValue(optionArgs, '--orders');
   const ordersTotal = ordersTotalStr
     ? Math.max(0, Number.parseInt(ordersTotalStr, 10))
     : null;
 
-  const touchProducts = !hasFlag(argv, '--no-products');
-  const ensureProductsStr = getArgValue(argv, '--ensure-products');
+  const touchProducts = !hasFlag(optionArgs, '--no-products');
+  const ensureProductsStr = getArgValue(optionArgs, '--ensure-products');
   const ensureProducts = ensureProductsStr
     ? Math.max(0, Number.parseInt(ensureProductsStr, 10))
     : touchProducts
@@ -79,7 +155,7 @@ function parseArgs(argvRaw: string[]): SeedArgs {
       : null;
 
   const addProducts = touchProducts
-    ? toInt(getArgValue(argv, '--add-products'), 30)
+    ? toInt(getArgValue(optionArgs, '--add-products'), 30)
     : 0;
 
   return {
@@ -91,6 +167,45 @@ function parseArgs(argvRaw: string[]): SeedArgs {
     addProducts,
     touchProducts,
   };
+}
+
+function printHelp() {
+  console.log(`
+🌱 OrderLink Seed Script
+
+Usage:
+  pnpm seed <command> [options]
+
+Commands:
+  help        Show this help output
+  employee    Seed only the super admin employee and site config
+  customers   Seed customers only
+  orders      Seed orders for existing customers only
+  all         Seed products, customers and orders
+
+Examples:
+  pnpm seed help
+  pnpm seed employee
+  pnpm seed all --customers 120 --max-orders-per-customer 18
+  pnpm seed customers --customers 50
+  pnpm seed orders --orders 2000
+  pnpm seed all --ensure-products 80 --add-products 30
+  pnpm seed all --no-products
+
+Options:
+  --customers <number>                 Customer count for customers/all commands. Default: 120
+  --max-orders-per-customer <number>   Max random orders per created customer. Default: 18
+  --orders <number>                    Fixed total order count
+  --ensure-products <number>           Ensure at least this many products exist. Default: 80
+  --add-products <number>              Add this many products per run. Default: 30
+  --no-products                        Do not create or touch products
+
+Environment variables:
+  SUPER_ADMIN_EMAIL                    Default: admin@orderlink.at
+  SUPER_ADMIN_PASSWORD                 Default: admin1234
+  SUPER_ADMIN_FIRST_NAME               Default: Super
+  SUPER_ADMIN_LAST_NAME                Default: Admin
+`);
 }
 
 /**
@@ -599,6 +714,46 @@ async function getRandomExistingCustomerRefs(limit = 5000): Promise<number[]> {
   return rows.map((r) => r.customerReference);
 }
 
+async function ensureSiteConfig() {
+  const existing = await prisma.siteConfig.findFirst({
+    where: { deleted: false },
+  });
+
+  if (existing) {
+    console.log('⚙️ Site config already exists.');
+    return;
+  }
+
+  const address = await prisma.address.create({
+    data: {
+      city: 'Graz',
+      country: 'AT',
+      postCode: '8010',
+      state: 'Steiermark',
+      streetName: 'Musterstraße',
+      streetNumber: '1',
+      deleted: false,
+    },
+  });
+
+  await prisma.siteConfig.create({
+    data: {
+      companyName: 'OrderLink',
+      logoPath: '/logo.png',
+      email: 'office@orderlink.at',
+      phoneNumber: '+436641234567',
+      iban: 'AT000000000000000000',
+      companyNumber: 'FN000000x',
+      addressId: address.addressId,
+      isPremium: false,
+      deleted: false,
+      stripeConfigured: false,
+    },
+  });
+
+  console.log('⚙️ Site config created.');
+}
+
 /**
  * -------------------------
  * MAIN
@@ -606,6 +761,11 @@ async function getRandomExistingCustomerRefs(limit = 5000): Promise<number[]> {
  */
 async function main() {
   const args = parseArgs(process.argv);
+
+  if (args.mode === 'help') {
+    printHelp();
+    return;
+  }
 
   console.log(`🌱 Seeding RUN_ID=${RUN_ID}`);
   console.log('Args:', args);
@@ -618,12 +778,20 @@ async function main() {
 
   await prisma.$connect();
 
+  await ensureSuperAdmin();
+  await ensureSiteConfig();
+
+  if (args.mode === 'employee') {
+    console.log('✅ Employee seed done.');
+    return;
+  }
+
   const products = await ensureProducts(
     args.ensureProducts,
     args.addProducts,
     args.touchProducts,
   );
-  if (args.mode !== 'customers-only' && products.length === 0) {
+  if (args.mode !== 'customers' && products.length === 0) {
     throw new Error(
       'No products available (and --no-products was used). Create products first or allow products seeding.',
     );
@@ -631,7 +799,7 @@ async function main() {
 
   let createdCustomerRefs: number[] = [];
 
-  if (args.mode === 'all' || args.mode === 'customers-only') {
+  if (args.mode === 'all' || args.mode === 'customers') {
     createdCustomerRefs = await createCustomers(args.customers);
   }
 
@@ -645,7 +813,7 @@ async function main() {
     });
   }
 
-  if (args.mode === 'orders-only') {
+  if (args.mode === 'orders') {
     // Orders für bestehende Customers
     const refs = await getRandomExistingCustomerRefs(5000);
     if (refs.length === 0) {
